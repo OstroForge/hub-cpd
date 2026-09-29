@@ -1072,7 +1072,7 @@ def names_csv(room: Room) -> bytes:
     return names_human_csv(room)
 
 
-def attach_session(room: Room, payload: dict, include_names: bool = False) -> dict:
+def attach_poll_meta(room: Room, payload: dict, include_names: bool = False) -> dict:
     payload["register"] = room.register_open
     payload["nameCount"] = len(room.names)
     payload["room"] = room.id
@@ -1131,14 +1131,14 @@ def public_poll(room: Room, include_names: bool = False) -> dict:
             "correct": None,
             "teach": poll["teach"] if revealed else "",
         }
-        return attach_session(room, out, include_names)
+        return attach_poll_meta(room, out, include_names)
     options = poll["options"]
     counts = [0] * len(options)
     for choice in poll["votes"].values():
         if isinstance(choice, int) and 0 <= choice < len(counts):
             counts[choice] += 1
     revealed = poll["revealed"]
-    return attach_session(room, {
+    return attach_poll_meta(room, {
         "live": True,
         "kind": "choice",
         "id": poll["id"],
