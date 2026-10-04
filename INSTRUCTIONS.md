@@ -1,6 +1,6 @@
 # COPD CPD — how to run this session
 
-WMAS ambulance CPD deck on JRCALC G0390 COPD, NEWS2 Scale 1 vs Scale 2, and live room voting.
+WMAS ambulance CPD deck on JRCALC / AACES COPD guidance, NEWS2 Scale 1 vs Scale 2, and live room voting.
 
 ## Local (this laptop)
 
@@ -73,14 +73,13 @@ Use this when you are not presenting from this laptop, or when Teams needs a pub
 | Phone / Teams vote page | https://hub-cpd.onrender.com/v |
 | Self-guided (no vote, no register) | https://hub-cpd.onrender.com/?view=self |
 | Printable handout | https://hub-cpd.onrender.com/handout.html |
-| Get my certificate | https://hub-cpd.onrender.com/?view=lookup |
 | Old COPD URL (forwards to Hub) | https://copd-cpd.onrender.com/ |
 | GitHub copy | https://ostroforge.github.io/copd-cpd/ |
 | GitHub handout | https://ostroforge.github.io/copd-cpd/handout.html |
 | Source code | https://github.com/OstroForge/copd-cpd |
 | Render dashboard | https://dashboard.render.com/web/srv-dalud967bikc73akh3bg |
 
-Hub staff **do not need a Render account**. Each facilitator has their own PIN. Local or hosted presenter view asks for it. That PIN is also their name on the attendance file, so they are not asked who is delivering.
+Hub staff **do not need a Render account**. Each facilitator has their own PIN. Local or hosted presenter view asks for it.
 
 Keep the list in `presenters.txt` or `presenter-pin.txt` on this laptop (gitignored), one line per person:
 
@@ -98,41 +97,25 @@ The live hostname is **hub-cpd.onrender.com**. In the Render dashboard, add a se
 | --- | --- | --- |
 | GitHub | **OstroForge** | ostroforge@outlook.com |
 | Render | workspace **My Workspace** (same GitHub account) | ostroforge@outlook.com |
-| OneDrive | Personal (attendance CSVs) | jon.ski1382@gmail.com |
+| OneDrive | Personal | jon.ski1382@gmail.com |
 
 GitHub sign-in: https://github.com/login  
 Render sign-in: https://dashboard.render.com/login  
 OneDrive: https://onedrive.live.com/
 
-Certificates folder (open while signed in as jon.ski1382@gmail.com):  
-https://onedrive.live.com/my?id=%2Fpersonal%2F4a2042dbbcf48071%2FDocuments%2FCursor%20Projects%2FCPD%2FCOPD%2Fcertificates&viewid=6c1bdb91-03c5-436a-8302-197408acb301
-
 ## On the day
 
 1. Wake the live site (or start `python serve.py`).
-2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.onrender.com/?view=presenter) — type **your** Hub PIN when asked. Start session uses your name from that PIN.
+2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.onrender.com/?view=presenter) — type **your** Hub PIN when asked.
 3. Share the **Audience** window to the projector and/or Teams (Share window, not the presenter screen).
 4. Room: scan **this session’s** QR (it includes a room code). Teams: copy the join link from the presenter sidebar into chat — do not reuse another facilitator’s QR.
 5. Space, a mouse click on the slide, a wireless clicker (Page Down / next), or **Next** on a question goes to the results slide. Download **results CSV** from the presenter sidebar or the bottom bar before the service sleeps.
-6. Last slide collects **certificate names**, **ESR numbers** and **work emails**. Leave it up. Phones only see that form on that slide. ESR and email are stored in the attendance CSV only — they are not printed on the certificate. Names are saved automatically. Staff can reprint a certificate later from **Get my certificate** on the home page (`/?view=lookup`) with the same name and ESR.
+6. The last slide of a hosted session shows the CPD certificate QR (`assets/copd-certificate-qr.png`). Leave it up for the room to scan. The Trust records attendance and issues the certificate. That slide is not in the self-guided deck.
+7. The slide before that collects feedback and ideas for another 30-minute CPD. Phones scan its QR. Each response is added to the OneDrive workbook `feedback/COPD_Feedback_sheet.xlsx`. The sharing link is not kept in this project: on this laptop it is read from `feedback-share.txt`, and on Render it is the environment variable `FEEDBACK_SHARE_URL`. Close the workbook in Excel before a live session, or the site cannot add rows. Download **feedback** from the presenter sidebar.
 
-Two people can deliver the same CPD at the same time. Each opens presenter view on the **same live site** (usually Render). The site gives each facilitator a different room code, a different attendance file, and quiz answers from their own phones only. Phones must scan the QR on **that** screen.
+Two people can deliver the same CPD at the same time. Each opens presenter view on the **same live site** (usually Render). The site gives each facilitator a different room code, and quiz answers from their own phones only. Phones must scan the QR on **that** screen.
 
 If you present from this laptop instead, phones vote on this `serve.py` process — a second laptop running its own `serve.py` is a second session. Do not mix a laptop presenter with the hosted Render QR unless everyone is actually presenting on Render.
-
-Automatic copies (same names, no extra click):
-
-- `certificates.csv` in this project folder (synced with OneDrive)
-- `COPD-CPD-certificate-names.csv` in this folder, and also in **Documents** and **OneDrive** if those folders exist
-- The serve.py terminal prints each name as it arrives
-
-You can still download **certificate names** from the presenter sidebar. On Render the files are lost when the service sleeps, so also set a `CERT_WEBHOOK` environment variable if you want each name POSTed as JSON to an inbox you control.
-
-**OneDrive attendance folder:** account **jon.ski1382@gmail.com**. Files land in `Documents/Cursor Projects/CPD/COPD/certificates`. Open that folder in a browser (signed in as that account):
-
-https://onedrive.live.com/my?id=%2Fpersonal%2F4a2042dbbcf48071%2FDocuments%2FCursor%20Projects%2FCPD%2FCOPD%2Fcertificates&viewid=6c1bdb91-03c5-436a-8302-197408acb301
-
-On this laptop, `attend-folder.txt` (gitignored) can list both folders. Put a `# LIVE` block and a `# DEV` block, each with the OneDrive **share** link (and optional local path). `python serve.py` uses **DEV**. Render ignores this file and uses `ATTEND_SHARE_URL` for the **LIVE** folder. Click **Start session** in presenter view — names write as `COPD-CPD-attendance-YYYY-MM-DD-HHMM-Presenter-ROOM.csv`, with columns `submitted_at`, `name`, `esr`, `email`. Do not commit that share link.
 
 ## Handout and self-guided
 

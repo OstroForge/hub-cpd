@@ -30,12 +30,15 @@ import threading
 import time
 import urllib.error
 import urllib.request
+import zipfile
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from functools import partial
 from http.cookiejar import CookieJar
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse
+from xml.sax.saxutils import escape
 
 from qrcodegen import QrCode
 
@@ -49,6 +52,12 @@ LOCK = threading.Lock()
 ROOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 ROOMS: dict[str, "Room"] = {}
 CERT_FILE = ROOT / "certificates.csv"
+FEEDBACK_FILE = ROOT / "feedback.csv"
+FEEDBACK_SHARE_FILE = ROOT / "feedback-share.txt"
+FEEDBACK_LOCK = threading.Lock()
+_FEEDBACK_OD: dict = {}
+FEEDBACK_HEADERS = ["Submitted", "Room", "Useful", "Comments", "Email", "Suggestion", "Name"]
+_SHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 CERT_WEBHOOK = (os.environ.get("CERT_WEBHOOK") or "").strip()
 ATTEND_CONFIG = ROOT / "attend-folder.txt"
 OD_UA = (
@@ -62,7 +71,7 @@ COURSES = {
     "copd": {
         "id": "copd",
         "title": "COPD, Type 2 Respiratory Failure and NEWS2",
-        "detail": "JRCALC Chronic Obstructive Pulmonary Disease (G0390) · 30 minutes",
+        "detail": "JRCALC / AACES COPD guidance · 30 minutes",
         "prefix": "COPD-CPD-attendance-",
     }
 }
@@ -156,6 +165,406 @@ def requested_join(handler: SimpleHTTPRequestHandler) -> str:
     if not (raw.startswith("http://") or raw.startswith("https://")) or len(raw) > 300:
         return join_url(handler)
     return raw
+
+
+_EMAIL_RE = re.compile(
+    r"^[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?"
+    r"@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?"
+    r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*"
+    r"\.[A-Za-z]{2,}$"
+)
+
+
+def clean_feedback_text(raw: object, limit: int) -> str:
+    return " ".join(str(raw or "").split())[:limit]
+
+
+_FEEDBACK_HITS: dict[str, list[float]] = {}
+
+
+def feedback_allowed(ip: str) -> bool:
+    now = time.monotonic()
+    hits = [stamp for stamp in _FEEDBACK_HITS.get(ip, []) if now - stamp < 3600]
+    if len(hits) >= 30:
+        _FEEDBACK_HITS[ip] = hits
+        return False
+    hits.append(now)
+    _FEEDBACK_HITS[ip] = hits
+    return True
+
+
+def save_feedback(row: dict) -> None:
+    with FEEDBACK_LOCK:
+        new_file = not FEEDBACK_FILE.exists()
+        with FEEDBACK_FILE.open("a", encoding="utf-8-sig", newline="") as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=["submitted_at", "room", "useful", "comments", "email", "suggestion", "name"],
+            )
+            if new_file:
+                writer.writeheader()
+            writer.writerow(row)
+        append_feedback_workbook(row)
+
+
+def feedback_csv() -> bytes:
+    if not FEEDBACK_FILE.is_file():
+        return "submitted_at,room,useful,comments,email,suggestion,name\r\n".encode("utf-8")
+    return FEEDBACK_FILE.read_bytes()
+
+
+def feedback_share_url() -> str:
+    url = (os.environ.get("FEEDBACK_SHARE_URL") or "").strip().strip('"')
+    if url:
+        return url
+    if not FEEDBACK_SHARE_FILE.is_file():
+        return ""
+    try:
+        return FEEDBACK_SHARE_FILE.read_text(encoding="utf-8").strip().strip('"')
+    except OSError:
+        return ""
+
+
+def feedback_row_values(row: dict) -> list[str]:
+    useful = {
+        "useful": "Useful",
+        "partly": "Partly useful",
+        "not": "Not very useful",
+    }.get(str(row.get("useful") or ""), str(row.get("useful") or ""))
+    return [
+        str(row.get("submitted_at") or ""),
+        str(row.get("room") or ""),
+        useful,
+        str(row.get("comments") or ""),
+        str(row.get("email") or ""),
+        str(row.get("suggestion") or ""),
+        str(row.get("name") or ""),
+    ]
+
+
+def _xlsx_text(value: str) -> str:
+    cleaned = "".join(ch for ch in str(value) if ch in "\t\n\r" or ord(ch) >= 32)
+    return escape(cleaned)
+
+
+def _col_index(letters: str) -> int:
+    number = 0
+    for ch in letters:
+        number = number * 26 + ord(ch) - 64
+    return number
+
+
+def _col_name(index: int) -> str:
+    letters = ""
+    while index:
+        index, rem = divmod(index - 1, 26)
+        letters = chr(65 + rem) + letters
+    return letters
+
+
+def _xlsx_row_xml(index: int, values: list[str]) -> str:
+    cells = []
+    for offset, value in enumerate(values, start=1):
+        ref = "{}{}".format(_col_name(offset), index)
+        cells.append(
+            '<c r="{}" t="inlineStr"><is><t>{}</t></is></c>'.format(ref, _xlsx_text(value))
+        )
+    return '<row r="{}">{}</row>'.format(index, "".join(cells))
+
+
+def _sheet_target(book: zipfile.ZipFile) -> str:
+    rels = book.read("xl/_rels/workbook.xml.rels").decode("utf-8")
+    match = re.search(r'Target="(?:/xl/)?(worksheets/[^"]+)"', rels)
+    if not match:
+        raise OSError("Workbook has no worksheet")
+    target = match.group(1)
+    if target.startswith("xl/"):
+        return target
+    return "xl/" + target.lstrip("/")
+
+
+def _shared_strings(book: zipfile.ZipFile) -> list[str]:
+    if "xl/sharedStrings.xml" not in book.namelist():
+        return []
+    root = ET.fromstring(book.read("xl/sharedStrings.xml"))
+    strings = []
+    for item in root.findall("{{{}}}si".format(_SHEET_NS)):
+        strings.append("".join((node.text or "") for node in item.iter("{{{}}}t".format(_SHEET_NS))))
+    return strings
+
+
+def _cell_text(cell: ET.Element, shared: list[str]) -> str:
+    kind = cell.attrib.get("t")
+    if kind == "inlineStr":
+        return "".join((node.text or "") for node in cell.iter("{{{}}}t".format(_SHEET_NS)))
+    node = cell.find("{{{}}}v".format(_SHEET_NS))
+    raw = node.text if node is not None and node.text else ""
+    if kind == "s" and raw.isdigit() and int(raw) < len(shared):
+        return shared[int(raw)]
+    return raw
+
+
+def workbook_rows(data: bytes) -> list[list[str]]:
+    with zipfile.ZipFile(io.BytesIO(data)) as book:
+        shared = _shared_strings(book)
+        root = ET.fromstring(book.read(_sheet_target(book)))
+    rows: list[list[str]] = []
+    for row in root.findall("{{{}}}sheetData/{{{}}}row".format(_SHEET_NS, _SHEET_NS)):
+        cells: dict[int, str] = {}
+        for cell in row.findall("{{{}}}c".format(_SHEET_NS)):
+            ref = re.match(r"[A-Z]+", cell.attrib.get("r") or "")
+            index = _col_index(ref.group(0)) if ref else len(cells) + 1
+            cells[index] = _cell_text(cell, shared)
+        if not cells:
+            rows.append([])
+            continue
+        width = max(cells)
+        rows.append([cells.get(i, "") for i in range(1, width + 1)])
+    return rows
+
+
+def _is_header(row: list[str]) -> bool:
+    got = [cell.strip().lower() for cell in row]
+    expected = [cell.lower() for cell in FEEDBACK_HEADERS]
+    return got[: len(expected)] == expected
+
+
+def _bump_dimension(xml: str, last_row: int, last_col: int) -> str:
+    match = re.search(r'<dimension\b[^>]*\bref="([^"]+)"', xml)
+    if not match:
+        return xml
+    end = match.group(1).split(":")[-1]
+    found = re.match(r"([A-Z]+)(\d+)", end)
+    if found:
+        last_col = max(last_col, _col_index(found.group(1)))
+        last_row = max(last_row, int(found.group(2)))
+    ref = "A1:{}{}".format(_col_name(last_col), last_row)
+    return xml[: match.start(1)] + ref + xml[match.end(1) :]
+
+
+def _insert_sheet_rows(xml: str, block: str, last_row: int) -> str:
+    xml = _bump_dimension(xml, last_row, len(FEEDBACK_HEADERS))
+    empty = re.search(r"<sheetData(?:\s[^>]*)?\s*/>", xml)
+    if empty:
+        return xml[: empty.start()] + "<sheetData>" + block + "</sheetData>" + xml[empty.end() :]
+    close = xml.rfind("</sheetData>")
+    if close < 0:
+        raise OSError("Workbook sheet has no data section")
+    return xml[:close] + block + xml[close:]
+
+
+def _zip_replace(data: bytes, name: str, payload: bytes) -> bytes:
+    source = zipfile.ZipFile(io.BytesIO(data))
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as target:
+        for info in source.infolist():
+            chunk = payload if info.filename == name else source.read(info.filename)
+            replacement = zipfile.ZipInfo(filename=info.filename, date_time=info.date_time)
+            replacement.compress_type = info.compress_type or zipfile.ZIP_DEFLATED
+            replacement.external_attr = info.external_attr
+            target.writestr(replacement, chunk)
+    return buffer.getvalue()
+
+
+def xlsx_append(data: bytes, values: list[str]) -> bytes:
+    with zipfile.ZipFile(io.BytesIO(data)) as book:
+        sheet_name = _sheet_target(book)
+        sheet_xml = book.read(sheet_name)
+    text = sheet_xml.decode("utf-8")
+    root = ET.fromstring(sheet_xml)
+    max_row = 0
+    for row in root.findall("{{{}}}sheetData/{{{}}}row".format(_SHEET_NS, _SHEET_NS)):
+        max_row = max(max_row, int(row.attrib.get("r") or 0))
+    rows = workbook_rows(data)
+    if not rows or not any(any(cell.strip() for cell in row) for row in rows):
+        block = _xlsx_row_xml(1, FEEDBACK_HEADERS) + _xlsx_row_xml(2, values)
+        last_row = 2
+    else:
+        start = (max_row or len(rows)) + 1
+        block = _xlsx_row_xml(start, values)
+        last_row = start
+    updated = _insert_sheet_rows(text, block, last_row)
+    return _zip_replace(data, sheet_name, updated.encode("utf-8"))
+
+
+def build_xlsx(table: list[list[str]]) -> bytes:
+    last = max(1, len(table))
+    rows_xml = "".join(_xlsx_row_xml(index, row) for index, row in enumerate(table, start=1))
+    sheet = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<worksheet xmlns="{ns}"><dimension ref="A1:G{last}"/><sheetData>{rows}</sheetData></worksheet>'
+    ).format(ns=_SHEET_NS, last=last, rows=rows_xml)
+    parts = {
+        "[Content_Types].xml": (
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+            '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+            '<Default Extension="xml" ContentType="application/xml"/>'
+            '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+            '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+            '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+            "</Types>"
+        ),
+        "_rels/.rels": (
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+            "</Relationships>"
+        ),
+        "xl/workbook.xml": (
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<workbook xmlns="{ns}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+            '<sheets><sheet name="Feedback" sheetId="1" r:id="rId1"/></sheets></workbook>'
+        ).format(ns=_SHEET_NS),
+        "xl/_rels/workbook.xml.rels": (
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+            '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+            "</Relationships>"
+        ),
+        "xl/styles.xml": (
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+            '<styleSheet xmlns="{ns}"><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts>'
+            '<fills count="1"><fill><patternFill patternType="none"/></fill></fills>'
+            '<borders count="1"><border/></borders>'
+            '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+            '<cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs>'
+            "</styleSheet>"
+        ).format(ns=_SHEET_NS),
+        "xl/worksheets/sheet1.xml": sheet,
+    }
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as book:
+        for name, payload in parts.items():
+            book.writestr(name, payload)
+    return buffer.getvalue()
+
+
+def get_feedback_session(force: bool = False) -> dict:
+    url = feedback_share_url()
+    if not url:
+        raise OSError("No feedback workbook link is configured")
+    global _FEEDBACK_OD
+    now = time.monotonic()
+    session = _FEEDBACK_OD
+    if (
+        force
+        or session.get("share") != url
+        or now - float(session.get("digest_at") or 0) > 1500
+        or not session.get("fed")
+    ):
+        session = od_connect(url)
+        _FEEDBACK_OD = session
+    return session
+
+
+def feedback_download(session: dict) -> bytes:
+    token = encode_share_url(str(session.get("share") or ""))
+    return od_http(
+        "GET",
+        "https://onedrive.live.com/_api/v2.0/shares/" + token + "/root/content",
+        headers={"Cookie": "FedAuth=" + session["fed"]},
+    )
+
+
+def feedback_upload(session: dict, content: bytes) -> None:
+    guid = str(session.get("folder_guid") or "")
+    if not guid:
+        raise OSError("Feedback workbook could not be addressed")
+    endpoint = session["site"] + "/_api/web/GetFileById('" + guid + "')/$value"
+    headers = {
+        "Accept": "application/json;odata=verbose",
+        "Content-Type": "application/octet-stream",
+        "Cookie": "FedAuth=" + session["fed"],
+        "X-RequestDigest": session["digest"],
+        "X-HTTP-Method": "PUT",
+        "IF-MATCH": "*",
+    }
+    try:
+        od_http("POST", endpoint, data=content, headers=headers)
+    except urllib.error.HTTPError as err:
+        if err.code == 423:
+            raise OSError("Feedback workbook is open elsewhere. Close it, then try again.")
+        raise OSError("Feedback workbook upload failed ({})".format(err.code)) from err
+
+
+def local_feedback_workbook() -> Path | None:
+    path = ROOT / "feedback" / "COPD_Feedback_sheet.xlsx"
+    return path if path.is_file() else None
+
+
+def append_local_workbook(path: Path, values: list[str]) -> None:
+    path.write_bytes(xlsx_append(path.read_bytes(), values))
+
+
+def append_remote_workbook(values: list[str]) -> None:
+    last_error: Exception | None = None
+    for attempt in range(2):
+        try:
+            session = get_feedback_session(force=attempt > 0)
+            feedback_upload(session, xlsx_append(feedback_download(session), values))
+            return
+        except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, ET.ParseError, zipfile.BadZipFile) as err:
+            last_error = err
+            global _FEEDBACK_OD
+            _FEEDBACK_OD = {}
+    raise OSError("Feedback workbook update failed") from last_error
+
+
+def append_feedback_workbook(row: dict) -> None:
+    local = local_feedback_workbook()
+    if not feedback_share_url() and local is None:
+        return
+    values = feedback_row_values(row)
+    if feedback_share_url():
+        try:
+            append_remote_workbook(values)
+            return
+        except OSError:
+            if local is None:
+                print("Feedback workbook update failed.", flush=True)
+                raise
+    if local is not None:
+        append_local_workbook(local, values)
+
+
+def _response_count(data: bytes | None) -> int:
+    if not data:
+        return -1
+    try:
+        rows = workbook_rows(data)
+    except (OSError, ET.ParseError, zipfile.BadZipFile, KeyError, ValueError):
+        return -1
+    body = rows[1:] if rows and _is_header(rows[0]) else rows
+    return sum(1 for row in body if any(cell.strip() for cell in row))
+
+
+def feedback_workbook_bytes() -> bytes | None:
+    copies: list[bytes] = []
+    if feedback_share_url():
+        try:
+            copies.append(feedback_download(get_feedback_session()))
+        except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, ET.ParseError, zipfile.BadZipFile):
+            pass
+    local = local_feedback_workbook()
+    if local is not None:
+        try:
+            copies.append(local.read_bytes())
+        except OSError:
+            pass
+    if not copies and FEEDBACK_FILE.is_file():
+        table = [FEEDBACK_HEADERS]
+        with FEEDBACK_FILE.open(encoding="utf-8-sig", newline="") as handle:
+            for record in csv.DictReader(handle):
+                table.append(feedback_row_values(record))
+        copies.append(build_xlsx(table))
+    if not copies:
+        return None
+    best = max(copies, key=_response_count)
+    if _response_count(best) < 1:
+        return None
+    return best
 
 
 def utc_now() -> str:
@@ -257,6 +666,13 @@ def secret_is_host(token: str) -> bool:
     return pin_key(token) in PRESENTERS
 
 
+def clean_scene_image(raw: object) -> str:
+    text = str(raw or "").strip()
+    if re.fullmatch(r"assets/[A-Za-z0-9._-]+\.(png|jpe?g|webp)", text):
+        return text
+    return ""
+
+
 def blank_poll() -> dict:
     return {
         "id": None,
@@ -268,6 +684,7 @@ def blank_poll() -> dict:
         "expectedTotal": None,
         "expectedScale": None,
         "teach": "",
+        "image": "",
         "open": False,
         "revealed": False,
         "votes": {},
@@ -281,6 +698,7 @@ class Room:
         self.history: dict = {}
         self.names: dict = {}
         self.register_open = False
+        self.feedback_open = False
         self.session_file: Path | None = None
         self.session_name = ""
         self.session_cloud = False
@@ -505,12 +923,7 @@ def restore_room_session(room: Room) -> None:
 
 
 def attach_session(room: Room) -> None:
-    if room.bound:
-        return
-    restore_room_session(room)
     room.bound = True
-    if room.names and room.session_name:
-        threading.Thread(target=_flush_session, args=(room,), daemon=True).start()
 
 
 def _flush_session(room: Room) -> None:
@@ -1074,6 +1487,7 @@ def names_csv(room: Room) -> bytes:
 
 def attach_poll_meta(room: Room, payload: dict, include_names: bool = False) -> dict:
     payload["register"] = room.register_open
+    payload["feedback"] = room.feedback_open
     payload["nameCount"] = len(room.names)
     payload["room"] = room.id
     if include_names:
@@ -1130,6 +1544,7 @@ def public_poll(room: Room, include_names: bool = False) -> dict:
             "expectedScale": poll.get("expectedScale"),
             "correct": None,
             "teach": poll["teach"] if revealed else "",
+            "image": poll.get("image") or "",
         }
         return attach_poll_meta(room, out, include_names)
     options = poll["options"]
@@ -1150,6 +1565,7 @@ def public_poll(room: Room, include_names: bool = False) -> dict:
         "total": sum(counts),
         "correct": poll["correct"] if revealed else None,
         "teach": poll["teach"] if revealed else "",
+        "image": poll.get("image") or "",
     }, include_names)
 
 
@@ -1335,6 +1751,7 @@ def reset_poll(poll: dict) -> None:
     poll["expectedTotal"] = None
     poll["expectedScale"] = None
     poll["teach"] = ""
+    poll["image"] = ""
     poll["revealed"] = False
     poll["votes"] = {}
 
@@ -1372,9 +1789,19 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             return
+        if path in ("/feedback", "/feedback/"):
+            rid = request_room_id(self)
+            loc = "/?view=feedback"
+            if rid:
+                loc += "&r=" + rid
+            self.send_response(302)
+            self.send_header("Location", loc)
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            return
         if path in ("/lookup", "/lookup/", "/certificate"):
             self.send_response(302)
-            self.send_header("Location", "/?view=lookup")
+            self.send_header("Location", "/")
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             return
@@ -1411,28 +1838,28 @@ class Handler(SimpleHTTPRequestHandler):
                     return
                 send_json(self, public_poll(room, include_names=authorised_host(self)))
             return
-        if path == "/api/session":
+        if path in ("/api/feedback.csv", "/api/feedback.xlsx"):
             if not authorised_host(self):
                 send_json(self, {"ok": False, "error": "forbidden"}, 403)
                 return
-            with LOCK:
-                room = self.room_for(create=False)
-            if room is None:
-                share, folder = attend_config()
-                send_json(self, {
-                    "ok": True,
-                    "room": "",
-                    "folder": "OneDrive certificates folder" if share else (str(folder) if folder else ""),
-                    "file": "",
-                    "name": "",
-                    "count": 0,
-                    "ready": bool(folder or share),
-                    "exists": False,
-                    "cloud": False,
-                    "url": "",
-                })
+            if path == "/api/feedback.csv":
+                send_bytes(self, feedback_csv(), "text/csv; charset=utf-8", filename="copd-cpd-feedback.csv")
                 return
-            send_json(self, session_status(room))
+            try:
+                body = feedback_workbook_bytes()
+            except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, ET.ParseError, zipfile.BadZipFile):
+                print("Feedback workbook download failed.", flush=True)
+                send_json(self, {"ok": False, "error": "could not read feedback"}, 500)
+                return
+            if not body:
+                send_json(self, {"ok": False, "error": "empty"}, 404)
+                return
+            send_bytes(
+                self,
+                body,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                filename="copd-cpd-feedback.xlsx",
+            )
             return
         if path == "/api/results.csv":
             if not authorised_host(self):
@@ -1447,16 +1874,10 @@ class Handler(SimpleHTTPRequestHandler):
             send_bytes(self, body, "text/csv; charset=utf-8", filename="copd-cpd-results.csv")
             return
         if path == "/api/certificates.csv":
-            if not authorised_host(self):
-                send_json(self, {"ok": False, "error": "forbidden"}, 403)
-                return
-            with LOCK:
-                room = self.room_for(create=False)
-                if room is None:
-                    send_json(self, {"ok": False, "error": "no room"}, 404)
-                    return
-                body = names_csv(room)
-            send_bytes(self, body, "text/csv; charset=utf-8", filename="copd-cpd-certificates.csv")
+            send_json(self, {
+                "ok": False,
+                "error": "Attendance and certificates are recorded by the Trust QR on the hosted session slide."
+            })
             return
         if path == "/qr.svg":
             send_bytes(self, qr_svg(requested_join(self)), "image/svg+xml; charset=utf-8")
@@ -1469,70 +1890,39 @@ class Handler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         data = read_json(self)
-        if path == "/api/certificate/lookup":
-            if not lookup_allowed(lookup_client(self)):
+        if path == "/api/feedback":
+            if not feedback_allowed(self.client_address[0]):
                 send_json(self, {"ok": False, "error": "try later"}, 429)
                 return
-            course = str(data.get("course") or "copd").strip().casefold()
-            name = clean_name(data.get("name"))
-            esr = clean_esr(data.get("esr"))
-            if len(name) < 2 or len(esr) < 4 or course not in COURSES:
-                send_json(self, {"ok": False, "error": "not found"})
+            useful = str(data.get("useful") or "").strip()
+            if useful not in ("useful", "partly", "not"):
+                send_json(self, {"ok": False, "error": "missing rating"}, 400)
                 return
-            found = find_certificate(course, name, esr)
-            if not found:
-                send_json(self, {"ok": False, "error": "not found"})
+            email = clean_feedback_text(data.get("email"), 120)
+            if email and not _EMAIL_RE.fullmatch(email):
+                send_json(self, {"ok": False, "error": "bad email"}, 400)
                 return
-            send_json(self, {"ok": True, **found})
-            return
-        if path == "/api/certificate":
-            voter = str(data.get("voter") or "").strip()[:80]
-            name = clean_name(data.get("name"))
-            esr = clean_esr(data.get("esr"))
-            email = clean_email(data.get("email"))
-            if not voter or len(name) < 2:
-                send_json(self, {"ok": False, "error": "missing name"}, 400)
-                return
-            if len(esr) < 4:
-                send_json(self, {"ok": False, "error": "missing esr"}, 400)
-                return
-            if not email:
-                send_json(self, {"ok": False, "error": "missing email"}, 400)
-                return
-            with LOCK:
-                room = self.room_for(create=False)
-                if room is None:
-                    send_json(self, {"ok": False, "error": "no room"}, 404)
-                    return
-                if not room.register_open:
-                    send_json(self, {"ok": False, "error": "register closed"}, 400)
-                    return
-                if voter not in room.names and len(room.names) >= 400:
-                    send_json(self, {"ok": False, "error": "full"}, 400)
-                    return
-                room.names[voter] = {"name": name, "esr": esr, "email": email, "at": utc_now()}
-                at = room.names[voter]["at"]
+            row = {
+                "submitted_at": utc_now(),
+                "room": re.sub(r"[^A-Z0-9]", "", str(data.get("room") or "").upper())[:8],
+                "useful": useful,
+                "comments": clean_feedback_text(data.get("comments"), 800),
+                "email": email,
+                "suggestion": clean_feedback_text(data.get("suggestion"), 800),
+                "name": clean_feedback_text(data.get("name"), 80),
+            }
             try:
-                save_names(room)
+                save_feedback(row)
             except OSError:
-                pass
-            notify_name(name, at, esr, email)
-            send_json(self, {"ok": True, "poll": public_poll(room), "name": name, "esr": esr, "email": email})
+                send_json(self, {"ok": False, "error": "could not save"}, 500)
+                return
+            send_json(self, {"ok": True})
             return
-        if path == "/api/session/start":
-            if not authorised_host(self):
-                print("Start session forbidden from {}".format(self.client_address[0]), flush=True)
-                send_json(self, {"ok": False, "error": "forbidden"}, 403)
-                return
-            presenter = presenter_for_token(request_host_secret(self)) or str(data.get("presenter") or "")
-            print("Start session from {} ({})".format(self.client_address[0], presenter), flush=True)
-            with LOCK:
-                room = self.room_for(create=True)
-            path_out, err = start_session_file(room, presenter)
-            if path_out is None:
-                send_json(self, {"ok": False, "error": err}, 400)
-                return
-            send_json(self, {**session_status(room), "ok": True})
+        if path in ("/api/certificate/lookup", "/api/certificate"):
+            send_json(self, {
+                "ok": False,
+                "error": "Attendance and certificates are recorded by the Trust QR on the hosted session slide."
+            })
             return
         if path == "/api/vote":
             voter = str(data.get("voter") or "").strip()[:80]
@@ -1622,6 +2012,7 @@ class Handler(SimpleHTTPRequestHandler):
                     correct = data.get("correct")
                     poll["correct"] = int(correct) if isinstance(correct, int) else None
                     poll["teach"] = str(data.get("teach") or "")[:1200]
+                    poll["image"] = clean_scene_image(data.get("image"))
                     if kind == "news2":
                         try:
                             poll["expectedTotal"] = int(data.get("expectedTotal"))
@@ -1641,15 +2032,23 @@ class Handler(SimpleHTTPRequestHandler):
                     poll["open"] = True
                     poll["revealed"] = False
                     room.register_open = False
+                    room.feedback_open = False
                 elif action == "reveal":
                     poll["revealed"] = True
                     poll["open"] = False
                     snapshot_poll(room)
                     room.register_open = False
+                    room.feedback_open = False
                 elif action == "idle":
                     snapshot_poll(room)
                     reset_poll(poll)
                     room.register_open = False
+                    room.feedback_open = False
+                elif action == "feedback":
+                    snapshot_poll(room)
+                    reset_poll(poll)
+                    room.register_open = False
+                    room.feedback_open = True
                 elif action == "register":
                     snapshot_poll(room)
                     reset_poll(poll)
@@ -1682,7 +2081,6 @@ def main() -> None:
         print("Stop the other process using that port (often `python -m http.server {}`).".format(PORT), flush=True)
         sys.exit(1)
     ips = lan_ips()
-    share, folder = attend_config()
     print()
     print("COPD CPD deck + live quiz", flush=True)
     print("  Presenter:  http://127.0.0.1:{}/?view=presenter".format(PORT), flush=True)
@@ -1690,17 +2088,13 @@ def main() -> None:
         print("  Facilitator PINs (Hub staff type their own; they do not need Render):", flush=True)
         for pin, name in PRESENTERS.items():
             print("    {}  {}".format(pin, name or "(add their name in presenters.txt)"), flush=True)
-    if share:
-        print("  Attendance: OneDrive {} certificates folder".format(
-            "live" if (os.environ.get("ATTEND_SHARE_URL") or os.environ.get("RENDER")) else "dev"
-        ), flush=True)
-    elif folder:
-        print("  Attendance: {}".format(folder), flush=True)
     if ips:
         print("  Room phones: http://{}:{}/v".format(ips[0], PORT), flush=True)
         for extra in ips[1:]:
             print("           also: http://{}:{}/v".format(extra, PORT), flush=True)
         print("  Phones: same Wi-Fi as this laptop, mobile data OFF, http not https.", flush=True)
+    if feedback_share_url():
+        print("  Feedback: OneDrive workbook", flush=True)
     if PUBLIC_URL:
         print("  Teams join:  {}/v".format(PUBLIC_URL), flush=True)
         print("  Hosted presenter: {}/?view=presenter  (each facilitator uses their PIN)".format(PUBLIC_URL), flush=True)

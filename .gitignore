@@ -16,5 +16,8 @@ certificates-*.csv
 certificates/*.csv
 COPD-CPD-certificate-names.csv
 COPD-CPD-attendance-*.csv
+feedback.csv
+feedback-share.txt
+*Feedback*.xlsx
 session-*.json
 Proposal for accreditation/
