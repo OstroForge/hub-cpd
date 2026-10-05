@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 .env
 .env.*
+!.env.example
 .venv/
 venv/
 ACCOUNTS.md
@@ -13,11 +14,12 @@ presenters.txt
 attend-folder.txt
 certificates.csv
 certificates-*.csv
-certificates/*.csv
-COPD-CPD-certificate-names.csv
-COPD-CPD-attendance-*.csv
+certificates/**/*.csv
+*-CPD-certificate-names.csv
+*-CPD-attendance-*.csv
 feedback.csv
 feedback-share.txt
 *Feedback*.xlsx
+**/feedback/*.xlsx
 session-*.json
 Proposal for accreditation/
