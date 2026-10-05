@@ -2,10 +2,10 @@ function copdSlides() {
   return [
       {
         type: "title",
-        kicker: "Ambulance Staff CPD  ·  30 minutes",
+        kicker: "Ambulance Clinical Refreshers",
         title: "COPD, Type 2 Respiratory Failure and NEWS2",
         subtitle: "Pre-hospital assessment and treatment of acute exacerbations, with a hard look at NEWS2 Scale 2.",
-        meta: "JRCALC G0390 v20.40 (updated 6 September 2023), JRCALC oxygen and medicines, and RCP NEWS2. Always follow the live JRCALC entry and local Trust policy.",
+        meta: "JRCALC / AACES COPD guidance v20.40 (updated 6 September 2023), JRCALC oxygen and medicines, and RCP NEWS2. Always follow the live JRCALC entry and local Trust policy.",
         notes: "Open with the title statement. Next slide is the icebreaker — leave it up while phones scan the QR."
       },
       {
@@ -46,8 +46,8 @@ function copdSlides() {
             <div class="card">
               <h3>NEWS2 scale</h3>
               <p>Use <strong>Scale 1</strong> unless type 2 respiratory failure is clearly documented in their medical history, they carry an alert card or are able to categorically inform you that they do have type 2 (hypercapnic) respiratory failure.</p>
-              <p class="small" style="color:var(--red);margin-top:10px">Ambulance clinicians on scene <b>do not</b> make this decision.</p>
-              <p class="small" style="margin-top:10px">This is a scoring decision from RCP NEWS2 — not a JRCALC on-scene choice.</p>
+              <p class="small" style="margin-top:10px">Routinely, look for that record before Scale 2. There can be exceptions — if you use Scale 2 without it, say why at handover.</p>
+              <p class="small" style="margin-top:10px">This is a scoring decision from RCP NEWS2. The oxygen target does not, by itself, choose the scale.</p>
             </div>
           </div>
           <div class="banner build" style="margin-top:12px">COPD ≠ type 2 respiratory failure</div>
@@ -76,7 +76,7 @@ function copdSlides() {
               <p style="margin-top:10px">It does <strong>not</strong> say “COPD = Scale 2”, and it does not advise an on-scene Scale 2 decision.</p>
             </div>
           </div>`,
-        notes: "Read the quote slowly. This is the user’s requested highlight, now in JRCALC’s own words. Then: G0390’s NEWS2 instruction is ‘calculate a NEWS2 score (refer to Sepsis)’ — no scale switch. RCP still governs how Scale 2 is used."
+        notes: "Read the quote slowly. This is the user’s requested highlight, now in JRCALC’s own words. Then: JRCALC / AACES COPD guidance’s NEWS2 instruction is ‘calculate a NEWS2 score (refer to Sepsis)’ — no scale switch. RCP still governs how Scale 2 is used."
       },
       {
         kicker: "Background",
@@ -143,7 +143,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               </ul>
             </div>
           </div>`,
-        notes: "Left box is a simple flare. Right box: clue on the left, other impression on the right. G0390 flags chest pain and fever as uncommon. Do not turn this into a lecture on every differential — one example per row is enough."
+        notes: "Left box is a simple flare. Right box: clue on the left, other impression on the right. JRCALC / AACES COPD guidance flags chest pain and fever as uncommon. Do not turn this into a lecture on every differential — one example per row is enough."
       },
       {
         kicker: "Assessment",
@@ -166,7 +166,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
                 <li>&lt;C&gt;ABCDE, including work of breathing</li>
                 <li>SpO<sub>2</sub>, RR, pulse, BP, temperature</li>
                 <li>Blood glucose if appropriate</li>
-                <li>12-lead ECG if indicated (G0390 update 2023)</li>
+                <li>12-lead ECG if indicated (JRCALC / AACES COPD guidance update 2023)</li>
                 <li>NEWS2 Scale 1 unless a hospital or specialist record of type 2 failure is already in front of you</li>
               </ul>
             </div>
@@ -209,10 +209,10 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
                 </ul>
               </div>
             </div>
-            <p class="small" style="margin-top:12px">G0390: in the short time a patient is in ambulance care, hypoxia presents a much greater risk than hypercapnia in most cases. Pulse oximetry does not show CO<sub>2</sub> — that needs capnography or a hospital blood gas.</p>
+            <p class="small" style="margin-top:12px">JRCALC / AACES COPD guidance: in the short time a patient is in ambulance care, hypoxia presents a much greater risk than hypercapnia in most cases. Pulse oximetry does not show CO<sub>2</sub>. Type 2 failure is confirmed on a blood gas.</p>
             <div class="banner red build" style="margin-top:12px">Do not withhold high-concentration oxygen from the critically ill COPD patient</div>
           </div>`,
-        notes: "Talk the two cards first. Click or Space brings in the red line. Kill the old fear that ‘oxygen will stop them breathing’ as a reason to leave someone hypoxic. Titrate once they are no longer critically ill."
+        notes: "Talk the two cards first. Click or Space brings in the red line. Kill the old fear that ‘oxygen will stop them breathing’ as a reason to leave someone hypoxic. Titrate once they are no longer critically ill. Good to know, not for the slide: waveform capnography is available but not used routinely on front-line vehicles. It shows end-tidal CO2 (EtCO2), not arterial CO2, so it does not confirm type 2 failure and it does not choose Scale 2. A normal EtCO2 is about 4.0–5.7 kPa (35–45 mmHg). A trace staying above about 6 kPa (45 mmHg), or rising, suggests CO2 retention. In COPD the end-tidal number often sits below the arterial PaCO2, so a normal trace does not rule type 2 failure out."
       },
       {
         kicker: "On-scene map",
@@ -236,7 +236,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               <h3>NO — controlled oxygen</h3>
               <ul>
                 <li>Target 88–92% (or the alert card)</li>
-                <li>Start 24–28% white Venturi</li>
+                <li>Start the 28% white Venturi this service stocks</li>
                 <li>Salbutamol 5 mg, 6-minute oxygen drive</li>
                 <li>Ipratropium once if severe</li>
               </ul>
@@ -244,9 +244,9 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
           </div>
           <div class="step dark" style="margin-top:12px">
             <h3>Both paths — NEWS2</h3>
-            <p>Scale 1 unless type 2 failure is already documented. You apply that record — you do not decide it on scene. 88–92% is the oxygen target. It is not Scale 2.</p>
+            <p>Scale 1 unless type 2 failure is already documented. Look for that record — an alert card, specialist plan or previous blood gas. 88–92% is the oxygen target. It is not, by itself, Scale 2.</p>
           </div>`,
-        notes: "Scene first: breathless, known or suspected COPD. Then the split: critically ill or not. Navy bar last: both paths still Scale 1 unless type 2 is already documented. Oxygen target is not the NEWS2 scale."
+        notes: "Scene first: breathless, known or suspected COPD. Then the split: critically ill or not. Navy bar last: both paths still Scale 1 unless type 2 is already documented. Look for the alert card. Oxygen target is not the NEWS2 scale. There can be exceptions — say why if Scale 2 is used without that record."
       },
       {
         kicker: "Physiology that changes the score",
@@ -279,7 +279,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               <tr>
                 <td><strong>NEWS2</strong></td>
                 <td>Scale 1</td>
-                <td>Scale 1 on scene. Scale 2 only if a hospital/specialist team has already documented type 2 failure</td>
+                <td>Scale 1 unless type 2 failure is already documented. Look for an alert card or specialist record before Scale 2.</td>
               </tr>
             </tbody>
           </table>`,
@@ -308,7 +308,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       },
       {
         kicker: "NEWS2",
-        title: "When Scale 2 can be applied — not decided on scene",
+        title: "When Scale 2 can be applied",
         html: `
           <div class="body two">
             <div class="card fact">
@@ -318,10 +318,10 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
                 <li>A hospital doctor, ANP or specialist has already recorded that decision</li>
                 <li>You can see that documentation: alert card stating type 2 / raised CO<sub>2</sub>, specialist care plan, previous ABG, or Hub special message</li>
               </ul>
-              <p style="margin-top:10px"><strong>You are applying their decision. You are not authorising Scale 2 from scene findings.</strong></p>
+              <p style="margin-top:10px"><strong>The usual role on scene is to apply that record. Look for it before you use Scale 2.</strong></p>
             </div>
             <div class="card myth">
-              <h3>Ambulance clinicians on scene do not choose Scale 2</h3>
+              <h3>COPD alone is not a reason to choose Scale 2</h3>
               <ul>
                 <li>Not because the patient “has COPD”</li>
                 <li>Not because they are on home oxygen</li>
@@ -331,8 +331,8 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               </ul>
             </div>
           </div>
-          <p class="small" style="margin-top:12px">If the paperwork is not there, use Scale 1 and say so at handover. Receiving staff can switch after a blood gas.</p>`,
-        notes: "Be blunt. RCP’s ‘competent clinical decision-maker’ is the clinician who can determine history or presence of hypercapnia — in practice a hospital doctor, ANP or specialist after a blood gas. An ambulance clinician cannot make a new Scale 2 decision on scene. An alert card that only says ‘COPD, target 88–92’ is an oxygen target, not a Scale 2 authorisation, unless it states type 2 / raised CO2 / previous hypercapnia."
+          <p class="small" style="margin-top:12px">If you cannot see that record, use Scale 1 and say so at handover. JRCALC is less absolute than a hard ban, and there can be exceptions — if you use Scale 2 without the record, say why. Receiving staff can confirm after a blood gas.</p>`,
+        notes: "RCP’s ‘competent clinical decision-maker’ is usually a hospital doctor, ANP or specialist after a blood gas. The routine ambulance role is to look for an alert card or other record of type 2 / raised CO2 / previous hypercapnia, not to start Scale 2 because the patient has COPD. JRCALC is vaguer, and there can be exceptions. An alert card that only says ‘COPD, target 88–92’ is an oxygen target, not by itself a Scale 2 record."
       },
       {
         kicker: "Worked example",
@@ -420,7 +420,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         kicker: "Worked example 2",
         title: "When Scale 2 is the safer score",
         html: `
-          <p style="margin-bottom:12px;font-size:20px">Same age, known COPD, oxygen alert card: previous type 2 failure, target 88–92%. SpO<sub>2</sub> <strong>90% on 24% Venturi</strong>.</p>
+          <p style="margin-bottom:12px;font-size:20px">Same age, known COPD, oxygen alert card: previous type 2 failure, target 88–92%. SpO<sub>2</sub> <strong>90% on 28% Venturi</strong>.</p>
           <table>
             <thead>
               <tr><th>Scale</th><th>SpO<sub>2</sub> score</th><th>Oxygen</th><th>SpO<sub>2</sub> + O<sub>2</sub></th></tr>
@@ -440,7 +440,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               </tr>
             </tbody>
           </table>
-          <p style="margin-top:14px">Scale 1 would keep alarming because 90% looks too low. Staff then creep the oxygen up to “improve the NEWS”. Scale 2 exists to stop that — but only where a hospital or specialist team has already documented type 2 failure. The ambulance clinician is applying that record, not creating it.</p>`,
+          <p style="margin-top:14px">Scale 1 would keep alarming because 90% looks too low. Staff then creep the oxygen up to “improve the NEWS”. Scale 2 exists to stop that, where type 2 failure is already documented. The usual role on scene is to apply that record. There can be exceptions — say why if you use Scale 2 without it.</p>`,
         notes: "This is why Scale 2 was invented. Austin 2010: high-flow pre-hospital oxygen increased mortality in suspected COPD compared with titrated oxygen. NEWS2 Scale 2 is a scoring fix for confirmed retainers, not a treatment protocol for all COPD."
       },
       {
@@ -448,52 +448,45 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         title: "How to give oxygen in COPD",
         html: `
           <div class="o2-methods">
-            <div class="o2-kit">
-              <figure>
-                <div class="photo-frame cutout">
-                  <img src="copd/assets/o2-white-venturi-70.png" alt="Woman in her 70s wearing a white 24 to 28 percent Venturi oxygen mask">
+            <div class="o2-rows">
+              <article class="o2-row">
+                <img src="copd/assets/o2-white-venturi-70.png" alt="Woman in her 70s wearing a white 28 percent Venturi oxygen mask">
+                <div>
+                  <h3>White Venturi 28%</h3>
+                  <p>Start here. <strong>4 L/min</strong>. Target <strong>88–92%</strong>, or the alert card.</p>
                 </div>
-                <figcaption>
-                  <h3>White Venturi 24–28%</h3>
-                  <p>Start here. Target <strong>88–92%</strong> (or the alert card). JRCALC start is 4 L/min via 28%, or their own mask.</p>
-                </figcaption>
-              </figure>
-              <figure>
-                <div class="photo-frame cutout">
-                  <img src="copd/assets/o2-red-venturi-70.png" alt="Woman in her 70s wearing a red 40 percent Venturi oxygen mask">
-                </div>
-                <figcaption>
+              </article>
+              <article class="o2-row">
+                <img src="copd/assets/o2-red-venturi-70.png" alt="Woman in her 70s wearing a red 40 percent Venturi oxygen mask">
+                <div>
                   <h3>Red Venturi 40%</h3>
-                  <p>If white is not achieving target, this is the Trust step-up. There is no simple face mask on the vehicle.</p>
-                </figcaption>
-              </figure>
-              <figure>
-                <div class="photo-frame cutout">
-                  <img src="copd/assets/o2-nebuliser-70.png" alt="Woman in her 70s wearing an oxygen-driven nebuliser mask">
+                  <p>Step up if 28% is not reaching target. There is no simple face mask on the vehicle.</p>
                 </div>
-                <figcaption>
+              </article>
+              <article class="o2-row">
+                <img src="copd/assets/o2-nebuliser-70.png" alt="Woman in her 70s wearing an oxygen-driven nebuliser mask">
+                <div>
                   <h3>Oxygen-driven nebuliser</h3>
-                  <p>Salbutamol / ipratropium. Oxygen may <strong>drive</strong> it for 6 minutes — then stop and aim 88–92%.</p>
-                </figcaption>
-              </figure>
+                  <p>Salbutamol or ipratropium. Oxygen may <strong>drive</strong> it for <strong>6 minutes</strong>, then stop and aim 88–92%.</p>
+                </div>
+              </article>
             </div>
             <div class="diagram-row three">
               <div class="step dark">
-                <h3>If 40% is not enough, or they are critically ill</h3>
-                <p>Trust high-flow is a <strong>reservoir mask</strong>. Do not withhold high-concentration oxygen. Aim 94–98% while they are critical, then titrate back.</p>
+                <h3>Reservoir mask</h3>
+                <p>If 40% is not enough, or they are critically ill. Do not withhold high-concentration oxygen. Aim 94–98%, then titrate back.</p>
               </div>
               <div class="step gold">
                 <h3>RR &gt;30 on a Venturi</h3>
-                <p>JRCALC Oxygen: increase flow to <strong>50% above the mask minimum</strong>. That keeps the labelled percentage — it does not change the colour.</p>
+                <p>Increase flow to <strong>50% above the mask minimum</strong>. Same mask — the percentage does not change.</p>
               </div>
               <div class="step red">
                 <h3>6 minutes is neb drive only</h3>
-                <p>Not a timer on oxygen given to treat hypoxia. If they become drowsy, reduce oxygen and support ventilation.</p>
+                <p>Not a timer on oxygen given for hypoxia. If they become drowsy, reduce oxygen and support ventilation.</p>
               </div>
             </div>
-            <p class="small">Over 50, long-term smoker, exertional breathlessness, no other cause: treat as COPD.</p>
           </div>`,
-        notes: "Point at the kit: white 24–28% start → red 40% if that is not working → reservoir for high-flow (no photo — we do not carry a simple face mask). The green chamber is a nebuliser, not high-flow. 50% flow bump is JRCALC Oxygen on a Venturi — same colour. Six minutes is neb drive only."
+        notes: "Point at the kit: white 28% start, then red 40% if that is not reaching target, then a reservoir mask for high-flow. The green chamber is a nebuliser, not high-flow. 50% flow bump is JRCALC Oxygen on a Venturi — same mask. Six minutes is neb drive only. Over 50, long-term smoker, exertional breathlessness, no other cause: treat as COPD."
       },
       {
         kicker: "Treatment",
@@ -531,7 +524,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <div class="step dark"><h3>3. Still symptomatic?</h3><p>Further 6-minute run if clinically indicated</p></div>
             <div class="step red" style="background:var(--green)"><h3>Ipratropium</h3><p>500 micrograms <strong>once only</strong></p></div>
           </div>`,
-        notes: "Concede this if challenged: G0390 does not say ‘maximum two oxygen-powered nebs’. It says limit oxygen-driven nebulisation to 6 minutes. Salbutamol may still be repeated. Each O2-driven episode should still be a 6-minute run, not a continuous neb. High-flow oxygen for critical illness has no 6-minute cap."
+        notes: "Concede this if challenged: JRCALC / AACES COPD guidance does not say ‘maximum two oxygen-powered nebs’. It says limit oxygen-driven nebulisation to 6 minutes. Salbutamol may still be repeated. Each O2-driven episode should still be a 6-minute run, not a continuous neb. High-flow oxygen for critical illness has no 6-minute cap."
       },
       {
         kicker: "The guideline text",
@@ -539,7 +532,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         html: `
           <div class="body">
             <div class="card">
-              <h3>JRCALC G0390 — Bronchodilators</h3>
+              <h3>JRCALC / AACES COPD guidance — Bronchodilators</h3>
               <p style="font-size:18px">“Limit oxygen-driven nebulisation to 6 minutes. If journey time is significant, consider a further 6 minutes of nebulisation therapy ONLY if clinically indicated, but aim for a target saturation within the range of 88–92%.”</p>
             </div>
             <div class="card" style="margin-top:10px">
@@ -556,7 +549,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         html: `
           <div class="body two">
             <div class="card">
-              <h3>What G0390 actually says</h3>
+              <h3>What JRCALC / AACES COPD guidance actually says</h3>
               <ul>
                 <li>Limit oxygen-driven nebulisation to 6 minutes</li>
                 <li>If the journey is significant, consider a further 6 minutes only if clinically indicated</li>
@@ -580,37 +573,43 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         kicker: "Package of care",
         title: "The rest of the job",
         html: `
-          <div class="body three">
-            <div class="card">
+          <div class="job-flow">
+            <section class="job-step">
+              <div class="job-num">1</div>
               <h3>On scene / en route</h3>
               <ul>
                 <li>Follow the alert card / individualised plan — the patient often knows what works</li>
                 <li>12-lead ECG if indicated</li>
                 <li>Pain score, fluids if required, blood glucose if appropriate</li>
                 <li>Watch for tiring, not just the SpO<sub>2</sub> number</li>
+                <li>Consider Call Before You Convey, or an alternative pathway, if the patient does not need alerting to hospital</li>
               </ul>
-            </div>
-            <div class="card">
-              <h3>Hospital rather than home if</h3>
+            </section>
+            <div class="job-arrow" aria-hidden="true"></div>
+            <section class="job-step decide build">
+              <div class="job-num">2</div>
+              <h3>Hospital, not home, if</h3>
               <ul>
                 <li>Cannot cope at home, living alone, or not coping</li>
-                <li>Severe breathlessness, poor/deteriorating condition</li>
-                <li>Cyanosis, new/worsening oedema, impaired consciousness, acute confusion</li>
-                <li>Already on LTOT, rapid onset, significant comorbidity</li>
+                <li>Severe breathlessness, poor or deteriorating condition</li>
+                <li>Cyanosis, new or worsening oedema, impaired consciousness, acute confusion</li>
+                <li>Already on LTOT, rapid onset, or significant comorbidity</li>
                 <li>SpO<sub>2</sub> &lt;90%</li>
               </ul>
-            </div>
-            <div class="card">
-              <h3>Handover language</h3>
+            </section>
+            <div class="job-arrow" aria-hidden="true"></div>
+            <section class="job-step hand build">
+              <div class="job-num">3</div>
+              <h3>Then say this</h3>
               <ul>
-                <li>NEWS2 total <strong>and the components</strong> — e.g. “3, all from sats”</li>
-                <li>Scale 1, unless a hospital/specialist record of type 2 failure is already documented</li>
+                <li>NEWS2 total <strong>and the components</strong> — “3, all from sats”</li>
+                <li>Scale 1, unless type 2 failure is already documented</li>
                 <li>Usual saturations if known, current SpO<sub>2</sub>, target, device</li>
-                <li>Alert card / previous NIV / previous hypercapnia if known</li>
+                <li>Alert card, previous NIV, or previous hypercapnia if known</li>
               </ul>
-            </div>
+            </section>
           </div>`,
-        notes: "Receiving staff should not have to guess the scale. ‘NEWS 3 on Scale 1, targeting 88–92, 90% on 28% Venturi, no documented type 2’ is a high-quality sentence."
+        notes: "Step 1 is already up. Click or Space brings in step 2, then step 3. Step 1 includes Call Before You Convey or an alternative pathway when the patient does not need a hospital alert. Receiving staff should not have to guess the scale. ‘NEWS 3 on Scale 1, targeting 88–92, 90% on 28% Venturi, no documented type 2’ is a high-quality sentence."
       },
       {
         type: "poll",
@@ -693,35 +692,32 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             </div>
             <div class="n2-chart-slot"></div>
           </div>`,
-        teach: "<strong>NEWS 6 on Scale 1.</strong> COPD, extra secretions and 90% on air do not document type 2 failure, so Scale 2 is not available. RR 22 scores 2, SpO<sub>2</sub> 90% on air scores 3, air 0, SBP 152 scores 0, pulse 104 scores 1, Alert 0, temp 36.9 scores 0. Total <strong>6</strong>. Scale 2 would score 90% as 0 (88–92) and give NEWS <strong>3</strong>, hiding the hypoxia. Still target 88–92%.",
+        teach: "<strong>NEWS 6 on Scale 1.</strong> COPD, extra secretions and 90% on air do not document type 2 failure, so stay on Scale 1. RR 22 scores 2, SpO<sub>2</sub> 90% on air scores 3, air 0, SBP 152 scores 0, pulse 104 scores 1, Alert 0, temp 36.9 scores 0. Total <strong>6</strong>. Scale 2 would score 90% as 0 (88–92) and give NEWS <strong>3</strong>, hiding the hypoxia. Still target 88–92%.",
         notes: "Patient 2 has no documented T2RF — Scale 1. Correct is NEWS 6. Typical error: Scale 2 because they have COPD, so 90% scores 0."
       },
       {
         kicker: "Critically unwell",
         title: "This patient needs high-flow oxygen now",
         html: `
-          <div class="body two" style="align-items:center">
-            <div class="shock-scene">
-              <div class="card warn" style="margin-bottom:10px">
-                <h3>Scene — this is critical illness, not a “usual COPD”</h3>
-                <p>64, known COPD. Alert card: previous type 2 failure, target 88–92%, 24% Venturi.</p>
-                <p style="margin-top:8px">Found exhausted and shocked: cyanosed, SpO<sub>2</sub> <strong>80%</strong> on 28% Venturi, BP <strong>86/50 (MAP 62)</strong>, pulse 128, RR 32, barely responding.</p>
+          <div class="shock-layout">
+            <img class="shock-monitor" src="copd/assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, MAP 62, respiratory rate 32, SpO2 80 percent">
+            <div>
+              <p class="shock-scene-line">64, known COPD. Alert card: previous type 2 failure, target 88–92%, on a 28% Venturi. Exhausted, cyanosed, barely responding.</p>
+              <div class="shock-vitals">
+                <div><strong>80%</strong><span>SpO2</span></div>
+                <div><strong>86/50</strong><span>BP</span></div>
+                <div><strong>128</strong><span>Pulse</span></div>
+                <div><strong>32</strong><span>RR</span></div>
               </div>
-              <div class="photo-frame cutout">
-                <img src="copd/assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, MAP 62, respiratory rate 32, SpO2 80 percent">
-              </div>
-            </div>
-            <div class="card ok">
-              <h3>Give high-concentration oxygen</h3>
-              <ul>
-                <li>Do not withhold it because they have COPD, an alert card, or an 88–92% target</li>
-                <li>Reservoir / high-flow now. TIME-CRITICAL. ATMIST</li>
-                <li>Titrate once they are no longer critically ill — if they then become drowsy, reduce flow and support ventilation</li>
-                <li>NEWS2 <strong>Scale 2</strong> because type 2 is already documented — not because they need high-flow O<sub>2</sub></li>
+              <ul class="shock-actions">
+                <li>Do not withhold oxygen for COPD, the alert card, or the 88–92% target</li>
+                <li>Reservoir mask now. <strong>TIME-CRITICAL.</strong> ATMIST</li>
+                <li>Titrate once they are no longer critically ill. If they become drowsy, reduce flow and support ventilation</li>
+                <li><strong>Scale 2</strong> because type 2 is already documented — not because of the high-flow oxygen</li>
               </ul>
             </div>
           </div>
-          <div class="banner red" style="margin-top:12px">The 6-minute rule is for oxygen driving a nebuliser. It is not a timer on oxygen given to treat hypoxia</div>`,
+          <div class="banner red" style="margin-top:12px">The 6-minute rule is neb drive only. It is not a timer on oxygen for hypoxia</div>`,
         notes: "Land this as the critically unwell exception, not a ‘take the oxygen off’ story. High-flow now. The 6-minute clock does not apply to oxygen therapy. Alert-card 88–92% is for when they are not critically ill. Scale 2 is from the documented type 2, not from the oxygen you just put on."
       },
       {
@@ -732,7 +728,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         prompt: "Every COPD patient should be scored on NEWS2 Scale 2.",
         options: ["True", "False"],
         correct: 1,
-        teach: "False. G0390 says some patients are at increased risk of type 2 failure — not all. Ambulance clinicians do not choose Scale 2 on scene. Default is Scale 1 unless a hospital/specialist record of type 2 failure is already there.",
+        teach: "False. JRCALC / AACES COPD guidance says some patients are at increased risk of type 2 failure — not all. Look for an alert card or other record before Scale 2. The default is Scale 1. There can be exceptions — say why if you use Scale 2 without that record.",
         notes: "First assessment of whether the session worked. Space reveals. If the room goes True, slow down on the take-home."
       },
       {
@@ -743,7 +739,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         prompt: "Can you target SpO<sub>2</sub> 88–92% while still using Scale 1?",
         options: ["Yes", "No"],
         correct: 0,
-        teach: "Yes. G0390 targets 88–92% and still only asks you to calculate a NEWS2 score. RCP: Scale 2 is a separate, documented decision.",
+        teach: "Yes. JRCALC / AACES COPD guidance targets 88–92% and still only asks you to calculate a NEWS2 score. RCP: Scale 2 is a separate, documented decision.",
         notes: "Second assessment question. This is the distinction most staff blur."
       },
       {
@@ -757,11 +753,12 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
           "They have COPD — give low-flow oxygen"
         ],
         correct: 0,
+        image: "copd/assets/patient-shock-monitor.png",
         detail: `
           <div class="photo-frame cutout shock-zoll">
             <img src="copd/assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, MAP 62, respiratory rate 32, SpO2 80 percent">
           </div>`,
-        teach: "<strong>High-flow.</strong> This is shock, not a “usual COPD”. G0390: do not withhold high-concentration oxygen if the primary illness needs it. Hypoxia is the greater short-term risk. Titrate 88–92% once they are no longer critically ill. The 6-minute rule does not apply here — that only limits oxygen as the driving gas of a nebuliser.",
+        teach: "<strong>High-flow.</strong> This is shock, not a “usual COPD”. JRCALC / AACES COPD guidance: do not withhold high-concentration oxygen if the primary illness needs it. Hypoxia is the greater short-term risk. Titrate 88–92% once they are no longer critically ill. The 6-minute rule does not apply here — that only limits oxygen as the driving gas of a nebuliser.",
         notes: "Watch for people still giving controlled oxygen in shock because of COPD. The Zoll is the argument: 80%, 86/50, 128, RR 32."
       },
       {
@@ -772,7 +769,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         prompt: "An oxygen-driven neb in COPD. How long may oxygen drive it?",
         options: ["2 minutes", "6 minutes", "Until the chamber is empty"],
         correct: 1,
-        teach: "6 minutes per run, then stop the oxygen drive and aim 88–92%. G0390 does not write a maximum number of nebs. Salbutamol may be repeated as further 6-minute oxygen-driven episodes if that is the only method you have. Ipratropium once. Applies if COPD is a possibility — not only type 2 failure.",
+        teach: "6 minutes per run, then stop the oxygen drive and aim 88–92%. JRCALC / AACES COPD guidance does not write a maximum number of nebs. Salbutamol may be repeated as further 6-minute oxygen-driven episodes if that is the only method you have. Ipratropium once. Applies if COPD is a possibility — not only type 2 failure.",
         notes: "If they say until empty, correct firmly. Duration is the drive time, not a two-neb cap."
       },
       {
@@ -788,13 +785,13 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       },
       {
         kicker: "Take home",
-        title: "Leave with these five lines",
+        title: "Five key points to remember",
         html: `
           <div class="body">
             <div class="banner build">1. Some COPD patients are at risk of type 2 failure — not all.</div>
             <div class="banner teal build" style="margin-top:8px">2. Do not put every COPD patient on NEWS2 Scale 2.</div>
             <div class="banner green build" style="margin-top:8px">3. Target 88–92% oxygen in COPD — that does not choose the scale.</div>
-            <div class="banner dark build" style="margin-top:8px">4. Scale 2 only if a hospital/specialist team has already documented type 2 failure — not an on-scene decision.</div>
+            <div class="banner dark build" style="margin-top:8px">4. Look for a record of type 2 failure before Scale 2. COPD alone is not enough.</div>
             <div class="banner red build" style="margin-top:8px">5. Never leave a critically ill COPD patient hypoxic.</div>
           </div>`,
         notes: "Read them slowly. Space reveals each line."
@@ -807,7 +804,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <div class="card">
               <h3>Clinical guidance</h3>
               <ul>
-                <li>JRCALC Plus G0390 COPD v20.40 (6 September 2023)</li>
+                <li>JRCALC / AACES COPD guidance v20.40 (6 September 2023)</li>
                 <li>JRCALC Oxygen — 4 L/min 28% Venturi, target 88–92%</li>
                 <li>JRCALC Salbutamol D0300, Ipratropium D0200, Hydrocortisone D0180</li>
                 <li>WMAS clinical notices and local PGDs where they apply — including CN-436</li>
@@ -824,8 +821,8 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               </ul>
             </div>
           </div>
-          <p class="small" style="margin-top:12px">Teaching summary of JRCALC Plus, not a substitute for the live guideline. ${NEWS2_CITE} NEWS2 Chart 1 is reproduced unmodified and in colour; the RCP places no copyright restriction on NEWS2 provided those conditions are met. Chest X-ray: Mikael Häggström, MD, via Wikimedia Commons, CC0 public domain. Other diagrams in this deck are original teaching graphics, not official JRCALC artwork. Recheck local PGDs and stock — prednisolone is named in G0390 but is not currently available in WMAS.</p>`,
-        notes: "Ask staff to open G0390 after the session. If the ePR auto-selects Scale 2 from a COPD tick-box, that is a governance issue worth feeding back."
+          <p class="small" style="margin-top:12px">Teaching summary of JRCALC Plus, not a substitute for the live guideline. ${NEWS2_CITE} NEWS2 Chart 1 is reproduced unmodified and in colour; the RCP places no copyright restriction on NEWS2 provided those conditions are met. Chest X-ray: Mikael Häggström, MD, via Wikimedia Commons, CC0 public domain. Other diagrams in this deck are original teaching graphics, not official JRCALC artwork. Recheck local PGDs and stock — prednisolone is named in JRCALC / AACES COPD guidance but is not currently available in WMAS.</p>`,
+        notes: "Ask staff to open JRCALC / AACES COPD guidance after the session. If the ePR auto-selects Scale 2 from a COPD tick-box, that is a governance issue worth feeding back."
       },
       {
         questions: true,
@@ -836,31 +833,43 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <div class="banner dark" style="font-size:clamp(28px,3.2vw,42px);padding:28px 24px">Thank you for attending</div>
             <div class="banner teal" style="margin-top:12px;padding:22px 24px">We hope it has been useful</div>
             <div class="banner" style="margin-top:12px;padding:22px 24px">Ask now, or email: <a href="mailto:jon.ostrowski@wmas.nhs.uk" style="color:inherit;text-decoration:underline">jon.ostrowski@wmas.nhs.uk</a></div>
-            <div class="banner green" style="margin-top:12px;padding:22px 24px">Any suggestions for future CPD sessions?</div>
+            <div class="banner green" style="margin-top:12px;padding:22px 24px">The next slide is for feedback, and ideas for another 30-minute CPD.</div>
           </div>`,
-        notes: "Leave this up. Offer to stay for ePR / local pathway queries. Next slide collects names for certificates — leave that one up."
+        notes: "Leave this up. Offer to stay for ePR / local pathway queries. The next slide collects feedback and topic ideas. Then the CPD certificate QR — only in a hosted session. Leave that one up for the room to scan."
       },
       {
-        collectNames: true,
-        kicker: "Certificates",
-        title: "Put your name in for a CPD certificate",
+        feedback: true,
+        kicker: "Feedback",
+        title: "Help shape the next session",
         html: `
-          <div class="body two" style="align-items:stretch">
-            <div class="card ok">
-              <ul>
-                <li>Enter your name as you wish it to appear on your certificate of attendance.</li>
-                <li>Please also provide your ESR (GRS) number for audit purposes.</li>
-                <li>Please also provide your work email for the register.</li>
-              </ul>
-              <p style="margin-top:14px;font-size:28px;font-weight:750;color:var(--navy)"><span class="cert-total">0</span> names in</p>
+          <div class="body two feedback-layout">
+            <div>
+              <div class="banner teal">Please provide feedback on this Hub CPD Session</div>
+              <div class="banner" style="margin-top:12px">Any suggestions for future hub CPD Sessions?</div>
             </div>
-            <aside class="poll-join cert-join">
-              <img alt="Join to add your name" width="132" height="132" />
+            <aside class="poll-join feedback-join">
+              <img class="feedback-qr" alt="Open the feedback form" width="132" height="132" hidden />
               <p class="poll-url"></p>
-              <p class="poll-phones">Scan if you closed the vote page</p>
             </aside>
+          </div>
+          <div class="feedback-brand">
+            <img class="feedback-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers.">
+            <p class="feedback-home"></p>
           </div>`,
-        notes: "Leave this up. Each phone generates its own certificate. Name, ESR and work email write into the OneDrive attendance CSV. ESR and email are not printed on the certificate. A name change on the same phone replaces the previous row — it does not add a second person."
+        notes: "Leave this up. Phones already on the vote page get the form by themselves. Anyone else can scan the QR. Download feedback from the presenter sidebar."
+      },
+      {
+        hostedOnly: true,
+        kicker: "",
+        title: "Record Attendance for CPD Certificate",
+        html: `
+          <div class="body trust-attend">
+            <div class="trust-qr">
+              <img src="copd/assets/copd-certificate-qr.png" alt="CPD certificate QR code" onerror="var p=this.parentElement;this.remove();var m=p&&p.querySelector('.trust-qr-missing');if(m)m.hidden=false" />
+              <p class="trust-qr-missing" hidden>Save the QR image as copd/assets/copd-certificate-qr.png, then refresh.</p>
+            </div>
+          </div>`,
+        notes: "This slide is only in a hosted session, after a Hub PIN. It is not in the self-guided deck. Leave it up so the room can scan. Save the Trust QR as copd/assets/copd-certificate-qr.png and hard-refresh."
       }
-    ];
+  ];
 }

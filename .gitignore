@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 .env
 .env.*
+!.env.example
 .venv/
 venv/
 ACCOUNTS.md
@@ -11,6 +12,9 @@ presenters.txt
 *.log
 .DS_Store
 attend-folder.txt
+feedback-share.txt
+feedback.csv
+*Feedback*.xlsx
 certificates.csv
 certificates-*.csv
 certificates/**/*.csv

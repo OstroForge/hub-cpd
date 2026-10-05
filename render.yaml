@@ -12,6 +12,12 @@ services:
         value: "3.12.0"
       - key: PUBLIC_URL
         value: https://hub-cpd.onrender.com
+      - key: DEBUG
+        value: "false"
+      - key: FEEDBACK_SHARE_COPD_LIVE
+        sync: false
+      - key: FEEDBACK_SHARE_HF_LIVE
+        sync: false
       - key: HOST_TOKEN
         generateValue: true
   - type: web
@@ -28,8 +34,12 @@ services:
         value: "3.12.0"
       - key: PUBLIC_URL
         value: https://hub-cpd-test.onrender.com
-      - key: ATTEND_ENV
-        value: "dev"
+      - key: DEBUG
+        value: "true"
+      - key: FEEDBACK_SHARE_COPD_DEV
+        sync: false
+      - key: FEEDBACK_SHARE_HF_DEV
+        sync: false
       - key: HOST_TOKEN
         generateValue: true
   - type: web
@@ -43,3 +53,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.0"
+      - key: DEBUG
+        value: "false"

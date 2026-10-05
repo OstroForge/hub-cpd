@@ -9,7 +9,7 @@ Each topic has its own folder:
 | COPD | `copd/` — `slides.js`, `handout.html`, `assets/` |
 | Heart Failure | `hf/` — `slides.js`, `handout.html`, `assets/` |
 
-The hub (`index.html`, `serve.py`) stays at the top. Attendance CSVs stay under `certificates/<course>/dev` or `live`. To add a later package, copy that folder pattern.
+The hub (`index.html`, `serve.py`) stays at the top. Each topic keeps its feedback workbooks in `feedback/dev.xlsx` and `feedback/live.xlsx`. To add a later package, copy that folder pattern.
 
 ## Local (this laptop)
 
@@ -71,6 +71,30 @@ Hard-refresh presenter view and scan **this** session’s QR. Phone: same Wi-Fi,
 
 Stop the server with Ctrl+C.
 
+## Local secrets (`.env`)
+
+Instructor PINs and feedback workbook links for **dev and prod** live in `.env` in this folder. That file is gitignored. This laptop uses the `DEV` feedback line. The hosted Hub uses the `LIVE` line. Restart `python serve.py` after you edit `.env`. A blank template is `.env.example`.
+
+`DEBUG=true` uses the dev workbooks. `DEBUG=false` uses the live workbooks. This laptop’s `.env` has `DEBUG=true`. On the live Render service set `DEBUG` to `false`. On the test service set `DEBUG` to `true`.
+
+The hosted site cannot read this file. In the Render dashboard, set `FEEDBACK_SHARE_COPD_LIVE` and `FEEDBACK_SHARE_HF_LIVE` on the live service, and `FEEDBACK_SHARE_COPD_DEV` and `FEEDBACK_SHARE_HF_DEV` on the test service.
+
+Instructors are one `PRESENTERS` line, in the same shape as the Render dashboard. Copy the value inside the quotes into the dashboard variable `PRESENTERS`:
+
+`PRESENTERS="PIN: Full Name; PIN: Full Name"`
+
+Feedback workbooks, a dev address and a prod address per topic:
+
+`FEEDBACK_SHARE_COPD_DEV="https://…"`
+
+`FEEDBACK_SHARE_COPD_LIVE="https://…"`
+
+Heart Failure has its own workbook. It does not write into the COPD sheet.
+
+`FEEDBACK_SHARE_HF_DEV="https://…"`
+
+`FEEDBACK_SHARE_HF_LIVE="https://…"`
+
 ## Hosted session (Render)
 
 Use this when you are not presenting from this laptop, or when Teams needs a public vote link.
@@ -84,7 +108,6 @@ Use this when you are not presenting from this laptop, or when Teams needs a pub
 | Self-guided (no vote, no register) | https://hub-cpd.onrender.com/?view=self |
 | Printable COPD handout | https://hub-cpd.onrender.com/copd/handout.html |
 | Printable Heart Failure handout | https://hub-cpd.onrender.com/hf/handout.html |
-| Get my certificate | https://hub-cpd.onrender.com/?view=lookup |
 | Old COPD URL (forwards to Hub) | https://copd-cpd.onrender.com/ |
 | GitHub copy | https://ostroforge.github.io/copd-cpd/ |
 | GitHub COPD handout | https://ostroforge.github.io/copd-cpd/copd/handout.html |
@@ -93,11 +116,7 @@ Use this when you are not presenting from this laptop, or when Teams needs a pub
 
 Hub staff **do not need a Render account**. Each facilitator has their own PIN. Local or hosted presenter view asks for it. That PIN is also their name on the attendance file, so they are not asked who is delivering.
 
-Keep the list in `presenters.txt` or `presenter-pin.txt` on this laptop (gitignored), one line per person:
-
-`PIN  Full Name`
-
-On Render, set `PRESENTERS` to the same list as `PIN:Full Name;PIN:Full Name`. Do not put PINs in this public file or in the room’s Teams chat. The `r=` code on a join/QR link is the **room** for that session, not a PIN.
+On this laptop the list is the `PRESENTERS` line in `.env`. Copy that same value into Render. Do not put PINs in this public file or in the room’s Teams chat. The `r=` code on a join/QR link is the **room** for that session, not a PIN.
 
 Free Render instances sleep after a quiet spell. The first open can take about a minute.
 
@@ -124,8 +143,9 @@ Environment variables (Environment tab). Copy **PRESENTERS** from the live `hub-
 | --- | --- |
 | `PYTHON_VERSION` | `3.12.0` |
 | `PUBLIC_URL` | `https://hub-cpd-test.onrender.com` |
-| `ATTEND_ENV` | `dev` |
-| `ATTEND_SHARE_URL` | the **DEV** OneDrive share from `attend-folder.txt` (the `#DEV` block), not the LIVE one |
+| `DEBUG` | `true` |
+| `FEEDBACK_SHARE_COPD_DEV` | the dev COPD feedback workbook from `.env` |
+| `FEEDBACK_SHARE_HF_DEV` | the dev Heart Failure feedback workbook from `.env` |
 
 Create Web Service. First build takes a few minutes. After that:
 
@@ -157,11 +177,11 @@ https://onedrive.live.com/my?id=%2Fpersonal%2F4a2042dbbcf48071%2FDocuments%2FCur
 ## On the day
 
 1. Wake the live site (or start `python serve.py`).
-2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.onrender.com/?view=presenter) — type **your** Hub PIN when asked. Start session uses your name from that PIN.
+2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.onrender.com/?view=presenter) — type **your** Hub PIN when asked.
 3. Share the **Audience** window to the projector and/or Teams (Share window, not the presenter screen).
 4. Room: scan **this session’s** QR (it includes a room code). Teams: copy the join link from the presenter sidebar into chat — do not reuse another facilitator’s QR.
-5. Space, a mouse click on the slide, a wireless clicker (Page Down / next), or **Next** on a question goes to the results slide. Download **results CSV** from the presenter sidebar or the bottom bar before the service sleeps.
-6. Last slide collects **certificate names**, **ESR numbers** and **work emails**. Leave it up. Phones only see that form on that slide. ESR and email are stored in the attendance CSV only — they are not printed on the certificate. Names are saved automatically. Staff can reprint a certificate later from **Get my certificate** on the home page (`/?view=lookup`) with the same name and ESR.
+5. Space, a mouse click on the slide, a wireless clicker (Page Down / next), or **Next** on a question goes to the results slide.
+6. Both hosted decks then show **Help shape the next session**. The feedback QR is in the top right, with the address under it. Phones already on the vote page get the form. Anyone else can scan that QR. The same QR is on the self-guided deck. Download the sheet from **Download feedback** in the presenter sidebar. The last slide is **Record Attendance for CPD Certificate**. Leave that QR up for the room to scan. It is not in the self-guided deck. Certificate attendance is the Trust QR only: there is no name, ESR, or email collection for certificates, and no certificate lookup page.
 
 Two people can deliver the same CPD at the same time. Each opens presenter view on the **same live site** (usually Render). The site gives each facilitator a different room code, a different attendance file, and quiz answers from their own phones only. Phones must scan the QR on **that** screen.
 
@@ -173,7 +193,7 @@ Automatic copies (same names, no extra click):
 - `COPD-CPD-certificate-names.csv` in this folder, and also in **Documents** and **OneDrive** if those folders exist
 - The serve.py terminal prints each name as it arrives
 
-You can still download **certificate names** from the presenter sidebar. On Render the files are lost when the service sleeps, so also set a `CERT_WEBHOOK` environment variable if you want each name POSTed as JSON to an inbox you control.
+On Render the files are lost when the service sleeps, so also set a `CERT_WEBHOOK` environment variable if you want each name POSTed as JSON to an inbox you control.
 
 **OneDrive attendance folder:** account **jon.ski1382@gmail.com**. Layout is course, then env:
 
@@ -192,22 +212,16 @@ The OneDrive **share link** must be the parent `certificates` folder — not `ce
 | COPD | `certificates/copd/dev` or `certificates/copd/live` |
 | Heart Failure | `certificates/heart failure/dev` or `certificates/heart failure/live` |
 
-On this laptop, `attend-folder.txt` (gitignored) keeps a `# LIVE` block and a `# DEV` block. Each block should use a share of that **parent** `certificates` folder, and the local path `...\COPD\certificates`. `python serve.py` uses **DEV**, so new files land in `certificates/<course>/dev`.
+Both hosted decks collect session feedback (how useful it was, comments, a suggestion for the next half hour, and an optional name and email). COPD writes to the COPD workbook. Heart Failure writes to the Heart Failure workbook. Certificate attendance is the Trust QR on the last slide. Neither course collects names, ESR numbers, or emails for a certificate. There is no page to look up or reprint a certificate.
 
-**Test site (`hub-cpd-test`) only:** set `ATTEND_SHARE_URL` to the parent `certificates` share, and keep `ATTEND_ENV=dev`. Do **not** change `ATTEND_SHARE_URL` on live `hub-cpd` (`main`) until this branch is merged.
-
-**Live `hub-cpd`:** leave its current LIVE share as it is. It still writes COPD registers into that live folder. After merge, point live at the same parent `certificates` share and set `ATTEND_ENV=live` so new files go to `certificates/copd/live`. Copy any old live CSVs into `copd/live` at that point.
-
-Old files in `certificates/dev`, `certificates/COPD/dev`, or `certificates/COPD/dev/heart failure` are still found for certificate lookup.
-
-To add a later package, give it a `folder` name in `COURSES` in `serve.py`. The `dev` and `live` folders are created on first **Start session**.
+To add a later package, give it a `folder` name in `COURSES` in `serve.py`. The `dev` and `live` folders are created the first time that course writes an attendance file.
 
 ## Handout and self-guided
 
 For staff who missed the room, or for a Teams share with no phones:
 
 1. **Handout** — two A4 pages. Open `copd/handout.html` or `hf/handout.html` and use Print / save PDF.
-2. **Self-guided deck** — add `?view=self` to the deck URL. Same slides, no QR, no live vote, no certificate register. Check questions reveal on click or Space. **Printable handout** is on the bottom bar.
+2. **Self-guided deck** — add `?view=self` to the deck URL. Same slides, no live vote, no certificate QR. The feedback QR stays, with the address under it. Check questions reveal on click or Space. **Printable handout** is on the bottom bar.
 
 A PowerPoint export is a poorer copy of this deck (NEWS2 chart and kit photos sit in HTML). Use the self-guided URL if you need a version with voting removed.
 

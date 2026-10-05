@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Heart Failure CPD handout | Hub CPD</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/assets/hub-cpd-star.png" />
   <style>
     :root {
       --navy: #1b2744;
@@ -68,7 +70,11 @@
       font-size: 11px;
       font-weight: 700;
       color: var(--copper);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+    .kicker img { height: 22px; width: auto; }
     h1 { font-size: 22px; line-height: 1.15; color: var(--navy); }
     h2 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy); margin: 12px 0 6px; }
     h3 { font-size: 14px; color: var(--navy); margin-bottom: 4px; }
@@ -110,6 +116,10 @@
     }
     .break { break-before: page; page-break-before: always; margin-top: 18px; padding-top: 8px; }
     @media print {
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
       body { background: #fff; }
       .toolbar { display: none; }
       .sheet { width: auto; margin: 0; padding: 0; box-shadow: none; }
@@ -121,21 +131,21 @@
 </head>
 <body>
   <div class="toolbar">
-    <a href="./">Home</a>
+    <a href="/">Home</a>
     <button type="button" onclick="window.print()">Print / save PDF</button>
-    <a href="index.html?course=hf&amp;view=self">Self-guided session</a>
+    <a href="/?course=hf&amp;view=self">Self-guided session</a>
   </div>
   <article class="sheet">
     <header>
       <div>
-        <p class="kicker">Hub CPD handout</p>
+        <p class="kicker"><img src="../assets/hub-cpd-star.png" alt="">Hub CPD handout</p>
         <h1>Heart Failure in Pre-hospital Care</h1>
         <p>JRCALC Heart Failure · GTN · Furosemide · Oxygen</p>
       </div>
       <p class="meta">Summary of current (as at 22/09/2026) JRCALC and related evidence. Recheck the live guideline, local PGDs and stock before you treat.</p>
     </header>
 
-    <h2>Leave with these five lines</h2>
+    <h2>Five key points to remember</h2>
     <div class="banner">1. Acute heart failure is time-critical unless a palliative plan says otherwise.</div>
     <div class="banner teal">2. Sit them fully upright first. Target 94–98% oxygen. Record a 12-lead.</div>
     <div class="banner green">3. GTN: ischaemia or uncontrolled hypertension, and SBP over 110 — not the ACS 90 mmHg line.</div>

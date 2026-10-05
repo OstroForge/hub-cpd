@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hub CPD | Ambulance clinical refreshers</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/assets/hub-cpd-star.png" />
   <style>
     :root {
       --navy: #12382c;
@@ -137,6 +139,17 @@
       color: #f7f4ee;
       justify-content: flex-end;
       padding: 48px 56px 56px;
+    }
+    .title-slide .title-logo {
+      position: absolute;
+      top: 18px;
+      right: 40px;
+      width: min(340px, 36%);
+      height: auto;
+      background: var(--paper);
+      padding: 8px 14px 6px;
+      border-radius: 10px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
     }
     .slide.title-slide h1 { color: #fff; }
     .slide.title-slide .subtitle { color: #e4f0ea; }
@@ -404,11 +417,23 @@
       color: var(--muted);
       letter-spacing: 0;
     }
-    .footer-bar span:first-child {
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+    .footer-mark {
+      height: 22px;
+      width: auto;
+      flex: none;
+    }
+    .title-slide .footer-mark,
+    .cert-slide .footer-mark {
+      filter: brightness(0) invert(1);
     }
     .title-slide .footer-bar,
     .cert-slide .footer-bar { color: #8fb3a6; left: 56px; right: 56px; }
@@ -577,6 +602,169 @@
       font-size: 12px;
       color: var(--muted);
       margin-top: 6px;
+    }
+    .o2-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+    .o2-row {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(220px, 34%) 1fr;
+      gap: 18px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.38);
+      border: 1px solid var(--line);
+      padding: 0 20px 0 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .o2-row img {
+      width: 100%;
+      height: 100%;
+      min-height: 148px;
+      object-fit: cover;
+      object-position: center 16%;
+      display: block;
+    }
+    .o2-row h3 {
+      font-size: clamp(24px, 2.3vw, 32px);
+      color: var(--navy);
+      margin: 0 0 6px;
+      line-height: 1.1;
+    }
+    .o2-row p {
+      font-size: clamp(18px, 1.7vw, 23px);
+      line-height: 1.3;
+      margin: 0;
+    }
+    .job-flow {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 28px 1.15fr 28px 1fr;
+      gap: 8px;
+      align-items: stretch;
+    }
+    .job-step {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-top: 8px solid var(--teal);
+      padding: 14px 16px 12px;
+      min-height: 0;
+    }
+    .job-step.decide { border-top-color: var(--red); background: #fdecea; }
+    .job-step.hand { border-top-color: var(--navy); }
+    .job-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 750;
+      font-size: 18px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 8px;
+    }
+    .job-step.decide .job-num { background: var(--red); }
+    .job-step.hand .job-num { background: var(--navy); }
+    .job-step h3 {
+      font-size: clamp(20px, 1.8vw, 26px);
+      color: var(--navy);
+      margin: 0 0 10px;
+      line-height: 1.15;
+    }
+    .job-step ul { margin: 0; padding-left: 18px; }
+    .job-step li {
+      font-size: clamp(15px, 1.25vw, 18px);
+      line-height: 1.28;
+      margin: 7px 0;
+    }
+    .job-arrow {
+      align-self: center;
+      width: 0;
+      height: 0;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-left: 16px solid var(--navy);
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .job-flow > .job-step.build:not(.show) {
+      display: block;
+      visibility: hidden;
+      opacity: 0;
+    }
+    .job-flow > .job-step.build.show {
+      display: block;
+      animation: job-in 0.45s ease both;
+    }
+    .job-flow > .job-arrow:has(+ .job-step.show) {
+      opacity: 1;
+      transform: none;
+    }
+    @keyframes job-in {
+      from { opacity: 0; transform: translateX(36px); }
+      to { opacity: 1; transform: none; }
+    }
+    .shock-layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(260px, 38%) 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+    .shock-monitor {
+      width: 100%;
+      max-height: min(52vh, 460px);
+      object-fit: contain;
+      display: block;
+    }
+    .shock-scene-line {
+      margin: 0;
+      font-size: clamp(17px, 1.5vw, 20px);
+      line-height: 1.35;
+    }
+    .shock-vitals {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .shock-vitals div {
+      background: var(--navy);
+      color: #fff;
+      text-align: center;
+      padding: 10px 6px 8px;
+    }
+    .shock-vitals strong {
+      display: block;
+      font-size: clamp(26px, 2.6vw, 40px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .shock-vitals span {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #f0c36a;
+    }
+    .shock-actions {
+      margin: 0;
+      padding-left: 1.15em;
+    }
+    .shock-actions li {
+      font-size: clamp(16px, 1.45vw, 20px);
+      line-height: 1.3;
+      margin: 7px 0;
     }
     .hf-shock-defs {
       margin: 0 0 10px;
@@ -834,7 +1022,9 @@
       .slide.active .photo-frame,
       .slide.title-slide.active h1,
       .slide.title-slide.active .subtitle,
-      .slide.title-slide.active .meta { animation: none; }
+      .slide.title-slide.active .meta,
+      .job-step,
+      .job-arrow { animation: none; transition: none; }
     }
 
     html:fullscreen .controls {
@@ -857,10 +1047,10 @@
     body.audience #startBtn,
     body.vote #startBtn { display: none; }
     body.audience .stage { padding-bottom: 12px; }
-    body.self .poll-join { display: none !important; }
-    body.self .poll-slide:not(.poll-news2):not(.poll-results) .kicker,
-    body.self .poll-slide:not(.poll-news2):not(.poll-results) h2,
-    body.self .poll-slide:not(.poll-news2):not(.poll-results) .poll-top {
+    body.self .poll-join:not(.feedback-join) { display: none !important; }
+    body.self .poll-slide .kicker,
+    body.self .poll-slide h2,
+    body.self .poll-slide .poll-top {
       padding-right: 0;
     }
     body.self .self-hint {
@@ -891,6 +1081,12 @@
       border: 1px solid #1c3f34;
       padding: 36px 40px 32px;
     }
+    .home-logo {
+      display: block;
+      width: min(560px, 100%);
+      height: auto;
+      margin: 0 0 18px;
+    }
     .home-kicker {
       font-size: 13px;
       letter-spacing: 0.16em;
@@ -905,6 +1101,11 @@
       letter-spacing: -0.03em;
       line-height: 1.15;
       margin-bottom: 12px;
+    }
+    .home-logo-title {
+      font-size: 0;
+      line-height: 0;
+      margin: 0 0 6px;
     }
     .home-lead {
       font-size: 18px;
@@ -995,11 +1196,6 @@
     .hub-course.hf .hub-links a { background: #1b2744; }
     .hub-links a:hover,
     .hub-links a:focus-visible { filter: brightness(1.12); }
-    .hub-cert {
-      margin-top: 22px;
-      font-size: 16px;
-    }
-    .hub-cert a { color: var(--navy); font-weight: 700; }
     @media (max-width: 720px) {
       .home-panel { padding: 24px 20px 20px; }
       .home-choices { grid-template-columns: 1fr; }
@@ -1017,18 +1213,6 @@
     .controls a.home-link:hover { background: #2a5c4a; }
     body:not(.self) a.home-link { display: none; }
 
-    #lookup {
-      display: none;
-      min-height: 100%;
-      padding: 28px 18px 40px;
-      align-items: center;
-      justify-content: center;
-    }
-    body.lookup { overflow: auto; }
-    body.lookup #lookup { display: flex; }
-    body.lookup .stage,
-    body.lookup .controls,
-    body.lookup .pv-side { display: none !important; }
     #pinGate {
       display: none;
       min-height: 100%;
@@ -1091,44 +1275,6 @@
       padding: 12px;
       font: inherit;
       cursor: pointer;
-    }
-    .lookup-form label {
-      display: block;
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--navy);
-      margin: 14px 0 6px;
-    }
-    .lookup-form input,
-    .lookup-form select {
-      width: 100%;
-      font: inherit;
-      font-size: 18px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--ink);
-    }
-    .lookup-form button {
-      display: block;
-      width: 100%;
-      margin-top: 18px;
-      background: var(--navy);
-      color: #f7f4ee;
-      border: 0;
-      padding: 14px 16px;
-      font: inherit;
-      font-size: 18px;
-      font-weight: 750;
-      cursor: pointer;
-    }
-    .lookup-form button:disabled { opacity: 0.45; cursor: not-allowed; }
-    .lookup-status { margin-top: 12px; color: var(--muted); font-size: 16px; }
-    .lookup-home {
-      display: inline-block;
-      margin-top: 18px;
-      color: var(--navy);
-      font-weight: 700;
     }
 
     .pv-side { display: contents; }
@@ -1240,18 +1386,8 @@
     body.audience #copyJoinBtn,
     body.vote #copyJoinBtn,
     body.self #copyJoinBtn,
-    body.audience #csvBtnBar,
-    body.vote #csvBtnBar,
-    body.self #csvBtnBar,
-    body.audience #namesBtnBar,
-    body.vote #namesBtnBar,
-    body.self #namesBtnBar { display: none; }
     body:not(.live) #copyJoinBtn,
-    body:not(.live) #csvBtnBar,
-    body:not(.live) #namesBtnBar { display: none; }
-    body.presenter #copyJoinBtn,
-    body.presenter #csvBtnBar,
-    body.presenter #namesBtnBar { display: none; }
+    body.presenter #copyJoinBtn { display: none; }
 
     .poll-slide .body {
       display: flex;
@@ -1260,17 +1396,17 @@
       min-height: 0;
       align-items: stretch;
     }
-    .poll-slide:not(.poll-news2):not(.poll-results) .kicker,
-    .poll-slide:not(.poll-news2):not(.poll-results) h2,
-    .poll-slide:not(.poll-news2):not(.poll-results) .poll-top {
+    .poll-slide .kicker,
+    .poll-slide h2,
+    .poll-slide .poll-top {
       padding-right: 180px;
     }
-    .poll-slide:not(.poll-news2):not(.poll-results) .poll-top {
+    .poll-slide .poll-top {
       display: block;
       width: 100%;
       max-width: 100%;
     }
-    .poll-slide:not(.poll-news2):not(.poll-results) .poll-join {
+    .slide .poll-join {
       position: absolute;
       top: 22px;
       right: 40px;
@@ -1425,6 +1561,145 @@
       color: var(--teal);
       margin-top: 4px;
     }
+    .trust-slide .kicker:empty { display: none; }
+    .trust-attend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      height: 100%;
+    }
+    .trust-qr {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+    .trust-qr img {
+      display: block;
+      width: auto;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .trust-qr img[hidden] { display: none !important; }
+    .trust-qr .trust-qr-missing {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .poll-join.feedback-join {
+      position: absolute;
+      top: 22px;
+      right: 40px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 200px;
+    }
+    .poll-join.feedback-join .feedback-qr {
+      width: 132px;
+      height: 132px;
+    }
+    .poll-join.feedback-join .poll-url {
+      width: 100%;
+      text-align: center;
+    }
+    .slide:has(.feedback-join) .kicker,
+    .slide:has(.feedback-join) h2,
+    .slide:has(.feedback-join) .feedback-layout {
+      padding-right: 230px;
+    }
+    .feedback-brand {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 18px 24px 4px;
+    }
+    .feedback-brand .feedback-logo {
+      width: min(340px, 48%);
+      height: auto;
+      display: block;
+    }
+    .feedback-brand .feedback-home {
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: 650;
+      color: var(--navy);
+      letter-spacing: 0.01em;
+    }
+    .body.two.feedback-layout {
+      display: block;
+    }
+    .feedback-layout .banner {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .feedback-layout { align-items: start; }
+    #feedback {
+      display: none;
+      min-height: 100%;
+      padding: 28px 18px 40px;
+      align-items: center;
+      justify-content: center;
+    }
+    body.feedback { overflow: auto; background: var(--stage); }
+    body.feedback #feedback { display: flex; }
+    body.feedback .stage,
+    body.feedback .controls,
+    body.feedback .pv-side,
+    body.feedback #home,
+    body.feedback #voteApp,
+    body.feedback #pinGate { display: none !important; }
+    .feedback-form label {
+      display: block;
+      margin: 14px 0 6px;
+      font-weight: 750;
+      color: var(--navy);
+    }
+    .feedback-form textarea,
+    .feedback-form input[type="text"],
+    .feedback-form input[type="email"] {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 18px;
+      padding: 10px 12px;
+    }
+    .feedback-form textarea { min-height: 96px; resize: vertical; }
+    .feedback-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feedback-form fieldset { border: 0; margin: 18px 0 0; padding: 0; }
+    .feedback-choices label {
+      margin: 0;
+      font-weight: 650;
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 10px 14px;
+    }
+    .feedback-choices input { margin-right: 8px; }
+    .feedback-form button {
+      margin-top: 18px;
+      background: var(--navy);
+      color: #fff;
+      border: 0;
+      font: inherit;
+      font-weight: 750;
+      padding: 12px 18px;
+      cursor: pointer;
+    }
+    .feedback-form button:disabled { opacity: 0.5; cursor: default; }
+    .feedback-status { margin-top: 12px; color: var(--muted); }
+    .feedback-home { display: inline-block; margin-top: 16px; color: var(--navy); }
     .poll-opts { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; width: 100%; }
     .poll-opt {
       display: grid;
@@ -1480,7 +1755,7 @@
     body.fallback .poll-opt { cursor: pointer; }
     body.fallback .poll-bar,
     body.fallback .poll-n,
-    body.fallback .poll-join { display: none; }
+    body.fallback .poll-join:not(.feedback-join) { display: none; }
 
     .poll-case h2 { font-size: clamp(22px, 2.3vw, 32px); margin-bottom: 8px; }
     .poll-case .poll-prompt {
@@ -1512,7 +1787,6 @@
     .poll-news2 .body { gap: 6px; flex: 1; min-height: 0; overflow: hidden; }
     .poll-news2 .poll-top {
       flex: 0 0 auto;
-      grid-template-columns: minmax(0, 1fr) 112px;
       width: 100%;
       max-width: 100%;
       gap: 10px;
@@ -2088,6 +2362,42 @@
       line-height: 1.35;
     }
     #votePrompt li { margin: 0.4em 0; }
+    .vote-feedback label {
+      display: block;
+      margin: 14px 0 6px;
+      color: #fff;
+      font-weight: 750;
+    }
+    .vote-feedback textarea,
+    .vote-feedback input[type="text"],
+    .vote-feedback input[type="email"] {
+      width: 100%;
+      box-sizing: border-box;
+      border: 0;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 18px;
+      padding: 10px 12px;
+    }
+    .vote-feedback textarea { min-height: 88px; }
+    .vote-feedback-choices { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    .vote-feedback-choices label {
+      margin: 0;
+      background: #1c5242;
+      padding: 14px 16px;
+      font-weight: 650;
+    }
+    .vote-feedback button[type="submit"] {
+      margin-top: 16px;
+      width: 100%;
+    }
+    .vote-feedback-done {
+      font-size: 22px;
+      font-weight: 750;
+      line-height: 1.3;
+      margin: 8px 0 0;
+    }
     #voteStatus { color: #a8c4b6; font-size: 16px; margin-bottom: 14px; }
     .vote-btn {
       display: block;
@@ -2135,13 +2445,13 @@
         border: 0;
         max-height: none;
       }
-      .build { display: block !important; opacity: 1 !important; transform: none !important; }
+      .build { display: block !important; opacity: 1 !important; transform: none !important; visibility: visible !important; }
+      .job-arrow { opacity: 1 !important; transform: none !important; }
       body.cert-printing .stage,
       body.cert-printing .controls,
       body.cert-printing .pv-side,
       body.cert-printing #voteApp,
-      body.cert-printing #home,
-      body.cert-printing #lookup { display: none !important; }
+      body.cert-printing #home { display: none !important; }
       body.cert-printing #cpdCert { display: block !important; }
       body.cert-printing { background: #fff; }
       body.cert-printing .cpd-cert-page {
@@ -2163,8 +2473,7 @@
 <body>
   <main id="home">
     <div class="home-panel">
-      <p class="home-kicker">Hub CPD  ·  West Midlands Ambulance Service</p>
-      <h1>Ambulance clinical refreshers</h1>
+      <h1 class="home-logo-title"><img class="home-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers."></h1>
       <p class="home-lead">30-minute JRCALC sessions for the room, Teams, or self-guided study. Always use the live guideline on the day.</p>
       <div class="hub-courses">
         <article class="hub-course">
@@ -2180,7 +2489,7 @@
         <article class="hub-course hf">
           <p class="hub-tag">Cardiac</p>
           <h2>Heart Failure</h2>
-          <p>Pulmonary oedema, positioning, GTN at 110 mmHg, fluids and furosemide.</p>
+          <p>Pulmonary oedema, positioning, GTN, fluids and furosemide.</p>
           <div class="hub-links">
             <a href="?course=hf&amp;view=self">Self-guided</a>
             <a href="?course=hf&amp;view=presenter">Presenter</a>
@@ -2188,29 +2497,30 @@
           </div>
         </article>
       </div>
-      <p class="hub-cert"><a href="?view=lookup">Get my certificate</a> — enter the course, your name and ESR number.</p>
     </div>
   </main>
-  <main id="lookup">
-    <div class="home-panel">
+  <main id="feedback">
+    <form class="home-panel feedback-form" id="feedbackForm">
       <p class="home-kicker">Hub CPD</p>
-      <h1>Get my certificate</h1>
-      <p class="home-lead">Enter the same name and ESR number you used at the end of the session. ESR is for the register only and is not printed on the certificate.</p>
-      <form class="lookup-form" id="lookupForm">
-        <label for="lookupCourse">Course attended</label>
-        <select id="lookupCourse" name="course" required>
-          <option value="copd">COPD, Type 2 Respiratory Failure and NEWS2</option>
-          <option value="hf">Heart Failure in Pre-hospital Care</option>
-        </select>
-        <label for="lookupName">Name on the certificate</label>
-        <input id="lookupName" name="name" type="text" maxlength="80" autocomplete="name" required />
-        <label for="lookupEsr">ESR (GRS) number</label>
-        <input id="lookupEsr" name="esr" type="text" inputmode="numeric" maxlength="16" autocomplete="off" required />
-        <button type="submit">Find my certificate</button>
-      </form>
-      <p class="lookup-status" id="lookupStatus"></p>
-      <a class="lookup-home" href="./">Home</a>
-    </div>
+      <h1>Session feedback</h1>
+      <p class="home-lead">How did this half hour go, and what should the next 30-minute CPD be?</p>
+      <fieldset class="feedback-choices">
+        <legend class="home-kicker">This session</legend>
+        <label><input type="radio" name="useful" value="useful" required /> Useful</label>
+        <label><input type="radio" name="useful" value="partly" /> Partly useful</label>
+        <label><input type="radio" name="useful" value="not" /> Not very useful</label>
+      </fieldset>
+      <label for="feedbackChange">Any comments</label>
+      <textarea id="feedbackChange" name="comments" maxlength="800" placeholder="Optional"></textarea>
+      <label for="feedbackIdea">Suggest another 30-minute CPD</label>
+      <textarea id="feedbackIdea" name="suggestion" maxlength="800" placeholder="A topic you want turned into a half-hour session"></textarea>
+      <label for="feedbackName">Name (optional)</label>
+      <input id="feedbackName" name="name" type="text" maxlength="80" autocomplete="name" />
+      <label for="feedbackEmail">If you would like to be contacted regarding your comments please leave your email address</label>
+      <input id="feedbackEmail" name="email" type="email" maxlength="120" autocomplete="email" inputmode="email" spellcheck="false" pattern="[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}" title="Enter a full email address, such as name@trust.nhs.uk" />
+      <button type="submit">Send feedback</button>
+      <p class="feedback-status" id="feedbackStatus" role="status"></p>
+    </form>
   </main>
   <div class="stage" id="stage"></div>
   <div class="pv-side" id="pvSide">
@@ -2224,15 +2534,12 @@
     <aside class="notes" id="notes"></aside>
     <div class="pv-join-box">
       <div class="pv-kicker">Session</div>
-      <button type="button" id="startSession">Start session — save to OneDrive</button>
-      <p id="sessionFile" class="pv-join-url">Click Start session. The file is created in the Hub OneDrive certificates folder — open it in OneDrive, not File Explorer.</p>
       <p id="roomCode" class="pv-join-url"></p>
       <div class="pv-kicker" style="margin-top:14px">Room + Teams join</div>
       <p class="pv-join-url" id="joinDisplay">Start python serve.py for a live vote link.</p>
       <button type="button" id="copyJoin">Copy join link</button>
+      <button type="button" id="feedbackBtn">Download feedback</button>
       <button type="button" id="hostedJoin">Use hosted QR (works off this Wi-Fi)</button>
-      <button type="button" id="csvBtn">Download results CSV</button>
-      <button type="button" id="namesBtn">Save attendance list</button>
       <p id="certCount" class="pv-join-url"></p>
       <input id="joinOverride" type="url" placeholder="Or paste https://hub-cpd.onrender.com/v" />
     </div>
@@ -2249,15 +2556,13 @@
     <button type="button" id="notesBtn">Notes (N)</button>
     <button type="button" id="pvBtn">Presenter view (S)</button>
     <button type="button" id="copyJoinBtn">Copy join link</button>
-    <button type="button" id="csvBtnBar">Download CSV</button>
-    <button type="button" id="namesBtnBar">Attendance</button>
     <button type="button" id="fsBtn">Fullscreen (F)</button>
   </div>
   <div id="pinGate" hidden>
     <form class="pin-panel" id="pinForm">
       <p class="home-kicker">Presenter</p>
       <h2>Hub PIN</h2>
-      <p>Each facilitator has their own PIN. Heart Failure uses the same PINs as COPD. You do not need a Render account. Start session will use the name on that PIN.</p>
+      <p>Each facilitator has their own PIN. Heart Failure uses the same PINs as COPD. You do not need a Render account.</p>
       <p class="pin-status" id="pinStatus">Enter your Hub PIN to open presenter view.</p>
       <label for="pinInput">PIN</label>
       <input id="pinInput" name="pin" type="password" autocomplete="off" inputmode="text" maxlength="32" required />
@@ -2367,10 +2672,7 @@
       ? heartFailureSlides()
       : copdSlides();
     const slides = slideSource.flatMap((s) => {
-      if (selfMode && (s.collectNames || s.questions)) return [];
-      if (selfMode && s.type === "title") {
-        return [{ ...s, kicker: "Self-guided CPD  ·  about 30 minutes" }];
-      }
+      if (selfMode && (s.collectNames || s.hostedOnly || s.questions)) return [];
       if (s.type !== "poll") return [s];
       if (selfMode) {
         const copy = Object.assign({}, s);
@@ -2451,7 +2753,7 @@
     const STORE = selfMode ? COURSE.selfStore : COURSE.store;
     const CHANNEL = COURSE.channel;
     const requested = params.get("view");
-    let view = requested === "presenter" || requested === "audience" || requested === "vote" || requested === "self" || requested === "lookup"
+    let view = requested === "presenter" || requested === "audience" || requested === "vote" || requested === "self" || requested === "feedback"
       ? requested
       : "home";
     try {
@@ -2630,6 +2932,7 @@
       document.body.classList.toggle("presenter", view === "presenter");
       document.body.classList.toggle("audience", view === "audience");
       document.body.classList.toggle("self", view === "self");
+      document.body.classList.toggle("feedback", view === "feedback");
       if (view === "presenter") {
         document.title = COURSE.short + " — Presenter";
         pvBtn.textContent = "Audience window";
@@ -2648,8 +2951,8 @@
         setHubLive(false);
       } else if (view === "home") {
         document.title = "Hub CPD";
-      } else if (view === "lookup") {
-        document.title = "Get my certificate | Hub CPD";
+      } else if (view === "feedback") {
+        document.title = COURSE.short + " — Feedback";
       } else {
         document.title = COURSE.title + " | Hub CPD";
         pvBtn.textContent = "Presenter view (S)";
@@ -2659,11 +2962,12 @@
     function slideMarkup(s, idx) {
       if (s.type === "title") {
         return `<section class="slide title-slide" data-i="${idx}">
+          <img class="title-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers.">
           <div class="kicker">${s.kicker}</div>
           <h1>${s.title}</h1>
           <p class="subtitle">${s.subtitle || ""}</p>
           ${s.meta ? `<p class="meta">${s.meta}</p>` : ""}
-          <div class="footer-bar"><span>${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
+          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
         </section>`;
       }
       if (s.type === "poll") {
@@ -2714,7 +3018,7 @@
             ${selfMode && s.teach ? `<div class="poll-teach">${s.teach}</div>` : ""}
             <p class="poll-host"></p>
           </div>
-          <div class="footer-bar"><span>${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
+          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
         </section>`;
       }
       if (s.type === "poll-results") {
@@ -2745,14 +3049,14 @@
             ${spread}
             <div class="poll-teach build"></div>
           </div>
-          <div class="footer-bar"><span>${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
+          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
         </section>`;
       }
-      return `<section class="slide${s.collectNames ? " cert-slide" : ""}" data-i="${idx}">
+      return `<section class="slide${s.collectNames ? " cert-slide" : ""}${s.hostedOnly ? " trust-slide" : ""}" data-i="${idx}">
         <div class="kicker">${s.kicker}</div>
         <h2>${s.title}</h2>
         ${s.html}
-        <div class="footer-bar"><span>${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
+        <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
       </section>`;
     }
 
@@ -2938,12 +3242,6 @@
     let sessionUrl = "";
     let sessionApi = false;
 
-    function csvEscape(value) {
-      const s = String(value || "");
-      if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-      return s;
-    }
-
     function rememberAttendance(names) {
       if (view === "audience" || view === "vote" || view === "self") return;
       if (!sessionFile) return;
@@ -2974,22 +3272,9 @@
 
     function paintSessionFile() {
       const el = document.getElementById("sessionFile");
-      const btn = document.getElementById("startSession");
-      if (btn) {
-        btn.disabled = Boolean(sessionFile);
-        btn.textContent = sessionFile ? "Session started" : "Start session — save to OneDrive";
-      }
-      if (!el) return;
-      if (sessionFile) {
-        const where = sessionFolder ? sessionFolder + "/" + sessionFile : sessionFile;
-        el.textContent = "Session started. Saving names to OneDrive: " + where;
-        return;
-      }
-      if (hub.presenter) {
-        el.textContent = "Presenting as " + hub.presenter + ". Click Start session to create this room’s OneDrive file.";
-        return;
-      }
-      el.textContent = "Click Start session. The file is created in the Hub OneDrive certificates folder — open it in OneDrive, not File Explorer.";
+      if (!el || !sessionFile) return;
+      const where = sessionFolder ? sessionFolder + "/" + sessionFile : sessionFile;
+      el.textContent = "Saving names to OneDrive: " + where;
     }
 
     async function refreshSessionStatus() {
@@ -3006,69 +3291,6 @@
       } catch (err) { /* local-only */ }
     }
 
-    async function startAttendanceSession() {
-      if (view === "audience" || view === "vote" || view === "self") return false;
-      let presenter = String(hub.presenter || "").replace(/\s+/g, " ").trim();
-      if (presenter.length < 2) {
-        const remembered = localStorage.getItem(PRESENTER_KEY) || "";
-        const typed = window.prompt("Who is delivering this session?", remembered);
-        if (typed == null) return false;
-        presenter = typed.replace(/\s+/g, " ").trim();
-        if (presenter.length < 2) {
-          window.alert("Enter the name of the person delivering this session.");
-          return false;
-        }
-        localStorage.setItem(PRESENTER_KEY, presenter);
-      }
-      try {
-        const res = await fetch("/api/session/start", {
-          method: "POST",
-          headers: apiHeaders({ "Content-Type": "application/json" }),
-          body: JSON.stringify({ presenter, course: COURSE.id })
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok) {
-          window.alert(data.error || "Could not create the attendance file in the OneDrive certificates folder.");
-          return false;
-        }
-        sessionApi = true;
-        applySessionStatus(data);
-        try { localStorage.removeItem(ATTEND_KEY); } catch (err) { /* ignore */ }
-        if (hub.poll) {
-          hub.poll.names = [];
-          hub.poll.nameCount = 0;
-        }
-        const fileName = data.name || sessionFile.split(/[/\\]/).pop() || sessionFile;
-        window.alert(
-          "Session started.\n\n" + fileName +
-          " is in the Hub OneDrive certificates folder.\n\nOpen that folder in OneDrive in the browser (onedrive.live.com)."
-        );
-        return Boolean(sessionFile || data.cloud || data.name);
-      } catch (err) {
-        const viaFile = location.protocol === "file:";
-        window.alert(
-          viaFile
-            ? "This window is the HTML file, not the live server, so it cannot write to OneDrive.\n\nOpen " + presenterServerUrl()
-            : "Could not create the attendance file in the OneDrive certificates folder.\n\n" +
-              ((err && err.message) || "The server dropped the request. Hard-refresh presenter view and try Start session once more.")
-        );
-        return false;
-      }
-    }
-
-    async function ensureSessionStarted() {
-      if (view === "audience" || view === "vote" || view === "self") return true;
-      if (sessionFile) return true;
-      if (!sessionApi) await refreshSessionStatus();
-      if (sessionFile) return true;
-      if (!sessionApi) return true;
-      const ok = window.confirm(
-        "Start the session first so names save to the OneDrive certificates folder.\n\nOK starts it now. Cancel stays on this slide."
-      );
-      if (!ok) return false;
-      return startAttendanceSession();
-    }
-
     function registerFromStore() {
       try {
         const rec = JSON.parse(localStorage.getItem(ATTEND_KEY) || "null") || { date: "", names: [] };
@@ -3077,30 +3299,7 @@
       return { date: "", names: [] };
     }
 
-    function registerCsvText() {
-      const rec = registerFromStore();
-      const date = rec.date || new Date().toISOString().slice(0, 10);
-      const lines = ["date,name"];
-      (rec.names || []).forEach((n) => lines.push(`${csvEscape(date)},${csvEscape(n)}`));
-      return lines.join("\r\n") + "\r\n";
-    }
-
-    function triggerCsvDownload(text, filename) {
-      const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(a.href);
-    }
-
     function go(n, fromRemote) {
-      const leavingCert = slides[i] && slides[i].collectNames && n !== i;
-      if (leavingCert && !fromRemote && view !== "audience" && view !== "vote") {
-        downloadNames({ silent: true });
-      }
       const next = Math.max(0, Math.min(slides.length - 1, n));
       dir = next >= i ? 1 : -1;
       i = next;
@@ -3110,7 +3309,6 @@
     }
 
     async function stepForward(fromRemote) {
-      if (!fromRemote && !(await ensureSessionStarted())) return;
       if (!fromRemote && slides[i] && slides[i].type === "poll" && revealCurrentPoll()) {
         if (!fromRemote) persist();
         return;
@@ -3246,6 +3444,41 @@
       if (broadcast !== false && channel) channel.postMessage({ join });
     }
 
+    function siteHomeUrl() {
+      try {
+        const u = new URL(hub.join || hub.feedbackOrigin || location.href);
+        return u.origin;
+      } catch (err) {
+        return location.origin;
+      }
+    }
+
+    function feedbackUrl() {
+      try {
+        const u = new URL(hub.join || hub.feedbackOrigin || location.href);
+        u.pathname = "/";
+        u.search = "";
+        u.hash = "";
+        u.searchParams.set("view", "feedback");
+        if (COURSE.id) u.searchParams.set("course", COURSE.id);
+        if (hub.room) u.searchParams.set("r", hub.room);
+        return u.toString();
+      } catch (err) {
+        return "?course=" + encodeURIComponent(COURSE.id) + "&view=feedback";
+      }
+    }
+
+    async function ensureFeedbackOrigin() {
+      if (hub.join && !/localhost|127\.0\.0\.1/i.test(hub.join)) return;
+      try {
+        const res = await fetch("/api/join", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.join) hub.feedbackOrigin = data.join;
+      } catch (err) { /* keep the page address */ }
+      fillJoin();
+    }
+
     function fillJoin() {
       const display = document.getElementById("joinDisplay");
       const roomEl = document.getElementById("roomCode");
@@ -3255,8 +3488,24 @@
           ? hub.join
           : "Start python serve.py for a live vote link.";
       }
+      const feedback = feedbackUrl();
+      const home = siteHomeUrl();
+      stage.querySelectorAll(".feedback-home").forEach((el) => {
+        el.textContent = home;
+      });
+      stage.querySelectorAll(".feedback-join").forEach((box) => {
+        const img = box.querySelector(".feedback-qr");
+        const url = box.querySelector(".poll-url");
+        if (img && img.dataset.src !== feedback) {
+          img.dataset.src = feedback;
+          img.alt = "Open the feedback form";
+          img.src = "/qr.svg?u=" + encodeURIComponent(feedback);
+          img.hidden = false;
+        }
+        if (url) url.textContent = feedback.replace(/([/?&=])/g, "$1\u200b");
+      });
       if (!hub.join) return;
-      stage.querySelectorAll(".poll-join").forEach((box) => {
+      stage.querySelectorAll(".poll-join:not(.feedback-join)").forEach((box) => {
         const img = box.querySelector("img");
         const url = box.querySelector(".poll-url");
         if (img && img.dataset.src !== hub.join) {
@@ -3267,58 +3516,30 @@
       });
     }
 
-    async function downloadResults() {
-      if (view === "audience" || view === "vote" || view === "self") return;
+    async function downloadFeedback() {
+      if (view === "audience" || view === "vote" || view === "self" || view === "feedback") return;
       try {
-        const res = await fetch("/api/results.csv", { headers: apiHeaders(), cache: "no-store" });
+        const res = await fetch("/api/feedback.xlsx?course=" + encodeURIComponent(COURSE.id), { headers: apiHeaders(), cache: "no-store" });
+        if (res.status === 404) {
+          window.alert("No feedback yet.");
+          return;
+        }
         if (!res.ok) {
-          window.alert("Could not download results. Open the presenter link, then try again.");
+          window.alert("Could not download feedback. Open the presenter link, then try again.");
           return;
         }
-        const text = await res.text();
-        if (text.trim().split(/\r?\n/).length < 2) {
-          window.alert("No scores stored yet. Leave a question up until phones send a score, then download.");
-          return;
-        }
-        const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+        const blob = await res.blob();
         const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `copd-cpd-results-${stamp}.csv`;
+        a.download = COURSE.id + "-cpd-feedback-" + stamp + ".xlsx";
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(a.href);
       } catch (err) {
-        window.alert("Could not download results.");
+        window.alert("Could not download feedback.");
       }
-    }
-
-    async function downloadNames(opts) {
-      if (view === "audience" || view === "vote" || view === "self") return;
-      const silent = !!(opts && opts.silent);
-      try {
-        const res = await fetch("/api/certificates.csv", { headers: apiHeaders(), cache: "no-store" });
-        if (res.ok) {
-          const text = await res.text();
-          const lines = text.trim().split(/\r?\n/).slice(1).filter(Boolean);
-          const names = lines.map((row) => {
-            const parts = row.split(",");
-            const name = (parts[1] || "").replace(/^"|"$/g, "").trim();
-            return name;
-          }).filter(Boolean);
-          rememberAttendance(names);
-        }
-      } catch (err) { /* use the local copy */ }
-      const rec = registerFromStore();
-      if (!(rec.names && rec.names.length)) {
-        if (!silent) {
-          window.alert("No names stored yet. Leave the certificate slide up until phones send a name, then save the list.");
-        }
-        return;
-      }
-      const stamp = new Date().toISOString().slice(0, 10);
-      triggerCsvDownload(registerCsvText(), `COPD-CPD-attendance-${stamp}.csv`);
     }
 
     async function copyJoinLink() {
@@ -3574,6 +3795,12 @@
         await hostAction("register");
         return;
       }
+      if (s && s.feedback) {
+        if (lastHostId === "feedback") return;
+        lastHostId = "feedback";
+        await hostAction("feedback");
+        return;
+      }
       if (lastHostId) {
         lastHostId = null;
         await hostAction("idle");
@@ -3707,16 +3934,8 @@
     const copyJoinBtn = document.getElementById("copyJoinBtn");
     if (copyJoin) copyJoin.onclick = copyJoinLink;
     if (copyJoinBtn) copyJoinBtn.onclick = copyJoinLink;
-    const csvBtn = document.getElementById("csvBtn");
-    const csvBtnBar = document.getElementById("csvBtnBar");
-    if (csvBtn) csvBtn.onclick = downloadResults;
-    if (csvBtnBar) csvBtnBar.onclick = downloadResults;
-    const namesBtn = document.getElementById("namesBtn");
-    const namesBtnBar = document.getElementById("namesBtnBar");
-    if (namesBtn) namesBtn.onclick = downloadNames;
-    if (namesBtnBar) namesBtnBar.onclick = downloadNames;
-    const startSessionBtn = document.getElementById("startSession");
-    if (startSessionBtn) startSessionBtn.onclick = startAttendanceSession;
+    const feedbackBtn = document.getElementById("feedbackBtn");
+    if (feedbackBtn) feedbackBtn.onclick = downloadFeedback;
     paintSessionFile();
     const joinOverride = document.getElementById("joinOverride");
     const hostedJoinBtn = document.getElementById("hostedJoin");
@@ -3747,14 +3966,14 @@
     timerEl.onclick = () => { timerStarted = Date.now(); };
 
     window.addEventListener("keydown", (e) => {
-      if (view === "vote" || view === "home" || view === "lookup") return;
+      if (view === "vote" || view === "home") return;
       if (e.target && e.target.closest && e.target.closest("input, textarea, select")) return;
       if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); stepForward(); }
       if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); stepBack(); }
       if (e.key === "Home") go(0);
       if (e.key === "End") {
         e.preventDefault();
-        ensureSessionStarted().then((ok) => { if (ok) go(slides.length - 1); });
+        go(slides.length - 1);
       }
       if ((e.key === "n" || e.key === "N") && view === "presenter") notesEl.classList.toggle("visible");
       if (e.key === "f" || e.key === "F") document.getElementById("fsBtn").click();
@@ -3762,7 +3981,7 @@
     });
 
     window.addEventListener("click", (e) => {
-      if (view === "vote" || view === "home" || view === "lookup") return;
+      if (view === "vote" || view === "home") return;
       if (e.target.closest("button, a, input, textarea, select, label, .pv-side, .controls, .notes, #voteApp, #cpdCert")) return;
       stepForward();
     });
@@ -3860,71 +4079,13 @@
       qrEl.onerror = () => goPrint();
       qrEl.src = src;
     }
-    function runLookupApp() {
-      document.body.classList.add("lookup");
-      applyView();
-      const form = document.getElementById("lookupForm");
-      const statusEl = document.getElementById("lookupStatus");
-      const courseEl = document.getElementById("lookupCourse");
-      fetch("/api/courses", { cache: "no-store" }).then(async (res) => {
-        const data = await res.json().catch(() => ({}));
-        const courses = data.courses || [];
-        if (!courseEl || !courses.length) return;
-        const current = courseEl.value;
-        courseEl.innerHTML = courses.map((c) =>
-          `<option value="${c.id}"${c.id === current ? " selected" : ""}>${c.title}</option>`
-        ).join("");
-      }).catch(() => { /* keep the COPD option */ });
-      if (!form) return;
-      form.onsubmit = async (e) => {
-        e.preventDefault();
-        const name = (form.name.value || "").trim();
-        const esr = (form.esr.value || "").replace(/[^A-Za-z0-9]/g, "");
-        const course = courseEl ? courseEl.value : "copd";
-        if (name.length < 2) {
-          statusEl.textContent = "Enter the name that was on the register.";
-          return;
-        }
-        if (esr.length < 4) {
-          statusEl.textContent = "Enter your ESR number.";
-          return;
-        }
-        const btn = form.querySelector("button[type='submit']");
-        btn.disabled = true;
-        statusEl.textContent = "Searching the register…";
-        try {
-          const res = await fetch("/api/certificate/lookup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ course, name, esr })
-          });
-          const data = await res.json().catch(() => ({}));
-          if (res.status === 429) {
-            statusEl.textContent = "Too many tries. Wait a few minutes and try again.";
-            btn.disabled = false;
-            return;
-          }
-          if (res.ok && data.ok && data.name) {
-            statusEl.textContent = "Certificate found. Use Save as PDF if you want a copy.";
-            printCpdCertificate(data.name, data.date, { title: data.title, detail: data.detail });
-            btn.disabled = false;
-            return;
-          }
-          statusEl.textContent = "No certificate found for that course, name and ESR number.";
-        } catch (err) {
-          statusEl.textContent = "Could not reach the register. Try again, or use the live Hub CPD site.";
-        }
-        btn.disabled = false;
-      };
-    }
-
     if (view === "vote") {
       runVoteApp();
+    } else if (view === "feedback") {
+      runFeedbackApp();
     } else if (view === "home") {
       document.body.classList.add("home");
       applyView();
-    } else if (view === "lookup") {
-      runLookupApp();
     } else {
       requirePresenterAccess().then((ok) => {
         if (!ok) return;
@@ -3932,11 +4093,70 @@
         stage.innerHTML = `<div class="deck">${slides.map(slideMarkup).join("")}</div>`;
         if (build > buildsOn(i)) build = buildsOn(i);
         applySlide();
+        if (view === "self") ensureFeedbackOrigin();
         if (view !== "self") {
           probeHub();
           setInterval(tickHub, 700);
         }
       });
+    }
+
+    function validContactEmail(value) {
+      const email = String(value || "").trim();
+      if (!email) return true;
+      return /^[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/.test(email);
+    }
+
+    function feedbackPayload(form) {
+      return {
+        useful: (form.useful.value || "").trim(),
+        comments: (form.comments.value || "").trim(),
+        email: (form.email.value || "").trim(),
+        suggestion: (form.suggestion.value || "").trim(),
+        name: (form.name.value || "").trim(),
+        room: hub.room || "",
+        course: COURSE.id
+      };
+    }
+
+    function runFeedbackApp() {
+      document.body.classList.add("feedback");
+      applyView();
+      const form = document.getElementById("feedbackForm");
+      const statusEl = document.getElementById("feedbackStatus");
+      if (!form) return;
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const payload = feedbackPayload(form);
+        if (!payload.useful) {
+          statusEl.textContent = "Say how useful the session was.";
+          return;
+        }
+        if (payload.email && !validContactEmail(payload.email)) {
+          statusEl.textContent = "That email address does not look complete.";
+          return;
+        }
+        const btn = form.querySelector("button[type='submit']");
+        btn.disabled = true;
+        statusEl.textContent = "Sending…";
+        try {
+          const res = await fetch("/api/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) {
+            statusEl.textContent = "Could not send that. Try again in a moment.";
+            btn.disabled = false;
+            return;
+          }
+          form.innerHTML = "<p class=\"home-kicker\">Hub CPD</p><h1>Thank you</h1><p class=\"home-lead\">Your feedback is in. Ideas for another 30-minute session are saved with it.</p><a class=\"feedback-home\" href=\"./\">Home</a>";
+        } catch (err) {
+          statusEl.textContent = "Could not reach the session. Use the same link as the room.";
+          btn.disabled = false;
+        }
+      };
     }
 
     function runVoteApp() {
@@ -4044,6 +4264,75 @@
       }
       let lastCertDraw = "";
       let lastWaitDraw = "";
+      let lastFeedbackDraw = "";
+      let feedbackSent = false;
+      function drawFeedback() {
+        const stamp = feedbackSent ? "sent" : "open";
+        if (stamp === lastFeedbackDraw && optsEl.querySelector(".vote-feedback, .vote-feedback-done")) return;
+        lastFeedbackDraw = stamp;
+        lastWaitDraw = "";
+        lastNews2Draw = "";
+        promptEl.textContent = "";
+        teachEl.classList.remove("show");
+        teachEl.textContent = "";
+        statusEl.textContent = feedbackSent ? "Thank you" : "How did this half hour go?";
+        if (feedbackSent) {
+          optsEl.innerHTML = `<p class="vote-feedback-done">Your feedback is in. Ideas for another 30-minute session are saved with it.</p>`;
+          return;
+        }
+        optsEl.innerHTML = `
+          <form class="vote-feedback">
+            <div class="vote-feedback-choices">
+              <label><input type="radio" name="useful" value="useful" required /> Useful</label>
+              <label><input type="radio" name="useful" value="partly" /> Partly useful</label>
+              <label><input type="radio" name="useful" value="not" /> Not very useful</label>
+            </div>
+            <label for="voteChange">Any comments</label>
+            <textarea id="voteChange" name="comments" maxlength="800" placeholder="Optional"></textarea>
+            <label for="voteIdea">Suggest another 30-minute CPD</label>
+            <textarea id="voteIdea" name="suggestion" maxlength="800" placeholder="A topic for a half-hour session"></textarea>
+            <label for="voteName">Name (optional)</label>
+            <input id="voteName" name="name" type="text" maxlength="80" autocomplete="name" />
+            <label for="voteEmail">If you would like to be contacted regarding your comments please leave your email address</label>
+            <input id="voteEmail" name="email" type="email" maxlength="120" autocomplete="email" inputmode="email" spellcheck="false" pattern="[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}" title="Enter a full email address, such as name@trust.nhs.uk" />
+            <button class="vote-btn" type="submit">Send feedback</button>
+          </form>`;
+        const form = optsEl.querySelector(".vote-feedback");
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          const payload = feedbackPayload(form);
+          if (!payload.useful) {
+            statusEl.textContent = "Say how useful the session was.";
+            return;
+          }
+          if (payload.email && !validContactEmail(payload.email)) {
+            statusEl.textContent = "That email address does not look complete.";
+            return;
+          }
+          const btn = form.querySelector("button[type='submit']");
+          btn.disabled = true;
+          statusEl.textContent = "Sending…";
+          try {
+            const res = await fetch("/api/feedback", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) {
+              statusEl.textContent = "Could not send that. Try again.";
+              btn.disabled = false;
+              return;
+            }
+            feedbackSent = true;
+            lastFeedbackDraw = "";
+            drawFeedback();
+          } catch (err) {
+            statusEl.textContent = "Cannot reach the session. Stay on this page and try again.";
+            btn.disabled = false;
+          }
+        };
+      }
       function drawWait() {
         const stamp = ["wait", hub.ok, hub.room || ""].join("|");
         if (stamp === lastWaitDraw && !optsEl.querySelector(".cert-form")) return;
@@ -4062,100 +4351,14 @@
         }
         statusEl.textContent = "Waiting for the next question";
       }
-      function certCourse() {
-        const title = (hub.poll && hub.poll.courseTitle) || COURSE.title;
-        return { title };
-      }
-      function drawCert(p) {
-        const saved = localStorage.getItem("copd-cert-name") || "";
-        const savedEsr = localStorage.getItem("copd-cert-esr") || "";
-        const savedEmail = localStorage.getItem("copd-cert-email") || "";
-        const stamp = ["cert", saved, savedEsr, savedEmail, hub.ok].join("|");
-        if (stamp === lastCertDraw && optsEl.querySelector(".cert-form, .cert-done")) return;
-        lastCertDraw = stamp;
-        lastNews2Draw = "";
-        lastWaitDraw = "";
-        promptEl.innerHTML = "<ul><li>Enter your name as you wish it to appear on your certificate of attendance.</li><li>Please also provide your ESR (GRS) number for audit purposes.</li><li>Please also provide your work email for the register.</li></ul>";
-        statusEl.textContent = hub.ok === false
-          ? "Cannot reach the laptop. Join the same Wi-Fi, then open this link again."
-          : saved
-            ? "You can send it again if the spelling is wrong."
-            : "";
-        teachEl.classList.remove("show");
-        teachEl.textContent = "";
-        const thanks = saved ? `<p class="cert-done">On the list as <strong>${esc(saved)}</strong>.</p>` : "";
-        const printBtn = saved ? `<button type="button" class="cert-print-btn">Save / print my certificate</button>` : "";
-        optsEl.innerHTML = `
-          ${thanks}
-          ${printBtn}
-          <form class="cert-form">
-            <label for="certName">Name</label>
-            <input id="certName" name="name" type="text" maxlength="80" autocomplete="name" value="${esc(saved)}" required />
-            <label for="certEsr">ESR (GRS) number</label>
-            <input id="certEsr" name="esr" type="text" inputmode="numeric" maxlength="16" autocomplete="off" value="${esc(savedEsr)}" required />
-            <label for="certEmail">Work email</label>
-            <input id="certEmail" name="email" type="email" maxlength="120" autocomplete="email" inputmode="email" value="${esc(savedEmail)}" required />
-            <button type="submit">${saved ? "Update my details" : "Send my name"}</button>
-          </form>`;
-        const print = optsEl.querySelector(".cert-print-btn");
-        if (print) print.onclick = () => printCertificate(saved, null, certCourse());
-        const form = optsEl.querySelector(".cert-form");
-        form.onsubmit = async (e) => {
-          e.preventDefault();
-          const name = (form.name.value || "").trim();
-          const esr = (form.esr.value || "").replace(/[^A-Za-z0-9]/g, "");
-          const email = (form.email.value || "").trim().toLowerCase();
-          if (name.length < 2) {
-            statusEl.textContent = "Enter the name you want on the certificate.";
-            return;
-          }
-          if (esr.length < 4) {
-            statusEl.textContent = "Enter your ESR number.";
-            return;
-          }
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            statusEl.textContent = "Enter your work email.";
-            return;
-          }
-          const btn = form.querySelector("button[type='submit']") || form.querySelector("button");
-          btn.disabled = true;
-          try {
-            const res = await fetch("/api/certificate", {
-              method: "POST",
-              headers: apiHeaders({ "Content-Type": "application/json" }),
-              body: JSON.stringify({ voter, name, esr, email })
-            });
-            const data = await res.json().catch(() => ({}));
-            if (res.ok && data.ok) {
-              localStorage.setItem("copd-cert-name", data.name || name);
-              localStorage.setItem("copd-cert-esr", data.esr || esr);
-              localStorage.setItem("copd-cert-email", data.email || email);
-              lastCertDraw = "";
-              if (data.poll) hub.poll = data.poll;
-              draw();
-              printCertificate(data.name || name, data.date, {
-                title: data.title || (data.poll && data.poll.courseTitle) || COURSE.title
-              });
-            } else {
-              statusEl.textContent = data.error === "missing esr"
-                ? "Enter your ESR number."
-                : data.error === "missing email"
-                  ? "Enter your work email."
-                  : "Could not send that name. Stay on this page and try again.";
-              btn.disabled = false;
-            }
-          } catch (err) {
-            statusEl.textContent = "Cannot reach the laptop. Try again.";
-            btn.disabled = false;
-          }
-        };
-      }
-      function printCertificate(name, when, course) {
-        printCpdCertificate(name, when, course);
-      }
       function draw(poll) {
         if (arguments.length) hub.poll = poll;
         const p = hub.poll;
+        if (p && p.feedback && !(p.id && (p.open || p.revealed))) {
+          drawFeedback();
+          return;
+        }
+        lastFeedbackDraw = "";
         if (p && p.id && (p.open || p.revealed)) {
           lastCertDraw = "";
           lastWaitDraw = "";
@@ -4196,10 +4399,6 @@
           return;
         }
         lastNews2Draw = "";
-        if (p && p.register) {
-          drawCert(p);
-          return;
-        }
         drawWait();
       }
       async function tick() {

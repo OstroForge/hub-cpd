@@ -2,7 +2,7 @@ function heartFailureSlides() {
   return [
     {
       type: "title",
-      kicker: "Ambulance Staff CPD  ·  30 minutes",
+      kicker: "Ambulance Clinical Refreshers",
       title: "Heart Failure in Pre-hospital Care",
       subtitle: "Recognise the presentation, sit them up, and treat the right problem — congestion, ischaemia or shock.",
       meta: "JRCALC Heart Failure, Glyceryl Trinitrate and Furosemide. Always follow the live JRCALC entry and local Trust policy.",
@@ -335,7 +335,7 @@ function heartFailureSlides() {
             </div>
           </figure>
         </div>
-        <div class="banner build" style="margin-top:12px">First sit them upright, then oxygen, ECG and further medications</div>`,
+        <div class="banner build hold-space" style="margin-top:12px">First sit them upright, then oxygen, ECG and further medications</div>`,
       notes: "This is free, immediate, and often skipped while people reach for GTN. If they are peri-arrest and need to be laid for CPR, that overrides — but the breathless congested patient should not be recumbent."
     },
     {
@@ -658,7 +658,7 @@ function heartFailureSlides() {
     },
     {
       kicker: "Take home",
-      title: "Leave with these five lines",
+      title: "Five key points to remember",
       html: `
         <div class="body">
           <div class="banner build">1. Acute heart failure is time-critical unless a palliative plan says otherwise.</div>
@@ -686,7 +686,7 @@ function heartFailureSlides() {
             </ul>
           </div>
           <div class="card">
-            <h3>Why the guideline is written this way</h3>
+            <h3>Bibliography</h3>
             <ul>
               <li>Mebazaa et al. Eur J Heart Fail 2015 — pre-hospital AHF consensus; vasodilators if SBP ≥110</li>
               <li>NICE CG187 Acute heart failure — hospital nitrates not routine</li>
@@ -707,31 +707,43 @@ function heartFailureSlides() {
           <div class="banner dark" style="font-size:clamp(28px,3.2vw,42px);padding:28px 24px">Thank you for attending</div>
           <div class="banner teal" style="margin-top:12px;padding:22px 24px">We hope it has been useful</div>
           <div class="banner" style="margin-top:12px;padding:22px 24px">Ask now, or email: <a href="mailto:jon.ostrowski@wmas.nhs.uk" style="color:inherit;text-decoration:underline">jon.ostrowski@wmas.nhs.uk</a></div>
-          <div class="banner green" style="margin-top:12px;padding:22px 24px">Any suggestions for future CPD sessions?</div>
+          <div class="banner green" style="margin-top:12px;padding:22px 24px">The next slide is for feedback, and ideas for another 30-minute CPD.</div>
         </div>`,
-      notes: "Leave this up. Next slide collects names for certificates."
+      notes: "Leave this up. Offer to stay for questions. The next slide collects feedback and topic ideas. Then the CPD certificate QR — only in a hosted session. Leave that one up for the room to scan."
     },
     {
-      collectNames: true,
-      kicker: "Certificates",
-      title: "Put your name in for a CPD certificate",
+      feedback: true,
+      kicker: "Feedback",
+      title: "Help shape the next session",
       html: `
-        <div class="body two" style="align-items:stretch">
-          <div class="card ok">
-            <ul>
-              <li>Enter your name as you wish it to appear on your certificate of attendance.</li>
-              <li>Please also provide your ESR (GRS) number for audit purposes.</li>
-              <li>Please also provide your work email for the register.</li>
-            </ul>
-            <p style="margin-top:14px;font-size:28px;font-weight:750;color:var(--navy)"><span class="cert-total">0</span> names in</p>
+        <div class="body two feedback-layout">
+          <div>
+            <div class="banner teal">Please provide feedback on this Hub CPD Session</div>
+            <div class="banner" style="margin-top:12px">Any suggestions for future hub CPD Sessions?</div>
           </div>
-          <aside class="poll-join cert-join">
-            <img alt="Join to add your name" width="132" height="132" />
+          <aside class="poll-join feedback-join">
+            <img class="feedback-qr" alt="Open the feedback form" width="132" height="132" hidden />
             <p class="poll-url"></p>
-            <p class="poll-phones">Scan if you closed the vote page</p>
           </aside>
+        </div>
+        <div class="feedback-brand">
+          <img class="feedback-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers.">
+          <p class="feedback-home"></p>
         </div>`,
-      notes: "Leave this up. Name, ESR and work email write into the OneDrive attendance CSV. ESR and email are not printed on the certificate."
+      notes: "Leave this up. Phones already on the vote page get the form by themselves. Anyone else can scan the QR. Download feedback from the presenter sidebar."
+    },
+    {
+      hostedOnly: true,
+      kicker: "",
+      title: "Record Attendance for CPD Certificate",
+      html: `
+        <div class="body trust-attend">
+          <div class="trust-qr">
+            <img src="hf/assets/hf-certificate-qr.png" alt="CPD certificate QR code" onerror="var p=this.parentElement;this.remove();var m=p&&p.querySelector('.trust-qr-missing');if(m)m.hidden=false" />
+            <p class="trust-qr-missing" hidden>Save the QR image as hf/assets/hf-certificate-qr.png, then refresh.</p>
+          </div>
+        </div>`,
+      notes: "This slide is only in a hosted session, after a Hub PIN. It is not in the self-guided deck. Leave it up so the room can scan. Save the Trust QR as hf/assets/hf-certificate-qr.png and hard-refresh."
     }
   ];
 }
