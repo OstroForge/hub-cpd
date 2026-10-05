@@ -9,7 +9,7 @@ Each topic has its own folder:
 | COPD | `copd/` — `slides.js`, `handout.html`, `assets/` |
 | Heart Failure | `hf/` — `slides.js`, `handout.html`, `assets/` |
 
-The hub (`index.html`, `serve.py`) stays at the top. Each topic keeps its feedback workbooks in `feedback/dev.xlsx` and `feedback/live.xlsx`. To add a later package, copy that folder pattern.
+The hub (`index.html`, `serve.py`) stays at the top. Each topic keeps its feedback workbooks in `feedback/dev.xlsx` and `feedback/live.xlsx`. To add a later package, copy that folder pattern. The backlog of later sessions is `FUTURE-TOPICS.md`.
 
 ## Local (this laptop)
 

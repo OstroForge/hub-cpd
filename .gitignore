@@ -15,10 +15,11 @@ attend-folder.txt
 feedback-share.txt
 feedback.csv
 *Feedback*.xlsx
+**/feedback/*.xlsx
 certificates.csv
 certificates-*.csv
 certificates/**/*.csv
-COPD-CPD-certificate-names.csv
+*-CPD-certificate-names.csv
 *-CPD-attendance-*.csv
 session-*.json
 Proposal for accreditation/
