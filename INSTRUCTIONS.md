@@ -2,6 +2,8 @@
 
 WMAS ambulance CPD deck on JRCALC / AACES COPD guidance, NEWS2 Scale 1 vs Scale 2, and live room voting.
 
+Later sessions are listed in `FUTURE-TOPICS.md`.
+
 ## Local (this laptop)
 
 From this project folder:
