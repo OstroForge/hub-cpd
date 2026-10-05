@@ -886,18 +886,8 @@
     body.audience #copyJoinBtn,
     body.vote #copyJoinBtn,
     body.self #copyJoinBtn,
-    body.audience #csvBtnBar,
-    body.vote #csvBtnBar,
-    body.self #csvBtnBar,
-    body.audience #namesBtnBar,
-    body.vote #namesBtnBar,
-    body.self #namesBtnBar { display: none; }
     body:not(.live) #copyJoinBtn,
-    body:not(.live) #csvBtnBar,
-    body:not(.live) #namesBtnBar { display: none; }
-    body.presenter #copyJoinBtn,
-    body.presenter #csvBtnBar,
-    body.presenter #namesBtnBar { display: none; }
+    body.presenter #copyJoinBtn { display: none; }
 
     .poll-slide .body {
       display: flex;
@@ -1976,7 +1966,6 @@
       <p class="pv-join-url" id="joinDisplay">Start python serve.py for a live vote link.</p>
       <button type="button" id="copyJoin">Copy join link</button>
       <button type="button" id="hostedJoin">Use hosted QR (works off this Wi-Fi)</button>
-      <button type="button" id="csvBtn">Download results CSV</button>
       <button type="button" id="feedbackBtn">Download feedback</button>
       <p id="certCount" class="pv-join-url" hidden></p>
       <input id="joinOverride" type="url" placeholder="Or paste https://hub-cpd.onrender.com/v" />
@@ -1994,7 +1983,6 @@
     <button type="button" id="notesBtn">Notes (N)</button>
     <button type="button" id="pvBtn">Presenter view (S)</button>
     <button type="button" id="copyJoinBtn">Copy join link</button>
-    <button type="button" id="csvBtnBar">Download CSV</button>
     <button type="button" id="fsBtn">Fullscreen (F)</button>
   </div>
   <div id="voteApp" hidden>
@@ -3521,33 +3509,6 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       });
     }
 
-    async function downloadResults() {
-      if (view === "audience" || view === "vote" || view === "self") return;
-      try {
-        const res = await fetch("/api/results.csv", { headers: apiHeaders(), cache: "no-store" });
-        if (!res.ok) {
-          window.alert("Could not download results. Open the presenter link, then try again.");
-          return;
-        }
-        const text = await res.text();
-        if (text.trim().split(/\r?\n/).length < 2) {
-          window.alert("No scores stored yet. Leave a question up until phones send a score, then download.");
-          return;
-        }
-        const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
-        const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `copd-cpd-results-${stamp}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(a.href);
-      } catch (err) {
-        window.alert("Could not download results.");
-      }
-    }
-
     async function downloadFeedback() {
       if (view === "audience" || view === "vote" || view === "self") return;
       try {
@@ -3928,10 +3889,6 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     const copyJoinBtn = document.getElementById("copyJoinBtn");
     if (copyJoin) copyJoin.onclick = copyJoinLink;
     if (copyJoinBtn) copyJoinBtn.onclick = copyJoinLink;
-    const csvBtn = document.getElementById("csvBtn");
-    const csvBtnBar = document.getElementById("csvBtnBar");
-    if (csvBtn) csvBtn.onclick = downloadResults;
-    if (csvBtnBar) csvBtnBar.onclick = downloadResults;
     const feedbackBtn = document.getElementById("feedbackBtn");
     if (feedbackBtn) feedbackBtn.onclick = downloadFeedback;
     const joinOverride = document.getElementById("joinOverride");

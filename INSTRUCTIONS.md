@@ -109,7 +109,7 @@ OneDrive: https://onedrive.live.com/
 2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.onrender.com/?view=presenter) — type **your** Hub PIN when asked.
 3. Share the **Audience** window to the projector and/or Teams (Share window, not the presenter screen).
 4. Room: scan **this session’s** QR (it includes a room code). Teams: copy the join link from the presenter sidebar into chat — do not reuse another facilitator’s QR.
-5. Space, a mouse click on the slide, a wireless clicker (Page Down / next), or **Next** on a question goes to the results slide. Download **results CSV** from the presenter sidebar or the bottom bar before the service sleeps.
+5. Space, a mouse click on the slide, a wireless clicker (Page Down / next), or **Next** on a question goes to the results slide.
 6. The last slide of a hosted session shows the CPD certificate QR (`assets/copd-certificate-qr.png`). Leave it up for the room to scan. The Trust records attendance and issues the certificate. That slide is not in the self-guided deck.
 7. The slide before that collects feedback and ideas for another 30-minute CPD. Phones scan its QR. Each response is added to the OneDrive workbook `feedback/COPD_Feedback_sheet.xlsx`. The sharing link is not kept in this project: on this laptop it is read from `feedback-share.txt`, and on Render it is the environment variable `FEEDBACK_SHARE_URL`. Close the workbook in Excel before a live session, or the site cannot add rows. Download **feedback** from the presenter sidebar.
 
