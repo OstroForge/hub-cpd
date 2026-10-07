@@ -188,6 +188,13 @@ COURSES = {
         "prefix": "HF-CPD-attendance-",
         "folder": "heart failure",
     },
+    "asthma": {
+        "id": "asthma",
+        "title": "Acute Asthma",
+        "detail": "JRCALC Asthma · 30 minutes",
+        "prefix": "ASTHMA-CPD-attendance-",
+        "folder": "asthma",
+    },
 }
 
 

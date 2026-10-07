@@ -128,6 +128,94 @@
     body.theme-hf .photo-frame,
     body.theme-hf .photo-frame img { background: #0a101c; }
 
+    body.theme-asthma {
+      --navy: #14382c;
+      --navy-2: #1f5344;
+      --ink: #1a2a24;
+      --muted: #5c6b64;
+      --paper: #d7e6dc;
+      --card: #f2f7f4;
+      --line: #c3d4c9;
+      --amber: #8a5608;
+      --amber-bg: #f8f0dc;
+      --teal: #1f6b58;
+      --teal-bg: #e5f4ee;
+      --stage: #0c1c16;
+    }
+    body.theme-asthma .slide.title-slide,
+    body.theme-asthma .slide.cert-slide {
+      background-color: #0e241c;
+      background-image:
+        linear-gradient(rgba(8, 36, 28, 0.42), rgba(8, 36, 28, 0.42)),
+        linear-gradient(90deg, rgba(8, 28, 22, 0.9) 0%, rgba(8, 28, 22, 0.62) 38%, rgba(8, 28, 22, 0.12) 100%),
+        url("asthma/assets/title-ambulance-asthma.png?v=9");
+      background-repeat: no-repeat;
+      background-position: left center, left center, 46% center;
+      background-size: auto, auto, 70% auto;
+    }
+    body.theme-asthma .title-slide .title-logo {
+      top: 16px;
+      right: auto;
+      left: 28px;
+    }
+    body.theme-asthma .slide.title-slide {
+      align-items: flex-end;
+      text-align: right;
+    }
+    body.theme-asthma .slide.title-slide .kicker,
+    body.theme-asthma .slide.title-slide h1,
+    body.theme-asthma .slide.title-slide .subtitle,
+    body.theme-asthma .slide.title-slide .meta {
+      text-align: right;
+      margin-left: auto;
+    }
+    body.theme-asthma .slide.title-slide .subtitle {
+      max-width: min(58ch, 68%);
+    }
+    body.theme-asthma .slide.title-slide .meta {
+      max-width: min(36ch, 46%);
+    }
+    body.theme-asthma .slide.title-slide h1,
+    body.theme-asthma .slide.cert-slide h2 { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.75); }
+    body.theme-asthma .slide.title-slide .subtitle { color: #e7f3ec; }
+    body.theme-asthma .slide.title-slide .meta { color: #c9ddd2; }
+    body.theme-asthma .controls { background: #0e241c; color: #d7e6dc; }
+    body.theme-asthma .controls button,
+    body.theme-asthma .controls a.home-link { background: #1c4336; color: #f2f7f4; }
+    body.theme-asthma .controls button:hover,
+    body.theme-asthma .controls a.home-link:hover { background: #275744; }
+    body.theme-asthma .progress { background: #1c4336; }
+    body.theme-asthma .notes { background: #12261e; color: #e7f3ec; border-top-color: var(--amber); }
+    body.theme-asthma .notes strong { color: #e4c56a; }
+    body.theme-asthma .pv-live { background: #12261e; color: #e7f3ec; border-color: #275744; }
+    body.theme-asthma .title-slide .footer-bar,
+    body.theme-asthma .cert-slide .footer-bar { color: #c9ddd2; }
+    body.theme-asthma .vote-btn { background: #1f5344; }
+    body.theme-asthma #voteTeach { background: #14382c; }
+    body.theme-asthma .cpd-cert-mark { background: #14382c; }
+    body.theme-asthma .cpd-cert-page h1,
+    body.theme-asthma .cpd-cert-page .who,
+    body.theme-asthma .cpd-cert-page .course { color: #14382c; }
+    body.theme-asthma .cpd-cert-page .who { border-bottom-color: #1f6b58; }
+    body.theme-asthma .photo-frame,
+    body.theme-asthma .photo-frame img { background: #0c1c16; }
+    body.theme-asthma .monitor-photo {
+      display: block;
+      width: 100%;
+      max-height: min(54vh, 440px);
+      object-fit: contain;
+      background: transparent;
+    }
+    body.theme-asthma .treat-photo {
+      display: block;
+      height: min(48vh, 400px);
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      margin: 0 auto;
+      background: transparent;
+    }
+
     .slide.title-slide,
     .slide.cert-slide {
       background:
@@ -1075,7 +1163,7 @@
     body.home .controls,
     body.home .pv-side { display: none !important; }
     .home-panel {
-      width: min(920px, 100%);
+      width: min(1080px, 100%);
       background: var(--paper);
       color: var(--ink);
       border: 1px solid #1c3f34;
@@ -1146,7 +1234,7 @@
     }
     .hub-courses {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       margin-top: 28px;
     }
@@ -1194,6 +1282,13 @@
       padding: 8px 12px;
     }
     .hub-course.hf .hub-links a { background: #1b2744; }
+    .hub-course.asthma {
+      border-color: #b7d0c4;
+      background: #e7f2eb;
+    }
+    .hub-course.asthma .hub-tag { color: #1f6b58; }
+    .hub-course.asthma h2 { color: #14382c; }
+    .hub-course.asthma .hub-links a { background: #14382c; }
     .hub-links a:hover,
     .hub-links a:focus-visible { filter: brightness(1.12); }
     @media (max-width: 720px) {
@@ -2496,6 +2591,16 @@
             <a href="hf/handout.html">Handout</a>
           </div>
         </article>
+        <article class="hub-course asthma">
+          <p class="hub-tag">Respiratory</p>
+          <h2>Acute Asthma</h2>
+          <p>Life-threatening features, oxygen to 94–98%, and when to give intramuscular adrenaline.</p>
+          <div class="hub-links">
+            <a href="?course=asthma&amp;view=self">Self-guided</a>
+            <a href="?course=asthma&amp;view=presenter">Presenter</a>
+            <a href="asthma/handout.html">Handout</a>
+          </div>
+        </article>
       </div>
     </div>
   </main>
@@ -2562,7 +2667,7 @@
     <form class="pin-panel" id="pinForm">
       <p class="home-kicker">Presenter</p>
       <h2>Hub PIN</h2>
-      <p>Each facilitator has their own PIN. Heart Failure uses the same PINs as COPD. You do not need a Render account.</p>
+      <p>Each facilitator has their own PIN. Every topic uses the same PINs. You do not need a Render account.</p>
       <p class="pin-status" id="pinStatus">Enter your Hub PIN to open presenter view.</p>
       <label for="pinInput">PIN</label>
       <input id="pinInput" name="pin" type="password" autocomplete="off" inputmode="text" maxlength="32" required />
@@ -2607,6 +2712,7 @@
 
   <script src="copd/slides.js"></script>
   <script src="hf/slides.js"></script>
+  <script src="asthma/slides.js?v=3"></script>
   <script>
     const NEWS2_CITE = "Reproduced from: Royal College of Physicians. <em>National Early Warning Score (NEWS) 2: Standardising the assessment of acute-illness severity in the NHS.</em> Updated report of a working party. London: RCP, 2017.";
     const params = new URLSearchParams(location.search);
@@ -2632,10 +2738,22 @@
         selfStore: "hf-cpd-self-state",
         channel: "hf-cpd-deck",
         attendKey: "hf-cpd-register"
+      },
+      asthma: {
+        id: "asthma",
+        title: "Acute Asthma",
+        short: "Acute Asthma CPD",
+        footer: "Hub CPD · Acute Asthma",
+        handout: "asthma/handout.html",
+        store: "asthma-cpd-state",
+        selfStore: "asthma-cpd-self-state",
+        channel: "asthma-cpd-deck",
+        attendKey: "asthma-cpd-register"
       }
     };
     const COURSE = COURSE_CATALOG[String(params.get("course") || "").trim().toLowerCase()] || COURSE_CATALOG.copd;
     if (COURSE.id === "hf") document.body.classList.add("theme-hf");
+    if (COURSE.id === "asthma") document.body.classList.add("theme-asthma");
     const NEWS2_FORM = {
       cols: [20.04, 31.24, 42.43, 53.62, 64.81, 76.01, 87.20, 98.61],
       rows: [
@@ -2670,6 +2788,8 @@
     const selfMode = params.get("view") === "self";
     const slideSource = (COURSE.id === "hf" && typeof heartFailureSlides === "function")
       ? heartFailureSlides()
+      : (COURSE.id === "asthma" && typeof asthmaSlides === "function")
+      ? asthmaSlides()
       : copdSlides();
     const slides = slideSource.flatMap((s) => {
       if (selfMode && (s.collectNames || s.hostedOnly || s.questions)) return [];
@@ -2682,6 +2802,9 @@
         } else if (s.pollId === "hf-hands") {
           copy.kicker = "Check yourself";
           copy.title = "GTN blood pressure in acute heart failure";
+        } else if (s.pollId === "asthma-hands") {
+          copy.kicker = "Check yourself";
+          copy.title = "Oxygen target in acute asthma";
         } else if (s.layout === "news2") {
           copy.kicker = String(s.kicker || "").replace("live NEWS2", "check yourself");
           copy.prompt = "Work out the NEWS2 from the observations. Space shows the scoring.";

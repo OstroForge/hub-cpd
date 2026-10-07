@@ -8,6 +8,7 @@ Each topic has its own folder:
 | --- | --- |
 | COPD | `copd/` — `slides.js`, `handout.html`, `assets/` |
 | Heart Failure | `hf/` — `slides.js`, `handout.html`, `assets/` |
+| Acute Asthma | `asthma/` — `slides.js`, `handout.html`, `assets/` |
 
 The hub (`index.html`, `serve.py`) stays at the top. Each topic keeps its feedback workbooks in `feedback/dev.xlsx` and `feedback/live.xlsx`. To add a later package, copy that folder pattern. The backlog of later sessions is `FUTURE-TOPICS.md`.
 
@@ -29,6 +30,7 @@ Then open on **this laptop**:
 | Self-guided (no vote, no register) | http://127.0.0.1:8765/?view=self |
 | Printable COPD handout | http://127.0.0.1:8765/copd/handout.html |
 | Printable Heart Failure handout | http://127.0.0.1:8765/hf/handout.html |
+| Printable Acute Asthma handout | http://127.0.0.1:8765/asthma/handout.html |
 
 Phones must **not** use `127.0.0.1` — that address only works on the laptop. Put the phone on the **same Wi-Fi** as the laptop (not mobile data) and open the LAN address printed in the terminal, for example:
 
@@ -108,6 +110,7 @@ Use this when you are not presenting from this laptop, or when Teams needs a pub
 | Self-guided (no vote, no register) | https://hub-cpd.onrender.com/?view=self |
 | Printable COPD handout | https://hub-cpd.onrender.com/copd/handout.html |
 | Printable Heart Failure handout | https://hub-cpd.onrender.com/hf/handout.html |
+| Printable Acute Asthma handout | https://hub-cpd.onrender.com/asthma/handout.html |
 | Old COPD URL (forwards to Hub) | https://copd-cpd.onrender.com/ |
 | GitHub copy | https://ostroforge.github.io/copd-cpd/ |
 | GitHub COPD handout | https://ostroforge.github.io/copd-cpd/copd/handout.html |
@@ -220,7 +223,7 @@ To add a later package, give it a `folder` name in `COURSES` in `serve.py`. The 
 
 For staff who missed the room, or for a Teams share with no phones:
 
-1. **Handout** — two A4 pages. Open `copd/handout.html` or `hf/handout.html` and use Print / save PDF.
+1. **Handout** — two A4 pages. Open `copd/handout.html`, `hf/handout.html` or `asthma/handout.html` and use Print / save PDF.
 2. **Self-guided deck** — add `?view=self` to the deck URL. Same slides, no live vote, no certificate QR. The feedback QR stays, with the address under it. Check questions reveal on click or Space. **Printable handout** is on the bottom bar.
 
 A PowerPoint export is a poorer copy of this deck (NEWS2 chart and kit photos sit in HTML). Use the self-guided URL if you need a version with voting removed.
