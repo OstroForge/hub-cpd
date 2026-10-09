@@ -41,11 +41,11 @@ Use **http**, not https. The QR on the slide already uses that LAN address.
 If it only works **sometimes**:
 
 1. Turn **mobile data off** on the phone (iPhone: Settings → Mobile Data off, and Wi-Fi Assist off). The phone otherwise hops to 4G and `192.168.1.x` suddenly “can’t be reached”.
-2. Stay on the same Wi-Fi as the laptop — not guest Wi-Fi, not a different band/SSID, not a mix of local and `onrender.com`.
+2. Stay on the same Wi-Fi as the laptop — not guest Wi-Fi, not a different band/SSID, not a mix of the laptop address and `hub-cpd.co.uk`.
 3. Type the URL with `http://` at the front, or scan the QR after a hard refresh of the deck.
 4. Some work / Trust Wi-Fi blocks phone-to-laptop traffic. Use a phone hotspot (laptop and phones on that hotspot) or the hosted Render session instead.
 
-Windows Firewall: allow Python on Private networks, or inbound TCP **8765**, if Windows asked and you clicked Cancel.
+Windows Firewall asks again every time `python serve.py` starts if Python is allowed on Public networks only. This laptop’s Wi-Fi is a **Private** network, so that prompt is the phone being refused. When the box appears, tick **Private networks** and click **Allow access**. Do not click Cancel. To set it without waiting for the box: Windows Security → Firewall & network protection → Allow an app through firewall → Change settings → tick Private (and Public) for Python → OK. That is a one-time click on this PC. A code change does not replace it.
 
 Do **not** also run `python -m http.server 8765`. Two listeners on the same port is why only one phone could vote: Windows split the connections, so every other device never reached this quiz.
 
@@ -97,25 +97,37 @@ Heart Failure has its own workbook. It does not write into the COPD sheet.
 
 `FEEDBACK_SHARE_HF_LIVE="https://…"`
 
-## Hosted session (Render)
+## Hosted session
 
-Use this when you are not presenting from this laptop, or when Teams needs a public vote link.
+Use this when you are not presenting from this laptop, or when Teams needs a public vote link. Share **https://hub-cpd.co.uk**. The app still runs on the Render service `hub-cpd`. Cloudflare DNS for the domain points at that service.
 
 | What | URL |
 | --- | --- |
-| Home (choose self-guided, presenter, or handout) | https://hub-cpd.onrender.com/ |
-| Presenter / notes | https://hub-cpd.onrender.com/?view=presenter |
-| Audience window (share this) | https://hub-cpd.onrender.com/?view=audience |
-| Phone / Teams vote page | https://hub-cpd.onrender.com/v |
-| Self-guided (no vote, no register) | https://hub-cpd.onrender.com/?view=self |
-| Printable COPD handout | https://hub-cpd.onrender.com/copd/handout.html |
-| Printable Heart Failure handout | https://hub-cpd.onrender.com/hf/handout.html |
-| Printable Acute Asthma handout | https://hub-cpd.onrender.com/asthma/handout.html |
+| Home (choose self-guided, presenter, or handout) | https://hub-cpd.co.uk/ |
+| Presenter / notes | https://hub-cpd.co.uk/?view=presenter |
+| Audience window (share this) | https://hub-cpd.co.uk/?view=audience |
+| Phone / Teams vote page | https://hub-cpd.co.uk/v |
+| Self-guided (no vote, no register) | https://hub-cpd.co.uk/?view=self |
+| Printable COPD handout | https://hub-cpd.co.uk/copd/handout.html |
+| Printable Heart Failure handout | https://hub-cpd.co.uk/hf/handout.html |
+| Printable Acute Asthma handout | https://hub-cpd.co.uk/asthma/handout.html |
+| Previous Render address (forwards to the domain once this build is live) | https://hub-cpd.onrender.com/ |
 | Old COPD URL (forwards to Hub) | https://copd-cpd.onrender.com/ |
-| GitHub copy | https://ostroforge.github.io/copd-cpd/ |
+| GitHub copy (static; not the live room) | https://ostroforge.github.io/copd-cpd/ |
 | GitHub COPD handout | https://ostroforge.github.io/copd-cpd/copd/handout.html |
 | Source code | https://github.com/OstroForge/copd-cpd |
-| Render dashboard (live Hub) | https://dashboard.render.com/web/srv-dalud967bikc73akh3bg |
+| Render dashboard (live Hub) | https://dashboard.render.com/web/srv-danfac74ouc73bol8ig |
+| Cloudflare dashboard | https://dash.cloudflare.com/ |
+
+The domain is registered at Cloudflare under **ostroforge@outlook.com**. Connect it once, and confirm `https://hub-cpd.co.uk/healthz` answers, before the next deploy that sets `PUBLIC_URL` to that address. Until then the working site is still `https://hub-cpd.onrender.com/`.
+
+1. Render, live service **hub-cpd**, Settings → Custom Domains. Add `hub-cpd.co.uk` and `www.hub-cpd.co.uk`. The DNS target is `hub-cpd.onrender.com`.
+2. Cloudflare, zone **hub-cpd.co.uk**, SSL/TLS → Overview → **Full**.
+3. DNS → Records. Add both as **DNS only** (grey cloud) until Render says the certificate is issued:
+   - `CNAME` `@` → `hub-cpd.onrender.com`
+   - `CNAME` `www` → `hub-cpd.onrender.com`
+4. In Render, verify the domains. When the certificates are valid, the grey-cloud records can be switched to Proxied.
+5. On the same Environment page, click **Edit**. Add a row: key `PUBLIC_URL`, value `https://hub-cpd.co.uk` (no slash on the end). Save. Render restarts the service. That value is what the room QR and the Teams join link use. It is not in the list yet — the live service only has `ATTEND_SHARE_URL` and `PRESENTERS`. Leave the test service on `https://hub-cpd-test.onrender.com`.
 
 Hub staff **do not need a Render account**. Each facilitator has their own PIN. Local or hosted presenter view asks for it. That PIN is also their name on the attendance file, so they are not asked who is delivering.
 
@@ -125,7 +137,7 @@ Free Render instances sleep after a quiet spell. The first open can take about a
 
 ## Test site (this branch, not live)
 
-Use this to try Heart Failure and the new folder layout **without merging to `main`**. Live `https://hub-cpd.onrender.com/` stays on `main`.
+Use this to try Heart Failure and the new folder layout **without merging to `main`**. Live `https://hub-cpd.co.uk/` stays on `main`.
 
 Create it once in the Render dashboard (signed in as ostroforge@outlook.com):
 
@@ -168,10 +180,12 @@ Keep the current `copd-cpd` service running so https://copd-cpd.onrender.com/ ca
 | --- | --- | --- |
 | GitHub | **OstroForge** | ostroforge@outlook.com |
 | Render | workspace **My Workspace** (same GitHub account) | ostroforge@outlook.com |
+| Cloudflare | zone **hub-cpd.co.uk** | ostroforge@outlook.com |
 | OneDrive | Personal (attendance CSVs) | jon.ski1382@gmail.com |
 
 GitHub sign-in: https://github.com/login  
 Render sign-in: https://dashboard.render.com/login  
+Cloudflare sign-in: https://dash.cloudflare.com/login  
 OneDrive: https://onedrive.live.com/
 
 Certificates folder (open while signed in as jon.ski1382@gmail.com):  
@@ -180,7 +194,7 @@ https://onedrive.live.com/my?id=%2Fpersonal%2F4a2042dbbcf48071%2FDocuments%2FCur
 ## On the day
 
 1. Wake the live site (or start `python serve.py`).
-2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.onrender.com/?view=presenter) — type **your** Hub PIN when asked.
+2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.co.uk/?view=presenter) — type **your** Hub PIN when asked.
 3. Share the **Audience** window to the projector and/or Teams (Share window, not the presenter screen).
 4. Room: scan **this session’s** QR (it includes a room code). Teams: copy the join link from the presenter sidebar into chat — do not reuse another facilitator’s QR.
 5. Space, a mouse click on the slide, a wireless clicker (Page Down / next), or **Next** on a question goes to the results slide.
@@ -236,4 +250,4 @@ Commit your changes, then:
 git push origin HEAD
 ```
 
-Render rebuilds from `main`. Hard-refresh the live URL after the deploy finishes.
+Render rebuilds from `main`. Hard-refresh https://hub-cpd.co.uk/ after the deploy finishes. Do not deploy the domain redirect until https://hub-cpd.co.uk/healthz already answers.

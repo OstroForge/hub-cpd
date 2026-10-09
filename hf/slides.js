@@ -559,8 +559,9 @@ function heartFailureSlides() {
       kicker: "The rest of the job",
       title: "Care plans, conveyance and handover",
       html: `
-        <div class="body three">
-          <div class="card">
+        <div class="step-row">
+          <section class="job-step">
+            <div class="job-num">1</div>
             <h3>Plans and specialist teams</h3>
             <ul>
               <li>Ask about a personal, anticipatory or end-of-life plan, DNACPR / ReSPECT</li>
@@ -568,8 +569,9 @@ function heartFailureSlides() {
               <li>If they are stable and known to the community team, call them if there is time</li>
               <li>Extra oral diuretic may be in the plan if they are staying home</li>
             </ul>
-          </div>
-          <div class="card">
+          </section>
+          <section class="job-step hand">
+            <div class="job-num">2</div>
             <h3>Where to take them</h3>
             <ul>
               <li>TIME-CRITICAL unless a palliative plan says otherwise</li>
@@ -577,8 +579,9 @@ function heartFailureSlides() {
               <li>There is a ‘time-to-therapy’ idea in AHF: what you do before the door matters</li>
               <li>Watch for an LVAD — different resuscitation rules</li>
             </ul>
-          </div>
-          <div class="card">
+          </section>
+          <section class="job-step amber">
+            <div class="job-num">3</div>
             <h3>Handover language</h3>
             <ul>
               <li>Congestion or shock — say which</li>
@@ -587,7 +590,7 @@ function heartFailureSlides() {
               <li>12-lead: ACS or not</li>
               <li>Usual care team / DNACPR if known</li>
             </ul>
-          </div>
+          </section>
         </div>`,
       notes: "Receiving staff need ‘wet and hypertensive, GTN two sprays, SBP still 150’ or ‘shocked, no nitrates, possible STEMI’. That is better than ‘LVF, treated’."
     },
@@ -661,11 +664,11 @@ function heartFailureSlides() {
       title: "Five key points to remember",
       html: `
         <div class="body">
-          <div class="banner build">1. Acute heart failure is time-critical unless a palliative plan says otherwise.</div>
-          <div class="banner teal build" style="margin-top:8px">2. Sit them fully upright first. Target 94–98% oxygen. Record a 12-lead.</div>
-          <div class="banner green build" style="margin-top:8px">3. GTN: ischaemia or uncontrolled hypertension, and SBP over 110 — not the ACS 90 mmHg line.</div>
-          <div class="banner dark build" style="margin-top:8px">4. STOP and THINK before IV fluids. No GTN or furosemide in cardiogenic shock.</div>
-          <div class="banner red build" style="margin-top:8px">5. Morphine is not routine — consider it for chest pain, or if a palliative plan already includes it.</div>
+          <div class="banner build hold-space">1. Acute heart failure is time-critical unless a palliative plan says otherwise.</div>
+          <div class="banner teal build hold-space" style="margin-top:8px">2. Sit them fully upright first. Target 94–98% oxygen. Record a 12-lead.</div>
+          <div class="banner green build hold-space" style="margin-top:8px">3. GTN: ischaemia or uncontrolled hypertension, and SBP over 110 — not the ACS 90 mmHg line.</div>
+          <div class="banner dark build hold-space" style="margin-top:8px">4. STOP and THINK before IV fluids. No GTN or furosemide in cardiogenic shock.</div>
+          <div class="banner red build hold-space" style="margin-top:8px">5. Morphine is not routine — consider it for chest pain, or if a palliative plan already includes it.</div>
         </div>`,
       notes: "Read them slowly. Space reveals each line."
     },

@@ -11,7 +11,7 @@ services:
       - key: PYTHON_VERSION
         value: "3.12.0"
       - key: PUBLIC_URL
-        value: https://hub-cpd.onrender.com
+        value: https://hub-cpd.co.uk
       - key: DEBUG
         value: "false"
       - key: FEEDBACK_SHARE_COPD_LIVE

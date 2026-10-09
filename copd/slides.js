@@ -5,7 +5,7 @@ function copdSlides() {
         kicker: "Ambulance Clinical Refreshers",
         title: "COPD, Type 2 Respiratory Failure and NEWS2",
         subtitle: "Pre-hospital assessment and treatment of acute exacerbations, with a hard look at NEWS2 Scale 2.",
-        meta: "JRCALC / AACES COPD guidance v20.40 (updated 6 September 2023), JRCALC oxygen and medicines, and RCP NEWS2. Always follow the live JRCALC entry and local Trust policy.",
+        meta: "JRCALC / AACE COPD guidance v20.40 (updated 6 September 2023), JRCALC oxygen and medicines, and RCP NEWS2. Always follow the live JRCALC entry and local Trust policy.",
         notes: "Open with the title statement. Next slide is the icebreaker — leave it up while phones scan the QR."
       },
       {
@@ -28,7 +28,7 @@ function copdSlides() {
         kicker: "Core messages",
         title: "Learning objectives",
         html: `
-          <div class="card" style="margin-bottom:12px">
+          <div class="card" style="margin-bottom:8px">
             <h3>By the end you will have refreshed how to:</h3>
             <ul style="columns:2;column-gap:28px">
               <li>Recognise and treat an acute exacerbation of COPD using JRCALC principles</li>
@@ -38,21 +38,21 @@ function copdSlides() {
             </ul>
           </div>
           <div class="body two">
-            <div class="card">
+            <div class="card" style="padding:12px 16px">
               <h3>Oxygen target</h3>
               <p>In known or suspected COPD, start with a target of <strong>88–92%</strong> (or the alert-card range) unless the patient is critically ill.</p>
-              <p class="small" style="margin-top:10px">This is a treatment decision from JRCALC.</p>
+              <p class="small" style="margin-top:6px">This is a treatment decision from JRCALC.</p>
             </div>
-            <div class="card">
+            <div class="card" style="padding:12px 16px;line-height:1.28">
               <h3>NEWS2 scale</h3>
               <p>Use <strong>Scale 1</strong> unless type 2 respiratory failure is clearly documented in their medical history, they carry an alert card or are able to categorically inform you that they do have type 2 (hypercapnic) respiratory failure.</p>
-              <p class="small" style="margin-top:10px">Routinely, look for that record before Scale 2. There can be exceptions — if you use Scale 2 without it, say why at handover.</p>
-              <p class="small" style="margin-top:10px">This is a scoring decision from RCP NEWS2. The oxygen target does not, by itself, choose the scale.</p>
+              <p class="small" style="margin-top:6px">Routinely, look for that record before Scale 2. There can be exceptions — if you use Scale 2 without it, say why at handover.</p>
+              <p class="small" style="margin-top:6px">This is a scoring decision from RCP NEWS2. The oxygen target does not, by itself, choose the scale.</p>
             </div>
           </div>
-          <div class="banner build" style="margin-top:12px">COPD ≠ type 2 respiratory failure</div>
-          <div class="banner teal build" style="margin-top:8px">COPD ≠ automatic NEWS2 Scale 2</div>
-          <p class="callout build" style="margin-top:12px">These are two separate decisions. They do not automatically travel together.</p>`,
+          <div class="banner build" style="margin-top:8px">COPD ≠ type 2 respiratory failure</div>
+          <div class="banner teal build" style="margin-top:6px">COPD ≠ automatic NEWS2 Scale 2</div>
+          <p class="callout build" style="margin-top:8px">These are two separate decisions. They do not automatically travel together.</p>`,
         notes: "Outcomes in 30 seconds. Then oxygen vs NEWS2. Space reveals the two banners, then the callout. Drop the old ‘usually missed’ card — the banners are that point."
       },
       {
@@ -76,13 +76,13 @@ function copdSlides() {
               <p style="margin-top:10px">It does <strong>not</strong> say “COPD = Scale 2”, and it does not advise an on-scene Scale 2 decision.</p>
             </div>
           </div>`,
-        notes: "Read the quote slowly. This is the user’s requested highlight, now in JRCALC’s own words. Then: JRCALC / AACES COPD guidance’s NEWS2 instruction is ‘calculate a NEWS2 score (refer to Sepsis)’ — no scale switch. RCP still governs how Scale 2 is used."
+        notes: "Read the quote slowly. This is the user’s requested highlight, now in JRCALC’s own words. Then: JRCALC / AACE COPD guidance’s NEWS2 instruction is ‘calculate a NEWS2 score (refer to Sepsis)’ — no scale switch. RCP still governs how Scale 2 is used."
       },
       {
         kicker: "Background",
         title: "COPD in one minute",
         html: `
-          <div class="body two">
+          <div class="body two fill-side">
             <div>
               <ul>
                 <li>Chronic progressive airflow obstruction</li>
@@ -93,7 +93,7 @@ function copdSlides() {
               </ul>
             </div>
             <div>
-              <div class="photo-frame" style="height:250px">
+              <div class="photo-frame">
                 <img src="copd/assets/copd-exacerbation-cxr.jpg" alt="Anteroposterior chest X-ray of a COPD exacerbation">
               </div>
               <p class="photo-caption">AP chest X-ray in a COPD exacerbation (Mikael Häggström, MD, public domain / CC0).</p>
@@ -143,15 +143,15 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               </ul>
             </div>
           </div>`,
-        notes: "Left box is a simple flare. Right box: clue on the left, other impression on the right. JRCALC / AACES COPD guidance flags chest pain and fever as uncommon. Do not turn this into a lecture on every differential — one example per row is enough."
+        notes: "Left box is a simple flare. Right box: clue on the left, other impression on the right. JRCALC / AACE COPD guidance flags chest pain and fever as uncommon. Do not turn this into a lecture on every differential — one example per row is enough."
       },
       {
         kicker: "Assessment",
         title: "What to ask and what to measure",
         html: `
-          <div class="body three">
-            <div class="card">
-              <h3>Ask</h3>
+          <div class="step-row">
+            <section class="job-step">
+              <div class="job-num job-pill">Ask</div>
               <ul>
                 <li>Baseline saturations when well, and previous problems with oxygen</li>
                 <li>Alert card, individualised plan, or Hub special message</li>
@@ -159,19 +159,19 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
                 <li>Have they already taken steroids or antibiotics?</li>
                 <li>Encourage their usual breathing-control techniques if they help</li>
               </ul>
-            </div>
-            <div class="card">
-              <h3>Examine</h3>
+            </section>
+            <section class="job-step hand build">
+              <div class="job-num job-pill">Examine</div>
               <ul>
                 <li>&lt;C&gt;ABCDE, including work of breathing</li>
                 <li>SpO<sub>2</sub>, RR, pulse, BP, temperature</li>
                 <li>Blood glucose if appropriate</li>
-                <li>12-lead ECG if indicated (JRCALC / AACES COPD guidance update 2023)</li>
+                <li>12-lead ECG if indicated (JRCALC / AACE COPD guidance update 2023)</li>
                 <li>NEWS2 Scale 1 unless a hospital or specialist record of type 2 failure is already in front of you</li>
               </ul>
-            </div>
-            <div class="card">
-              <h3>Red flags</h3>
+            </section>
+            <section class="job-step decide build">
+              <div class="job-num job-pill">Red flags</div>
               <ul>
                 <li>Exhaustion or tiring</li>
                 <li>Silent chest</li>
@@ -179,9 +179,9 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
                 <li>Drowsiness or new confusion</li>
                 <li>Major ABCD failure</li>
               </ul>
-            </div>
+            </section>
           </div>`,
-        notes: "The patient and carers often know their baseline better than we do. An oxygen alert card is gold, but its absence does not prove they are not a retainer — and its presence still does not automatically select NEWS2 Scale 2 unless HCRF is documented."
+        notes: "Ask is already up. Click or Space brings in Examine, then Red flags. The patient and carers often know their baseline better than we do. An oxygen alert card is gold, but its absence does not prove they are not a retainer — and its presence still does not automatically select NEWS2 Scale 2 unless HCRF is documented."
       },
       {
         kicker: "Time critical",
@@ -209,7 +209,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
                 </ul>
               </div>
             </div>
-            <p class="small" style="margin-top:12px">JRCALC / AACES COPD guidance: in the short time a patient is in ambulance care, hypoxia presents a much greater risk than hypercapnia in most cases. Pulse oximetry does not show CO<sub>2</sub>. Type 2 failure is confirmed on a blood gas.</p>
+            <p class="small" style="margin-top:12px">JRCALC / AACE COPD guidance: in the short time a patient is in ambulance care, hypoxia presents a much greater risk than hypercapnia in most cases. Pulse oximetry does not show CO<sub>2</sub>. Type 2 failure is confirmed on a blood gas.</p>
             <div class="banner red build" style="margin-top:12px">Do not withhold high-concentration oxygen from the critically ill COPD patient</div>
           </div>`,
         notes: "Talk the two cards first. Click or Space brings in the red line. Kill the old fear that ‘oxygen will stop them breathing’ as a reason to leave someone hypoxic. Titrate once they are no longer critically ill. Good to know, not for the slide: waveform capnography is available but not used routinely on front-line vehicles. It shows end-tidal CO2 (EtCO2), not arterial CO2, so it does not confirm type 2 failure and it does not choose Scale 2. A normal EtCO2 is about 4.0–5.7 kPa (35–45 mmHg). A trace staying above about 6 kPa (45 mmHg), or rising, suggests CO2 retention. In COPD the end-tidal number often sits below the arterial PaCO2, so a normal trace does not rule type 2 failure out."
@@ -338,17 +338,16 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         kicker: "Worked example",
         title: "Same patient, two scales, two very different risks",
         html: `
-          <div class="body two" style="margin-bottom:10px;align-items:stretch">
+          <div class="body two scale-pair">
             <div>
-              <p style="margin-bottom:10px;font-size:18px">68-year-old with known COPD. No alert card. No documented blood gas. SpO<sub>2</sub> <strong>90% on air</strong>, elevated pulse and respiratory rate. Other observations unremarkable.</p>
+              <p>68-year-old with known COPD. No alert card. No documented blood gas. SpO<sub>2</sub> <strong>90% on air</strong>, elevated pulse and respiratory rate. Other observations unremarkable.</p>
               <div class="photo-frame cutout">
                 <img src="copd/assets/zoll_1.png" alt="Zoll monitor showing pulse 110, blood pressure 144 over 87, respiratory rate 24, SpO2 90 percent">
               </div>
-              <p class="photo-caption"</p>
             </div>
             ${news2OfficialChart()}
           </div>
-          <table>
+          <table class="scale-score">
             <thead>
               <tr><th>Scale</th><th>SpO<sub>2</sub> 90% on air</th><th>What the score tells the next clinician</th></tr>
             </thead>
@@ -524,7 +523,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <div class="step dark"><h3>3. Still symptomatic?</h3><p>Further 6-minute run if clinically indicated</p></div>
             <div class="step red" style="background:var(--green)"><h3>Ipratropium</h3><p>500 micrograms <strong>once only</strong></p></div>
           </div>`,
-        notes: "Concede this if challenged: JRCALC / AACES COPD guidance does not say ‘maximum two oxygen-powered nebs’. It says limit oxygen-driven nebulisation to 6 minutes. Salbutamol may still be repeated. Each O2-driven episode should still be a 6-minute run, not a continuous neb. High-flow oxygen for critical illness has no 6-minute cap."
+        notes: "Concede this if challenged: JRCALC / AACE COPD guidance does not say ‘maximum two oxygen-powered nebs’. It says limit oxygen-driven nebulisation to 6 minutes. Salbutamol may still be repeated. Each O2-driven episode should still be a 6-minute run, not a continuous neb. High-flow oxygen for critical illness has no 6-minute cap."
       },
       {
         kicker: "The guideline text",
@@ -532,7 +531,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         html: `
           <div class="body">
             <div class="card">
-              <h3>JRCALC / AACES COPD guidance — Bronchodilators</h3>
+              <h3>JRCALC / AACE COPD guidance — Bronchodilators</h3>
               <p style="font-size:18px">“Limit oxygen-driven nebulisation to 6 minutes. If journey time is significant, consider a further 6 minutes of nebulisation therapy ONLY if clinically indicated, but aim for a target saturation within the range of 88–92%.”</p>
             </div>
             <div class="card" style="margin-top:10px">
@@ -549,7 +548,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         html: `
           <div class="body two">
             <div class="card">
-              <h3>What JRCALC / AACES COPD guidance actually says</h3>
+              <h3>What JRCALC / AACE COPD guidance actually says</h3>
               <ul>
                 <li>Limit oxygen-driven nebulisation to 6 minutes</li>
                 <li>If the journey is significant, consider a further 6 minutes only if clinically indicated</li>
@@ -728,7 +727,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         prompt: "Every COPD patient should be scored on NEWS2 Scale 2.",
         options: ["True", "False"],
         correct: 1,
-        teach: "False. JRCALC / AACES COPD guidance says some patients are at increased risk of type 2 failure — not all. Look for an alert card or other record before Scale 2. The default is Scale 1. There can be exceptions — say why if you use Scale 2 without that record.",
+        teach: "False. JRCALC / AACE COPD guidance says some patients are at increased risk of type 2 failure — not all. Look for an alert card or other record before Scale 2. The default is Scale 1. There can be exceptions — say why if you use Scale 2 without that record.",
         notes: "First assessment of whether the session worked. Space reveals. If the room goes True, slow down on the take-home."
       },
       {
@@ -739,7 +738,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         prompt: "Can you target SpO<sub>2</sub> 88–92% while still using Scale 1?",
         options: ["Yes", "No"],
         correct: 0,
-        teach: "Yes. JRCALC / AACES COPD guidance targets 88–92% and still only asks you to calculate a NEWS2 score. RCP: Scale 2 is a separate, documented decision.",
+        teach: "Yes. JRCALC / AACE COPD guidance targets 88–92% and still only asks you to calculate a NEWS2 score. RCP: Scale 2 is a separate, documented decision.",
         notes: "Second assessment question. This is the distinction most staff blur."
       },
       {
@@ -758,7 +757,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
           <div class="photo-frame cutout shock-zoll">
             <img src="copd/assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, MAP 62, respiratory rate 32, SpO2 80 percent">
           </div>`,
-        teach: "<strong>High-flow.</strong> This is shock, not a “usual COPD”. JRCALC / AACES COPD guidance: do not withhold high-concentration oxygen if the primary illness needs it. Hypoxia is the greater short-term risk. Titrate 88–92% once they are no longer critically ill. The 6-minute rule does not apply here — that only limits oxygen as the driving gas of a nebuliser.",
+        teach: "<strong>High-flow.</strong> This is shock, not a “usual COPD”. JRCALC / AACE COPD guidance: do not withhold high-concentration oxygen if the primary illness needs it. Hypoxia is the greater short-term risk. Titrate 88–92% once they are no longer critically ill. The 6-minute rule does not apply here — that only limits oxygen as the driving gas of a nebuliser.",
         notes: "Watch for people still giving controlled oxygen in shock because of COPD. The Zoll is the argument: 80%, 86/50, 128, RR 32."
       },
       {
@@ -769,7 +768,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         prompt: "An oxygen-driven neb in COPD. How long may oxygen drive it?",
         options: ["2 minutes", "6 minutes", "Until the chamber is empty"],
         correct: 1,
-        teach: "6 minutes per run, then stop the oxygen drive and aim 88–92%. JRCALC / AACES COPD guidance does not write a maximum number of nebs. Salbutamol may be repeated as further 6-minute oxygen-driven episodes if that is the only method you have. Ipratropium once. Applies if COPD is a possibility — not only type 2 failure.",
+        teach: "6 minutes per run, then stop the oxygen drive and aim 88–92%. JRCALC / AACE COPD guidance does not write a maximum number of nebs. Salbutamol may be repeated as further 6-minute oxygen-driven episodes if that is the only method you have. Ipratropium once. Applies if COPD is a possibility — not only type 2 failure.",
         notes: "If they say until empty, correct firmly. Duration is the drive time, not a two-neb cap."
       },
       {
@@ -788,11 +787,11 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         title: "Five key points to remember",
         html: `
           <div class="body">
-            <div class="banner build">1. Some COPD patients are at risk of type 2 failure — not all.</div>
-            <div class="banner teal build" style="margin-top:8px">2. Do not put every COPD patient on NEWS2 Scale 2.</div>
-            <div class="banner green build" style="margin-top:8px">3. Target 88–92% oxygen in COPD — that does not choose the scale.</div>
-            <div class="banner dark build" style="margin-top:8px">4. Look for a record of type 2 failure before Scale 2. COPD alone is not enough.</div>
-            <div class="banner red build" style="margin-top:8px">5. Never leave a critically ill COPD patient hypoxic.</div>
+            <div class="banner build hold-space">1. Some COPD patients are at risk of type 2 failure — not all.</div>
+            <div class="banner teal build hold-space" style="margin-top:8px">2. Do not put every COPD patient on NEWS2 Scale 2.</div>
+            <div class="banner green build hold-space" style="margin-top:8px">3. Target 88–92% oxygen in COPD — that does not choose the scale.</div>
+            <div class="banner dark build hold-space" style="margin-top:8px">4. Look for a record of type 2 failure before Scale 2. COPD alone is not enough.</div>
+            <div class="banner red build hold-space" style="margin-top:8px">5. Never leave a critically ill COPD patient hypoxic.</div>
           </div>`,
         notes: "Read them slowly. Space reveals each line."
       },
@@ -804,7 +803,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <div class="card">
               <h3>Clinical guidance</h3>
               <ul>
-                <li>JRCALC / AACES COPD guidance v20.40 (6 September 2023)</li>
+                <li>JRCALC / AACE COPD guidance v20.40 (6 September 2023)</li>
                 <li>JRCALC Oxygen — 4 L/min 28% Venturi, target 88–92%</li>
                 <li>JRCALC Salbutamol D0300, Ipratropium D0200, Hydrocortisone D0180</li>
                 <li>WMAS clinical notices and local PGDs where they apply — including CN-436</li>
@@ -821,8 +820,8 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               </ul>
             </div>
           </div>
-          <p class="small" style="margin-top:12px">Teaching summary of JRCALC Plus, not a substitute for the live guideline. ${NEWS2_CITE} NEWS2 Chart 1 is reproduced unmodified and in colour; the RCP places no copyright restriction on NEWS2 provided those conditions are met. Chest X-ray: Mikael Häggström, MD, via Wikimedia Commons, CC0 public domain. Other diagrams in this deck are original teaching graphics, not official JRCALC artwork. Recheck local PGDs and stock — prednisolone is named in JRCALC / AACES COPD guidance but is not currently available in WMAS.</p>`,
-        notes: "Ask staff to open JRCALC / AACES COPD guidance after the session. If the ePR auto-selects Scale 2 from a COPD tick-box, that is a governance issue worth feeding back."
+          <p class="small" style="margin-top:12px">Teaching summary of JRCALC Plus, not a substitute for the live guideline. ${NEWS2_CITE} NEWS2 Chart 1 is reproduced unmodified and in colour; the RCP places no copyright restriction on NEWS2 provided those conditions are met. Chest X-ray: Mikael Häggström, MD, via Wikimedia Commons, CC0 public domain. Other diagrams in this deck are original teaching graphics, not official JRCALC artwork. Recheck local PGDs and stock — prednisolone is named in JRCALC / AACE COPD guidance but is not currently available in WMAS.</p>`,
+        notes: "Ask staff to open JRCALC / AACE COPD guidance after the session. If the ePR auto-selects Scale 2 from a COPD tick-box, that is a governance issue worth feeding back."
       },
       {
         questions: true,

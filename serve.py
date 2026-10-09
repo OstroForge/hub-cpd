@@ -248,8 +248,8 @@ def host_is_local(host: str) -> bool:
     return name in ("", "localhost", "127.0.0.1", "::1")
 
 
-HUB_ORIGIN = "https://hub-cpd.onrender.com"
-LEGACY_HOSTS = {"copd-cpd.onrender.com"}
+HUB_ORIGIN = "https://hub-cpd.co.uk"
+LEGACY_HOSTS = {"copd-cpd.onrender.com", "hub-cpd.onrender.com", "www.hub-cpd.co.uk"}
 
 
 def request_host_name(handler: SimpleHTTPRequestHandler) -> str:

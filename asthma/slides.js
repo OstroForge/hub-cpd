@@ -130,8 +130,9 @@ function asthmaSlides() {
       kicker: "Grade the attack",
       title: "Moderate, severe, life-threatening",
       html: `
-        <div class="body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-          <div class="card">
+        <div class="step-row">
+          <section class="job-step">
+            <div class="job-num">1</div>
             <h3>Moderate</h3>
             <ul>
               <li>Talks in sentences</li>
@@ -139,8 +140,9 @@ function asthmaSlides() {
               <li>Peak flow above 50% of best, if you can measure it</li>
             </ul>
             <p class="small" style="margin-top:8px">Still treat. A lower threshold to convey if it is evening, they have had a near-fatal attack, or they cannot look after themselves.</p>
-          </div>
-          <div class="card warn">
+          </section>
+          <section class="job-step amber">
+            <div class="job-num">2</div>
             <h3>Acute severe — any one</h3>
             <ul>
               <li>Cannot finish a sentence in one breath</li>
@@ -148,8 +150,9 @@ function asthmaSlides() {
               <li>Heart rate 110 or more</li>
               <li>Peak flow 33–50% of best</li>
             </ul>
-          </div>
-          <div class="card" style="border-color:var(--red)">
+          </section>
+          <section class="job-step decide">
+            <div class="job-num">3</div>
             <h3>Life-threatening — any one</h3>
             <ul>
               <li>Sats under 92%</li>
@@ -158,7 +161,7 @@ function asthmaSlides() {
               <li>Hypotension or arrhythmia</li>
               <li>Peak flow under 33% of best</li>
             </ul>
-          </div>
+          </section>
         </div>
         <div class="banner red build" style="margin-top:12px">You do not need every feature. One life-threatening feature is enough.</div>`,
       notes: "Walk the three columns. Peak flow is useful and often not done — do not let a missing peak flow delay oxygen and a neb. Sats under 92%, a quiet chest, or exhaustion each stand alone. The next slide is a monitor close-up with readable numbers."
