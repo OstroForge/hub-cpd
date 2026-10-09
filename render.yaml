@@ -11,7 +11,37 @@ services:
       - key: PYTHON_VERSION
         value: "3.12.0"
       - key: PUBLIC_URL
-        value: https://hub-cpd.onrender.com
+        value: https://hub-cpd.co.uk
+      - key: DEBUG
+        value: "false"
+      - key: FEEDBACK_SHARE_COPD_LIVE
+        sync: false
+      - key: FEEDBACK_SHARE_HF_LIVE
+        sync: false
+      - key: HOST_TOKEN
+        generateValue: true
+      - key: DRAFT_CODE
+        sync: false
+  - type: web
+    name: hub-cpd-test
+    runtime: python
+    region: frankfurt
+    plan: free
+    branch: heart-failure-cpd
+    buildCommand: pip install -r requirements.txt
+    startCommand: python serve.py
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: PUBLIC_URL
+        value: https://hub-cpd-test.onrender.com
+      - key: DEBUG
+        value: "true"
+      - key: FEEDBACK_SHARE_COPD_DEV
+        sync: false
+      - key: FEEDBACK_SHARE_HF_DEV
+        sync: false
       - key: HOST_TOKEN
         generateValue: true
       - key: FEEDBACK_SHARE_URL
@@ -27,3 +57,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.0"
+      - key: DEBUG
+        value: "false"

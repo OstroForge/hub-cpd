@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Heart Failure CPD handout | Hub CPD</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/assets/hub-cpd-star.png" />
+  <style>
+    :root {
+      --navy: #1b2744;
+      --ink: #1c2333;
+      --muted: #5c6578;
+      --paper: #f4f6fa;
+      --card: #fff;
+      --line: #c5cddd;
+      --red: #b42318;
+      --teal: #2d6a8f;
+      --green: #176b45;
+      --copper: #c45c3a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Calibri, Arial, sans-serif;
+      color: var(--ink);
+      background: #d8dee8;
+      line-height: 1.35;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      background: var(--navy);
+      color: #f4f6fa;
+    }
+    .toolbar a, .toolbar button {
+      background: #e8a07a;
+      color: #1b2744;
+      border: 0;
+      padding: 8px 14px;
+      font: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .sheet {
+      width: min(210mm, 100%);
+      margin: 16px auto 32px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 14mm 12mm 12mm;
+      box-shadow: 0 8px 28px rgba(10, 16, 28, 0.18);
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 4px solid var(--navy);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .kicker {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--copper);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .kicker img { height: 22px; width: auto; }
+    h1 { font-size: 22px; line-height: 1.15; color: var(--navy); }
+    h2 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy); margin: 12px 0 6px; }
+    h3 { font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+    p, li { font-size: 12.5px; }
+    .meta { font-size: 11px; color: var(--muted); max-width: 42ch; text-align: right; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+    }
+    .card.red { border-color: #e7b4ae; background: #fdecea; }
+    .card.teal { border-color: #b7d0e0; background: #e3eef5; }
+    .card.green { border-color: #b7e0c8; background: #e7f6ee; }
+    ul { padding-left: 1.1em; }
+    li { margin: 0.15em 0; }
+    .banner {
+      background: var(--navy);
+      color: #fff;
+      font-weight: 750;
+      padding: 7px 10px;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+    .banner.teal { background: var(--teal); }
+    .banner.green { background: var(--green); }
+    .banner.red { background: var(--red); }
+    .banner.copper { background: var(--copper); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border: 1px solid var(--line); padding: 5px 7px; text-align: left; vertical-align: top; }
+    th { background: #e4eaf4; color: var(--navy); }
+    .foot {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      font-size: 10.5px;
+      color: var(--muted);
+    }
+    .break { break-before: page; page-break-before: always; margin-top: 18px; padding-top: 8px; }
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      body { background: #fff; }
+      .toolbar { display: none; }
+      .sheet { width: auto; margin: 0; padding: 0; box-shadow: none; }
+      .break { margin-top: 0; }
+      a { color: inherit; text-decoration: none; }
+    }
+    @page { size: A4; margin: 10mm; }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <a href="/">Home</a>
+    <button type="button" onclick="window.print()">Print / save PDF</button>
+    <a href="/?course=hf&amp;view=self">Self-guided session</a>
+  </div>
+  <article class="sheet">
+    <header>
+      <div>
+        <p class="kicker"><img src="../assets/hub-cpd-star.png" alt="">Hub CPD handout</p>
+        <h1>Heart Failure in Pre-hospital Care</h1>
+        <p>JRCALC Heart Failure · GTN · Furosemide · Oxygen</p>
+      </div>
+      <p class="meta">Summary of current (as at 22/09/2026) JRCALC and related evidence. Recheck the live guideline, local PGDs and stock before you treat.</p>
+    </header>
+
+    <h2>Five key points to remember</h2>
+    <div class="banner">1. Acute heart failure is time-critical unless a palliative plan says otherwise.</div>
+    <div class="banner teal">2. Sit them fully upright first. Target 94–98% oxygen. Record a 12-lead.</div>
+    <div class="banner green">3. GTN: ischaemia or uncontrolled hypertension, and SBP over 110 — not the ACS 90 mmHg line.</div>
+    <div class="banner">4. STOP and THINK before IV fluids. No GTN or furosemide in cardiogenic shock.</div>
+    <div class="banner red">5. Morphine is not routine — consider it for chest pain, or if a palliative plan already includes it.</div>
+
+    <h2>Three presentations — not one protocol</h2>
+    <div class="grid3">
+      <div class="card teal">
+        <h3>Acute pulmonary oedema</h3>
+        <p>Sudden wet lungs, severe dyspnoea, with or without swollen legs. Sit fully upright. Oxygen 94–98%.</p>
+      </div>
+      <div class="card">
+        <h3>Peripheral oedema</h3>
+        <p>Fluid-loaded: legs, abdomen, scrotum, raised JVP, pleural fluid. Lungs may be clear in isolated right failure.</p>
+      </div>
+      <div class="card red">
+        <h3>Cardiogenic shock</h3>
+        <p>5–8% of AHF. Often STEMI if new. No GTN, no furosemide, do not dump fluid. TIME-CRITICAL.</p>
+      </div>
+    </div>
+
+    <h2>Red flags versus think again</h2>
+    <div class="grid">
+      <div class="card green">
+        <h3>Supports heart failure</h3>
+        <ul>
+          <li>Orthopnoea — slept in the chair</li>
+          <li>PND — wakes gasping, better sitting up</li>
+          <li>New dyspnoea with previous MI, hypertension or angina</li>
+          <li>New oedema with breathlessness</li>
+          <li>Pink or white frothy sputum, basal crackles ± wheeze</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Reconsider</h3>
+        <ul>
+          <li>COPD flare, pneumonia, PE</li>
+          <li>Sepsis — AHF is frequently mistaken for it</li>
+          <li>A normal 12-lead is unusual in heart failure</li>
+          <li>If you cannot tell COPD from AHF, salbutamol may be considered</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>GTN — two gates</h2>
+    <div class="grid">
+      <div class="card teal">
+        <h3>Indication — JRCALC Heart Failure</h3>
+        <p>Consider GTN in acute heart failure <strong>with ischaemia or uncontrolled hypertension</strong>.</p>
+        <p style="margin-top:6px">Spray: 400–800 micrograms (1–2 sprays). Assess over 5 minutes. Repeat 5–10 min if SBP still &gt;110. Maximum 6 sprays (2.4 mg) in AHF.</p>
+      </div>
+      <div class="card red">
+        <h3>Safety — do not give</h3>
+        <p>SBP &lt;110 mmHg in AHF, or symptomatic hypotension. Hypovolaemia. Unconscious. Head trauma / cerebral haemorrhage. PDE5 inhibitors in the last 24 hours. Known severe aortic or mitral stenosis.</p>
+        <p style="margin-top:6px"><strong>90 mmHg is the angina / MI table</strong> — a different indication in the same monograph.</p>
+      </div>
+    </div>
+
+    <h2>Furosemide and morphine</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Furosemide</h3>
+        <p>Consider 40 mg IV slowly over 2 minutes for pulmonary oedema / respiratory distress in AHF. Adults 18+. No repeat. Not in cardiogenic shock. Consider when the journey is long.</p>
+      </div>
+      <div class="card red">
+        <h3>Morphine</h3>
+        <p>Do not use routinely. Associated with higher mortality in HF registries. Consider for chest pain, or if a palliative plan already lists it.</p>
+      </div>
+    </div>
+
+    <section class="break">
+      <h2>On-scene map</h2>
+      <div class="grid">
+        <div class="card red">
+          <h3>Hypotensive or hypoperfused</h3>
+          <ul>
+            <li>Treat as cardiogenic shock</li>
+            <li>No GTN, no furosemide</li>
+            <li>STOP and THINK before IV fluids</li>
+            <li>12-lead — often STEMI</li>
+            <li>TIME-CRITICAL, prefer CCU</li>
+          </ul>
+        </div>
+        <div class="card green">
+          <h3>Congested, blood pressure holding</h3>
+          <ul>
+            <li>Sit fully upright immediately — they will slump, sit them up again</li>
+            <li>Oxygen 94–98%</li>
+            <li>GTN only if both gates are open</li>
+            <li>Consider furosemide 40 mg slow IV</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top:8px">JRCALC: if they have heart failure or valve disease, STOP and THINK before intravenous fluids — especially large or rapid volumes. Positioning lowers left atrial pressure; it is treatment, not comfort.</p>
+
+      <h2>Check yourself</h2>
+      <table>
+        <thead>
+          <tr><th>Question</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SBP threshold below which you must not give GTN in AHF?</td>
+            <td>110 mmHg — or any symptomatic hypotension. 90 mmHg is the ACS / angina figure.</td>
+          </tr>
+          <tr>
+            <td>Every AHF patient with SBP over 90 gets GTN?</td>
+            <td>False. Indication is AHF with ischaemia or uncontrolled hypertension, and SBP over 110.</td>
+          </tr>
+          <tr>
+            <td>Known HF, collapsed, hypotensive — fluids?</td>
+            <td>STOP and THINK. Cardiogenic shock is not an empty tank. AHF is often misread as sepsis.</td>
+          </tr>
+          <tr>
+            <td>Furosemide dose in adult pulmonary oedema?</td>
+            <td>40 mg IV slowly over 2 minutes. No repeat. Not in cardiogenic shock.</td>
+          </tr>
+          <tr>
+            <td>Routine morphine for pulmonary oedema?</td>
+            <td>No. Consider it for chest pain, or if a palliative plan includes it.</td>
+          </tr>
+          <tr>
+            <td>First physical treatment for the congested, breathless patient?</td>
+            <td>Sit fully upright immediately, and keep repositioning them.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Handover that receiving staff can use</h2>
+      <div class="card green">
+        <p>“Wet and hypertensive, GTN two sprays, SBP still 150, furosemide 40 mg, 12-lead no STEMI.”</p>
+        <p style="margin-top:6px">Or: “Shocked, crackles, SBP 86, no nitrates, no diuretic, possible STEMI, TIME-CRITICAL.” Say congestion or shock. Say why GTN was given or withheld.</p>
+      </div>
+
+      <p class="foot">
+        JRCALC Plus Heart Failure v4.33; JRCALC Glyceryl Trinitrate (updated 10 December 2025); JRCALC Furosemide; JRCALC Oxygen.
+        Mebazaa et al. Eur J Heart Fail 2015 (pre-hospital AHF consensus; vasodilators if SBP ≥110).
+        NICE CG187 Acute heart failure. Ponikowski et al. ESC 2016. Wakai et al. Cochrane 2013.
+        Self-guided slides: add <code>?course=hf&amp;view=self</code> to the deck URL. This is not a substitute for the live JRCALC entry or Trust policy.
+      </p>
+    </section>
+  </article>
+</body>
+</html>

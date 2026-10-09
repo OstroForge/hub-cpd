@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    html, body { margin: 0; background: transparent; }
+    .stage { position: relative; width: 1280px; height: 520px; background: transparent; }
+    .star { position: absolute; left: 24px; top: 36px; width: 448px; height: 448px; }
+    .lockup {
+      position: absolute; left: 530px; top: 150px; z-index: 1;
+      width: max-content;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: #12382c; background: transparent;
+    }
+    .name {
+      display: inline-block;
+      white-space: nowrap;
+      font-weight: 800; font-size: 156px; letter-spacing: -2px; line-height: 1;
+    }
+    .rule { height: 8px; background: #c4a35a; margin: 14px 0 0; border-radius: 2px; }
+    .tagline {
+      display: block;
+      text-align: center;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-top: 14px;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <svg class="star" viewBox="0 0 192 192" aria-hidden="true">
+      <path d="m 74,133 0,52 44,0 0,-52 44,26 22,-38 L 140,96 184,70 162,32 117,58 117,7 74,7 74,58 30,32 8,70 52,96 8,121 30,159 z"
+            fill="#12382c" stroke="#c4a35a" stroke-width="5" stroke-linejoin="miter"/>
+      <g fill="#ffffff">
+        <path d="m 93,166 c 0,7 6,7 6,0 l 3,-138 c 0,-8 -12,-8 -12,0 l 3,135 0,3 z"/>
+        <path d="m 100,153 c 7,4 3,15 -3,15 2,-5 3,-9 3,-15 z m 1,-40 c 10,9 4,22 -3,26 -6,3 -6,7 -6,15 -9,-10 -4,-19 4,-24 5,-4 5,-10 5,-17 z m 1,-30 c 0,11 -17,14 -17,22 0,3 1,9 6,12 0,-11 9,-12 15,-18 7,-7 7,-19 -4,-28 0,4 0,8 0,12 z M 90,77 C 80,69 76,55 80,46 c 3,-10 20,-11 20,-3 0,8 -20,3 -13,16 l 3,5 0,13 z"/>
+        <path d="m 95,43 c 7,-3 -7,-3 0,0 z" fill="#12382c"/>
+      </g>
+    </svg>
+    <div class="lockup">
+      <div class="name">Hub CPD</div>
+      <div class="rule"></div>
+      <div class="tagline">Ambulance clinical refreshers</div>
+    </div>
+  </div>
+  <script>
+    const lock = document.querySelector(".lockup");
+    const name = document.querySelector(".name");
+    const tag = document.querySelector(".tagline");
+    const target = name.getBoundingClientRect().width;
+    let lo = 12;
+    let hi = 80;
+    tag.style.display = "inline-block";
+    for (let i = 0; i < 22; i++) {
+      const mid = (lo + hi) / 2;
+      tag.style.fontSize = mid + "px";
+      if (tag.getBoundingClientRect().width > target - 2) hi = mid;
+      else lo = mid;
+    }
+    tag.style.fontSize = lo + "px";
+    tag.style.display = "block";
+    tag.style.width = target + "px";
+  </script>
+</body>
+</html>

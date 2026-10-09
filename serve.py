@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Serve the COPD CPD deck with a live room quiz.
+"""Serve Hub CPD decks with a live room quiz.
 
 Same questions every session. No Slido account.
 
@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import base64
 import csv
+import hashlib
+import hmac
 import io
 import json
 import os
@@ -33,17 +35,119 @@ import urllib.request
 import zipfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
+from xml.sax.saxutils import escape
 from functools import partial
 from http.cookiejar import CookieJar
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse
-from xml.sax.saxutils import escape
 
 from qrcodegen import QrCode
 
 ROOT = Path(__file__).resolve().parent
 PORT = 8765
+
+
+def unquote_env(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        return value[1:-1]
+    return value
+
+
+def debug_flag(raw: str | None) -> bool | None:
+    if raw is None:
+        return None
+    text = raw.strip().lower()
+    if text in ("1", "true", "yes", "on"):
+        return True
+    if text in ("0", "false", "no", "off"):
+        return False
+    return None
+
+
+def _env_lookup(file_values: dict[str, str]) -> dict[str, str]:
+    """Process environment wins over the gitignored .env file."""
+    source: dict[str, str] = {}
+    for key in ("DEBUG", "ATTEND_ENV", "ATTEND_SHARE_URL", "RENDER"):
+        if key in os.environ:
+            source[key] = os.environ[key]
+        elif key in file_values:
+            source[key] = file_values[key]
+    return source
+
+
+def sheet_env_from(source: dict[str, str]) -> str:
+    """dev or live. DEBUG=true uses the dev workbooks. DEBUG=false uses the live ones."""
+    flag = debug_flag(source.get("DEBUG"))
+    if flag is True:
+        return "dev"
+    if flag is False:
+        return "live"
+    forced = (source.get("ATTEND_ENV") or "").strip().lower()
+    if forced in ("dev", "live"):
+        return forced
+    if (source.get("ATTEND_SHARE_URL") or "").strip() or source.get("RENDER"):
+        return "live"
+    return "dev"
+
+
+def presenter_piece(value: str) -> str:
+    """One person in the same shape as Render's PRESENTERS value."""
+    text = value.strip()
+    if ":" not in text:
+        return text
+    pin, name = text.split(":", 1)
+    pin = pin.strip()
+    name = " ".join(name.split())
+    return "{}: {}".format(pin, name) if name else pin
+
+
+def load_local_env(path: Path) -> None:
+    """Fill os.environ from the gitignored .env file. Real environment variables win."""
+    if not path.is_file():
+        return
+    try:
+        lines = path.read_text(encoding="utf-8-sig").splitlines()
+    except OSError:
+        return
+    shared: list[str] = []
+    by_env: dict[str, list[str]] = {"dev": [], "live": []}
+    file_values: dict[str, str] = {}
+    for line in lines:
+        raw = line.strip()
+        if not raw or raw.startswith("#") or "=" not in raw:
+            continue
+        key, value = raw.split("=", 1)
+        key = key.strip()
+        value = unquote_env(value)
+        if not key:
+            continue
+        if key == "INSTRUCTOR":
+            if value:
+                shared.append(value)
+            continue
+        if key in ("INSTRUCTOR_DEV", "INSTRUCTOR_LIVE"):
+            if value:
+                by_env[key.rsplit("_", 1)[-1].lower()].append(value)
+            continue
+        file_values.setdefault(key, value)
+    chosen = sheet_env_from(_env_lookup(file_values))
+    extras = shared + by_env.get(chosen, [])
+    if extras:
+        parts = []
+        base = file_values.get("PRESENTERS", "").strip()
+        if base:
+            parts.append(base)
+        parts.extend(presenter_piece(item) for item in extras)
+        file_values["PRESENTERS"] = "; ".join(parts)
+    for key, value in file_values.items():
+        if key not in os.environ:
+            os.environ[key] = value
+
+
+load_local_env(ROOT / ".env")
+
 HOST_TOKEN = os.environ.get("HOST_TOKEN") or secrets.token_urlsafe(8)
 PIN_FILE = ROOT / "presenter-pin.txt"
 PRESENTERS_FILE = ROOT / "presenters.txt"
@@ -52,12 +156,6 @@ LOCK = threading.Lock()
 ROOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 ROOMS: dict[str, "Room"] = {}
 CERT_FILE = ROOT / "certificates.csv"
-FEEDBACK_FILE = ROOT / "feedback.csv"
-FEEDBACK_SHARE_FILE = ROOT / "feedback-share.txt"
-FEEDBACK_LOCK = threading.Lock()
-_FEEDBACK_OD: dict = {}
-FEEDBACK_HEADERS = ["Submitted", "Room", "Useful", "Comments", "Email", "Suggestion", "Name"]
-_SHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 CERT_WEBHOOK = (os.environ.get("CERT_WEBHOOK") or "").strip()
 ATTEND_CONFIG = ROOT / "attend-folder.txt"
 OD_UA = (
@@ -65,16 +163,70 @@ OD_UA = (
     "(KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
 )
 _OD: dict = {}
-_LOOKUP_HITS: dict[str, list[float]] = {}
-_ATTEND_CACHE: dict = {"at": 0.0, "prefix": "", "rows": []}
+FEEDBACK_FILE = ROOT / "feedback.csv"
+FEEDBACK_LOCK = threading.Lock()
+_FEEDBACK_SESSIONS: dict[str, dict] = {}
+_FEEDBACK_HITS: dict[str, list[float]] = {}
+FEEDBACK_HEADERS = ["Submitted", "Room", "Useful", "Comments", "Email", "Suggestion", "Name"]
+_SHEET_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+_EMAIL_RE = re.compile(
+    r"^[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?"
+    r"@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?"
+    r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*"
+    r"\.[A-Za-z]{2,}$"
+)
 COURSES = {
     "copd": {
         "id": "copd",
         "title": "COPD, Type 2 Respiratory Failure and NEWS2",
-        "detail": "JRCALC / AACES COPD guidance · 30 minutes",
+        "detail": "JRCALC Chronic Obstructive Pulmonary Disease · 30 minutes",
         "prefix": "COPD-CPD-attendance-",
-    }
+        "folder": "copd",
+        "published": True,
+        "home_tag": "Respiratory",
+        "home_heading": "COPD, Type 2 Respiratory Failure and NEWS2",
+        "home_blurb": "Controlled oxygen versus NEWS2 Scale 2, and why they are not the same decision.",
+        "home_class": "",
+    },
+    "hf": {
+        "id": "hf",
+        "title": "Heart Failure in Pre-hospital Care",
+        "detail": "JRCALC Heart Failure · 30 minutes",
+        "prefix": "HF-CPD-attendance-",
+        "folder": "heart failure",
+        "published": False,
+        "home_tag": "Cardiac",
+        "home_heading": "Heart Failure",
+        "home_blurb": "Pulmonary oedema, positioning, GTN, fluids and furosemide.",
+        "home_class": "hf",
+    },
+    "asthma": {
+        "id": "asthma",
+        "title": "Acute Asthma",
+        "detail": "JRCALC Asthma · 30 minutes",
+        "prefix": "ASTHMA-CPD-attendance-",
+        "folder": "asthma",
+        "published": False,
+        "home_tag": "Respiratory",
+        "home_heading": "Acute Asthma",
+        "home_blurb": "Life-threatening features, oxygen to 94–98%, and when to give intramuscular adrenaline.",
+        "home_class": "asthma",
+    },
 }
+_DRAFT_HITS: dict[str, list[float]] = {}
+
+
+def course_record(course_id: str) -> dict:
+    return COURSES.get(course_id) or COURSES["copd"]
+
+
+def course_folder_name(course_id: str) -> str:
+    rec = course_record(course_id)
+    raw = str(rec.get("folder") or rec["id"])
+    text = re.sub(r"[\\/]+", " ", raw).strip()
+    text = re.sub(r"[^\w\s.-]", "", text, flags=re.UNICODE)
+    text = re.sub(r"\s+", " ", text).strip(" .")
+    return (text[:80] or rec["id"])
 
 
 def _usable_lan_ip(ip: str) -> bool:
@@ -114,8 +266,8 @@ def host_is_local(host: str) -> bool:
     return name in ("", "localhost", "127.0.0.1", "::1")
 
 
-HUB_ORIGIN = "https://hub-cpd.onrender.com"
-LEGACY_HOSTS = {"copd-cpd.onrender.com"}
+HUB_ORIGIN = "https://hub-cpd.co.uk"
+LEGACY_HOSTS = {"copd-cpd.onrender.com", "hub-cpd.onrender.com", "www.hub-cpd.co.uk"}
 
 
 def request_host_name(handler: SimpleHTTPRequestHandler) -> str:
@@ -150,10 +302,15 @@ def request_base(handler: SimpleHTTPRequestHandler) -> str:
     return f"{proto}://{host}"
 
 
-def join_url(handler: SimpleHTTPRequestHandler, room_id: str = "") -> str:
+def join_url(handler: SimpleHTTPRequestHandler, room_id: str = "", course_id: str = "") -> str:
     url = request_base(handler) + "/v"
+    parts = []
     if room_id:
-        url += "?r=" + room_id
+        parts.append("r=" + room_id)
+    if course_id in COURSES:
+        parts.append("course=" + course_id)
+    if parts:
+        url += "?" + "&".join(parts)
     return url
 
 
@@ -167,19 +324,526 @@ def requested_join(handler: SimpleHTTPRequestHandler) -> str:
     return raw
 
 
-_EMAIL_RE = re.compile(
-    r"^[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?"
-    r"@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?"
-    r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*"
-    r"\.[A-Za-z]{2,}$"
-)
+def utc_now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def clean_name(raw: object) -> str:
+    text = " ".join(str(raw or "").split())
+    return text[:80]
+
+
+def clean_esr(raw: object) -> str:
+    return re.sub(r"[^A-Z0-9]", "", str(raw or "").upper())[:16]
+
+
+def clean_email(raw: object) -> str:
+    text = " ".join(str(raw or "").split()).lower()[:120]
+    if not re.fullmatch(r"[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}", text):
+        return ""
+    return text
+
+
+def pin_key(raw: str) -> str:
+    return re.sub(r"[^A-Z0-9]", "", (raw or "").upper())
+
+
+def load_presenters() -> dict[str, str]:
+    found: dict[str, str] = {}
+
+    def add(pin: str, name: str) -> None:
+        key = pin_key(pin)
+        who = clean_name(name)
+        if len(key) >= 4 and key not in found:
+            found[key] = who
+
+    env_list = (os.environ.get("PRESENTERS") or "").strip().strip('"')
+    if env_list:
+        for part in env_list.split(";"):
+            part = part.strip()
+            if not part:
+                continue
+            if ":" in part:
+                pin, name = part.split(":", 1)
+                add(pin, name)
+            else:
+                add(part, "")
+    env_pin = (os.environ.get("PRESENTER_PIN") or "").strip().strip('"')
+    if env_pin:
+        add(env_pin, os.environ.get("PRESENTER_NAME") or "")
+    if not found:
+        for path in (PIN_FILE, PRESENTERS_FILE):
+            if not path.exists():
+                continue
+            try:
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except OSError:
+                continue
+            for line in lines:
+                raw = line.strip().strip('"')
+                if not raw or raw.startswith("#"):
+                    continue
+                bits = raw.replace("\t", " ").split(None, 1)
+                add(bits[0], bits[1] if len(bits) > 1 else "")
+    if found:
+        return found
+    pin = "".join(secrets.choice(ROOM_ALPHABET) for _ in range(6))
+    add(pin, "Course lead")
+    line = 'PRESENTERS="{}: Course lead"\n'.format(pin)
+    env_path = ROOT / ".env"
+    try:
+        if env_path.exists():
+            current = env_path.read_text(encoding="utf-8")
+            if current and not current.endswith("\n"):
+                current += "\n"
+            env_path.write_text(current + line, encoding="utf-8")
+        else:
+            env_path.write_text(
+                "# Local secrets. Gitignored.\n" + line,
+                encoding="utf-8",
+            )
+    except OSError:
+        try:
+            PRESENTERS_FILE.write_text(
+                "# PIN  Full name as it should appear on the attendance file\n"
+                "# Prefer .env — PRESENTERS=\"PIN: Full Name; PIN: Full Name\"\n"
+                + pin
+                + "  Course lead\n",
+                encoding="utf-8",
+            )
+        except OSError:
+            pass
+    return found
+
+
+PRESENTERS = load_presenters()
+
+
+def request_host_secret(handler: SimpleHTTPRequestHandler) -> str:
+    parsed = urlparse(handler.path)
+    query = (parse_qs(parsed.query).get("host") or [""])[0]
+    return (handler.headers.get("X-Host-Token") or query or "").strip()
+
+
+def presenter_for_token(token: str) -> str:
+    return PRESENTERS.get(pin_key(token), "")
+
+
+def secret_is_host(token: str) -> bool:
+    if not token:
+        return False
+    if token == HOST_TOKEN:
+        return True
+    return pin_key(token) in PRESENTERS
+
+
+def blank_poll() -> dict:
+    return {
+        "id": None,
+        "kind": "choice",
+        "prompt": "",
+        "options": [],
+        "obs": {},
+        "correct": None,
+        "expectedTotal": None,
+        "expectedScale": None,
+        "teach": "",
+        "open": False,
+        "revealed": False,
+        "votes": {},
+    }
+
+
+class Room:
+    def __init__(self, rid: str) -> None:
+        self.id = rid
+        self.poll = blank_poll()
+        self.history: dict = {}
+        self.names: dict = {}
+        self.register_open = False
+        self.feedback_open = False
+        self.session_file: Path | None = None
+        self.session_name = ""
+        self.session_cloud = False
+        self.session_url = ""
+        self.bound = False
+        self.course_id = "copd"
+        self.touched = time.monotonic()
+
+    def cert_path(self) -> Path:
+        return ROOT / ("certificates-{}.csv".format(self.id.lower()))
+
+
+def new_room_id() -> str:
+    for _ in range(20):
+        rid = "".join(secrets.choice(ROOM_ALPHABET) for _ in range(6))
+        if rid not in ROOMS:
+            return rid
+    return secrets.token_urlsafe(6).upper()[:8]
+
+
+def course_published(course_id: str) -> bool:
+    rec = COURSES.get(course_id)
+    if not rec:
+        return False
+    return bool(rec.get("published", True))
+
+
+def draft_code() -> str:
+    return (os.environ.get("DRAFT_CODE") or "").strip()
+
+
+def draft_debug_open() -> bool:
+    """This laptop (DEBUG=true) opens every session. The live site does not."""
+    return debug_flag(os.environ.get("DEBUG")) is True
+
+
+def draft_codes_match(got: str, expected: str) -> bool:
+    if not expected or not got:
+        return False
+    return hmac.compare_digest(
+        hashlib.sha256(got.encode("utf-8")).digest(),
+        hashlib.sha256(expected.encode("utf-8")).digest(),
+    )
+
+
+def request_cookies(handler: SimpleHTTPRequestHandler) -> dict[str, str]:
+    found: dict[str, str] = {}
+    raw = handler.headers.get("Cookie") or ""
+    for part in raw.split(";"):
+        if "=" not in part:
+            continue
+        key, value = part.split("=", 1)
+        found[key.strip()] = value.strip()
+    return found
+
+
+def sign_draft(scope: str) -> str:
+    scope = scope.strip()
+    mac = hmac.new(HOST_TOKEN.encode("utf-8"), scope.encode("utf-8"), hashlib.sha256).hexdigest()
+    return scope + "." + mac
+
+
+def draft_cookie_header(scope: str) -> str:
+    return "hub_draft={}; HttpOnly; SameSite=Lax; Path=/; Max-Age=43200".format(sign_draft(scope))
+
+
+def draft_scope_from_cookie(handler: SimpleHTTPRequestHandler) -> str:
+    raw = request_cookies(handler).get("hub_draft", "")
+    if "." not in raw:
+        return ""
+    scope, mac = raw.rsplit(".", 1)
+    expected = hmac.new(HOST_TOKEN.encode("utf-8"), scope.encode("utf-8"), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(mac, expected):
+        return ""
+    if scope == "all" or scope in COURSES:
+        return scope
+    return ""
+
+
+def draft_room_allows(handler: SimpleHTTPRequestHandler, course_id: str) -> bool:
+    rid = request_room_id(handler)
+    if not rid or rid not in ROOMS:
+        return False
+    return (getattr(ROOMS[rid], "course_id", "") or "") == course_id
+
+
+def draft_access(handler: SimpleHTTPRequestHandler, course_id: str) -> bool:
+    if course_id not in COURSES:
+        return False
+    if course_published(course_id) or draft_debug_open():
+        return True
+    scope = draft_scope_from_cookie(handler)
+    if scope == "all" or scope == course_id:
+        return True
+    return draft_room_allows(handler, course_id)
+
+
+def draft_attempt_allowed(ip: str) -> bool:
+    now = time.monotonic()
+    hits = [stamp for stamp in _DRAFT_HITS.get(ip, []) if now - stamp < 600]
+    if len(hits) >= 8:
+        _DRAFT_HITS[ip] = hits
+        return False
+    hits.append(now)
+    _DRAFT_HITS[ip] = hits
+    return True
+
+
+def unpublished_course_from_path(path: str) -> str:
+    parts = [part for part in (path or "").split("/") if part]
+    if not parts:
+        return ""
+    course_id = parts[0].casefold()
+    if course_id in COURSES and not course_published(course_id):
+        return course_id
+    return ""
+
+
+def home_card(course: dict, draft: bool) -> str:
+    extra = re.sub(r"[^a-z0-9 -]", "", str(course.get("home_class") or ""))
+    classes = "hub-course" + ((" " + extra) if extra else "")
+    tag = escape(str(course.get("home_tag") or ""))
+    if draft:
+        tag += ' <span class="draft-mark">Draft</span>'
+    heading = escape(str(course.get("home_heading") or course["title"]))
+    blurb = escape(str(course.get("home_blurb") or ""))
+    cid = re.sub(r"[^a-z0-9-]", "", str(course["id"]))
+    return (
+        '<article class="{classes}">\n'
+        '          <p class="hub-tag">{tag}</p>\n'
+        "          <h2>{heading}</h2>\n"
+        "          <p>{blurb}</p>\n"
+        '          <div class="hub-links">\n'
+        '            <a href="?course={cid}&amp;view=self">Self-guided</a>\n'
+        '            <a href="?course={cid}&amp;view=presenter">Presenter</a>\n'
+        '            <a href="{cid}/handout.html">Handout</a>\n'
+        "          </div>\n"
+        "        </article>"
+    ).format(classes=classes, tag=tag, heading=heading, blurb=blurb, cid=cid)
+
+
+def home_cards_html(include_drafts: bool) -> str:
+    cards = []
+    for course in COURSES.values():
+        published = course_published(course["id"])
+        if not published and not include_drafts:
+            continue
+        cards.append(home_card(course, draft=not published))
+    return "\n".join(cards)
+
+
+def fill_home_cards(text: str, include_drafts: bool) -> str:
+    cards = home_cards_html(include_drafts)
+    block = '<div class="hub-courses" id="hubCourses">\n' + cards + "\n      </div>"
+    if include_drafts and any(not course_published(cid) for cid in COURSES):
+        block = (
+            '<p class="home-draft-note">Draft sessions on this laptop. '
+            "The live home page lists finished sessions only.</p>\n      "
+            + block
+        )
+    return text.replace('<div class="hub-courses" id="hubCourses"></div>', block, 1)
+
+
+def published_map_json() -> str:
+    payload = {cid: course_published(cid) for cid in COURSES}
+    return json.dumps(payload, separators=(",", ":"))
+
+
+def fill_published_map(text: str) -> str:
+    return re.sub(
+        r'(<script id="hubPublished" type="application/json">)(.*?)(</script>)',
+        lambda match: match.group(1) + published_map_json() + match.group(3),
+        text,
+        count=1,
+        flags=re.DOTALL,
+    )
+
+
+def strip_course_from_index(text: str, course_id: str) -> str:
+    cid = re.escape(course_id)
+    text = re.sub(
+        r'\s*<script src="' + cid + r'/slides\.js[^"]*"></script>',
+        "",
+        text,
+        count=1,
+    )
+    needle = "?course=" + course_id + "&amp;"
+    hit = text.find(needle)
+    if hit < 0:
+        return text
+    open_at = text.rfind("<article", 0, hit)
+    close_at = text.find("</article>", hit)
+    if open_at < 0 or close_at < 0 or text.find("<article", open_at + 1, hit) != -1:
+        return text
+    end = close_at + len("</article>")
+    while open_at > 0 and text[open_at - 1] in "\r\n":
+        open_at -= 1
+    return text[:open_at] + text[end:]
+
+
+def index_html_for(handler: SimpleHTTPRequestHandler) -> str:
+    text = (ROOT / "index.html").read_text(encoding="utf-8")
+    text = fill_home_cards(text, draft_debug_open())
+    text = fill_published_map(text)
+    for course_id in COURSES:
+        if course_published(course_id) or draft_access(handler, course_id):
+            continue
+        text = strip_course_from_index(text, course_id)
+    return text
+
+
+def draft_status_payload(handler: SimpleHTTPRequestHandler, course_id: str) -> dict:
+    course_id = (course_id or "").strip().casefold()
+    if not course_id:
+        return {"locked": True}
+    if course_id not in COURSES:
+        if draft_scope_from_cookie(handler) == "all" or draft_debug_open():
+            return {"locked": False, "missing": True}
+        if not draft_code():
+            return {"locked": True, "unconfigured": True}
+        return {"locked": True}
+    if course_published(course_id):
+        return {"locked": False, "open": True, "published": True}
+    if draft_access(handler, course_id):
+        return {"locked": False, "open": True}
+    if not draft_code() and not draft_debug_open():
+        return {"locked": True, "unconfigured": True}
+    return {"locked": True}
+
+
+def send_index(handler: SimpleHTTPRequestHandler, body: str, cookie_scope: str = "") -> None:
+    data = body.encode("utf-8")
+    handler.send_response(200)
+    handler.send_header("Content-Type", "text/html; charset=utf-8")
+    handler.send_header("Cache-Control", "no-store")
+    if cookie_scope:
+        handler.send_header("Set-Cookie", draft_cookie_header(cookie_scope))
+    handler.send_header("Content-Length", str(len(data)))
+    handler.end_headers()
+    handler.wfile.write(data)
+
+
+def serve_index_if_needed(handler: SimpleHTTPRequestHandler) -> bool:
+    path = urlparse(handler.path).path
+    if path not in ("/", "/index.html"):
+        return False
+    original = (ROOT / "index.html").read_text(encoding="utf-8")
+    body = index_html_for(handler)
+    course_id = request_course_id(handler)
+    existing = draft_scope_from_cookie(handler)
+    cookie_scope = ""
+    if (
+        course_id
+        and not course_published(course_id)
+        and draft_room_allows(handler, course_id)
+        and existing not in ("all", course_id)
+    ):
+        cookie_scope = course_id
+    if body == original and not cookie_scope:
+        return False
+    send_index(handler, body, cookie_scope)
+    return True
+
+
+def request_course_id(handler: SimpleHTTPRequestHandler) -> str:
+    parsed = urlparse(handler.path)
+    course = (parse_qs(parsed.query).get("course") or [""])[0].strip().casefold()
+    if not course:
+        course = (handler.headers.get("X-Course") or "").strip().casefold()
+    return course if course in COURSES else ""
+
+
+def request_room_id(handler: SimpleHTTPRequestHandler) -> str:
+    parsed = urlparse(handler.path)
+    rid = (parse_qs(parsed.query).get("r") or [""])[0].strip().upper()
+    if not rid:
+        rid = (handler.headers.get("X-Room") or "").strip().upper()
+    return re.sub(r"[^A-Z0-9]", "", rid)[:8]
+
+
+def get_room(rid: str, create: bool = False) -> Room | None:
+    if rid and rid in ROOMS:
+        room = ROOMS[rid]
+        room.touched = time.monotonic()
+        attach_session(room)
+        return room
+    if not create:
+        return None
+    if rid and re.fullmatch(r"[A-Z0-9]{4,8}", rid):
+        room = Room(rid)
+        ROOMS[rid] = room
+        attach_session(room)
+        return room
+    fresh = new_room_id()
+    room = Room(fresh)
+    ROOMS[fresh] = room
+    attach_session(room)
+    return room
+
+
+def load_names() -> None:
+    return
+
+
+def extra_cert_paths() -> list[Path]:
+    paths = [ROOT / "COPD-CPD-certificate-names.csv"]
+    home = Path.home()
+    for folder in (home / "Documents", home / "OneDrive"):
+        if folder.exists():
+            paths.append(folder / "COPD-CPD-certificate-names.csv")
+    unique = []
+    seen = set()
+    for path in paths:
+        key = str(path.resolve()) if path.parent.exists() else str(path)
+        if key not in seen:
+            seen.add(key)
+            unique.append(path)
+    return unique
+
+
+def attend_file_sections(lines: list[str]) -> dict[str, dict[str, str]]:
+    sections: dict[str, dict[str, str]] = {
+        "dev": {"share": "", "folder": ""},
+        "live": {"share": "", "folder": ""},
+        "any": {"share": "", "folder": ""},
+    }
+    current = "any"
+    for line in lines:
+        raw = line.strip().strip('"')
+        if not raw:
+            continue
+        if raw.startswith("#"):
+            label = raw[1:].strip().upper()
+            if "DEV" in label:
+                current = "dev"
+            elif "LIVE" in label or "PROD" in label:
+                current = "live"
+            continue
+        lower = raw.lower()
+        slot = sections[current]
+        if lower.startswith("http://") or lower.startswith("https://"):
+            if not slot["share"]:
+                slot["share"] = raw
+        elif not slot["folder"]:
+            slot["folder"] = raw
+    return sections
+
+
+def feedback_share_url(course_id: str = "copd") -> str:
+    """OneDrive workbook for a topic in the current environment.
+
+    .env keeps both addresses: FEEDBACK_SHARE_<COURSE>_DEV and _LIVE.
+    """
+    course = re.sub(r"[^A-Za-z0-9]", "", (course_id or "copd")).upper() or "COPD"
+    env_name = attend_env().upper()
+    for key in ("FEEDBACK_SHARE_" + course + "_" + env_name, "FEEDBACK_SHARE_" + course):
+        specific = (os.environ.get(key) or "").strip().strip('"')
+        if specific:
+            return specific
+    if course == "COPD":
+        url = (os.environ.get("FEEDBACK_SHARE_URL") or "").strip().strip('"')
+        if url:
+            return url
+        legacy = ROOT / "feedback-share.txt"
+        if legacy.is_file():
+            try:
+                return legacy.read_text(encoding="utf-8").strip().strip('"')
+            except OSError:
+                return ""
+    return ""
+
+
+def feedback_workbook_url(course_id: str = "copd") -> str:
+    """That course's own workbook. COPD and Heart Failure never share a sheet."""
+    course = (course_id or "copd").strip().casefold()
+    if course not in COURSES:
+        course = "copd"
+    return feedback_share_url(course)
 
 
 def clean_feedback_text(raw: object, limit: int) -> str:
     return " ".join(str(raw or "").split())[:limit]
-
-
-_FEEDBACK_HITS: dict[str, list[float]] = {}
 
 
 def feedback_allowed(ip: str) -> bool:
@@ -193,36 +857,10 @@ def feedback_allowed(ip: str) -> bool:
     return True
 
 
-def save_feedback(row: dict) -> None:
-    with FEEDBACK_LOCK:
-        new_file = not FEEDBACK_FILE.exists()
-        with FEEDBACK_FILE.open("a", encoding="utf-8-sig", newline="") as handle:
-            writer = csv.DictWriter(
-                handle,
-                fieldnames=["submitted_at", "room", "useful", "comments", "email", "suggestion", "name"],
-            )
-            if new_file:
-                writer.writeheader()
-            writer.writerow(row)
-        append_feedback_workbook(row)
-
-
-def feedback_csv() -> bytes:
-    if not FEEDBACK_FILE.is_file():
-        return "submitted_at,room,useful,comments,email,suggestion,name\r\n".encode("utf-8")
-    return FEEDBACK_FILE.read_bytes()
-
-
-def feedback_share_url() -> str:
-    url = (os.environ.get("FEEDBACK_SHARE_URL") or "").strip().strip('"')
-    if url:
-        return url
-    if not FEEDBACK_SHARE_FILE.is_file():
-        return ""
-    try:
-        return FEEDBACK_SHARE_FILE.read_text(encoding="utf-8").strip().strip('"')
-    except OSError:
-        return ""
+def feedback_room_label(row: dict) -> str:
+    course = re.sub(r"[^a-z0-9]", "", str(row.get("course") or "copd").lower()) or "copd"
+    room = re.sub(r"[^A-Z0-9]", "", str(row.get("room") or "").upper())[:8]
+    return (course + " " + room).strip()
 
 
 def feedback_row_values(row: dict) -> list[str]:
@@ -233,7 +871,7 @@ def feedback_row_values(row: dict) -> list[str]:
     }.get(str(row.get("useful") or ""), str(row.get("useful") or ""))
     return [
         str(row.get("submitted_at") or ""),
-        str(row.get("room") or ""),
+        feedback_room_label(row),
         useful,
         str(row.get("comments") or ""),
         str(row.get("email") or ""),
@@ -441,13 +1079,12 @@ def build_xlsx(table: list[list[str]]) -> bytes:
     return buffer.getvalue()
 
 
-def get_feedback_session(force: bool = False) -> dict:
-    url = feedback_share_url()
+def get_feedback_session(course_id: str, force: bool = False) -> dict:
+    url = feedback_workbook_url(course_id)
     if not url:
         raise OSError("No feedback workbook link is configured")
-    global _FEEDBACK_OD
     now = time.monotonic()
-    session = _FEEDBACK_OD
+    session = _FEEDBACK_SESSIONS.get(url) or {}
     if (
         force
         or session.get("share") != url
@@ -455,7 +1092,7 @@ def get_feedback_session(force: bool = False) -> dict:
         or not session.get("fed")
     ):
         session = od_connect(url)
-        _FEEDBACK_OD = session
+        _FEEDBACK_SESSIONS[url] = session
     return session
 
 
@@ -485,12 +1122,15 @@ def feedback_upload(session: dict, content: bytes) -> None:
         od_http("POST", endpoint, data=content, headers=headers)
     except urllib.error.HTTPError as err:
         if err.code == 423:
-            raise OSError("Feedback workbook is open elsewhere. Close it, then try again.")
+            raise OSError("Feedback workbook is open elsewhere. Close it, then try again.") from err
         raise OSError("Feedback workbook upload failed ({})".format(err.code)) from err
 
 
-def local_feedback_workbook() -> Path | None:
-    path = ROOT / "feedback" / "COPD_Feedback_sheet.xlsx"
+def local_feedback_workbook(course_id: str) -> Path | None:
+    course = (course_id or "").strip().casefold()
+    if course not in COURSES:
+        return None
+    path = ROOT / course / "feedback" / (attend_env() + ".xlsx")
     return path if path.is_file() else None
 
 
@@ -498,35 +1138,49 @@ def append_local_workbook(path: Path, values: list[str]) -> None:
     path.write_bytes(xlsx_append(path.read_bytes(), values))
 
 
-def append_remote_workbook(values: list[str]) -> None:
+def append_remote_workbook(course_id: str, values: list[str]) -> None:
     last_error: Exception | None = None
+    url = feedback_workbook_url(course_id)
     for attempt in range(2):
         try:
-            session = get_feedback_session(force=attempt > 0)
+            session = get_feedback_session(course_id, force=attempt > 0)
             feedback_upload(session, xlsx_append(feedback_download(session), values))
             return
         except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, ET.ParseError, zipfile.BadZipFile) as err:
             last_error = err
-            global _FEEDBACK_OD
-            _FEEDBACK_OD = {}
+            if url:
+                _FEEDBACK_SESSIONS.pop(url, None)
     raise OSError("Feedback workbook update failed") from last_error
 
 
 def append_feedback_workbook(row: dict) -> None:
-    local = local_feedback_workbook()
-    if not feedback_share_url() and local is None:
-        return
+    course = str(row.get("course") or "copd")
     values = feedback_row_values(row)
-    if feedback_share_url():
+    if feedback_workbook_url(course):
         try:
-            append_remote_workbook(values)
-            return
-        except OSError:
-            if local is None:
-                print("Feedback workbook update failed.", flush=True)
-                raise
-    if local is not None:
-        append_local_workbook(local, values)
+            append_remote_workbook(course, values)
+        except OSError as err:
+            cause = err.__cause__ or err
+            code = getattr(cause, "code", None)
+            detail = " ({})".format(code) if code else ""
+            print("Feedback workbook update failed{}.".format(detail), flush=True)
+            raise
+        return
+    local = local_feedback_workbook(course)
+    if local is None:
+        raise OSError("No feedback workbook is configured")
+    append_local_workbook(local, values)
+
+
+def save_feedback(row: dict) -> None:
+    with FEEDBACK_LOCK:
+        append_feedback_workbook(row)
+
+
+def feedback_csv() -> bytes:
+    if not FEEDBACK_FILE.is_file():
+        return "submitted_at,course,room,useful,comments,email,suggestion,name\r\n".encode("utf-8")
+    return FEEDBACK_FILE.read_bytes()
 
 
 def _response_count(data: bytes | None) -> int:
@@ -540,273 +1194,37 @@ def _response_count(data: bytes | None) -> int:
     return sum(1 for row in body if any(cell.strip() for cell in row))
 
 
-def feedback_workbook_bytes() -> bytes | None:
-    copies: list[bytes] = []
-    if feedback_share_url():
-        try:
-            copies.append(feedback_download(get_feedback_session()))
-        except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, ET.ParseError, zipfile.BadZipFile):
-            pass
-    local = local_feedback_workbook()
-    if local is not None:
-        try:
-            copies.append(local.read_bytes())
-        except OSError:
-            pass
-    if not copies and FEEDBACK_FILE.is_file():
-        table = [FEEDBACK_HEADERS]
-        with FEEDBACK_FILE.open(encoding="utf-8-sig", newline="") as handle:
-            for record in csv.DictReader(handle):
-                table.append(feedback_row_values(record))
-        copies.append(build_xlsx(table))
-    if not copies:
+def feedback_workbook_bytes(course_id: str = "copd") -> bytes | None:
+    data: bytes | None = None
+    if feedback_workbook_url(course_id):
+        data = feedback_download(get_feedback_session(course_id))
+    else:
+        local = local_feedback_workbook(course_id)
+        if local is not None:
+            data = local.read_bytes()
+    if not data or _response_count(data) < 1:
         return None
-    best = max(copies, key=_response_count)
-    if _response_count(best) < 1:
-        return None
-    return best
-
-
-def utc_now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def clean_name(raw: object) -> str:
-    text = " ".join(str(raw or "").split())
-    return text[:80]
-
-
-def clean_esr(raw: object) -> str:
-    return re.sub(r"[^A-Z0-9]", "", str(raw or "").upper())[:16]
-
-
-def clean_email(raw: object) -> str:
-    text = " ".join(str(raw or "").split()).lower()[:120]
-    if not re.fullmatch(r"[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}", text):
-        return ""
-    return text
-
-
-def pin_key(raw: str) -> str:
-    return re.sub(r"[^A-Z0-9]", "", (raw or "").upper())
-
-
-def load_presenters() -> dict[str, str]:
-    found: dict[str, str] = {}
-
-    def add(pin: str, name: str) -> None:
-        key = pin_key(pin)
-        who = clean_name(name)
-        if len(key) >= 4 and key not in found:
-            found[key] = who
-
-    env_list = (os.environ.get("PRESENTERS") or "").strip().strip('"')
-    if env_list:
-        for part in env_list.split(";"):
-            part = part.strip()
-            if not part:
-                continue
-            if ":" in part:
-                pin, name = part.split(":", 1)
-                add(pin, name)
-            else:
-                add(part, "")
-    env_pin = (os.environ.get("PRESENTER_PIN") or "").strip().strip('"')
-    if env_pin:
-        add(env_pin, os.environ.get("PRESENTER_NAME") or "")
-    for path in (PIN_FILE, PRESENTERS_FILE):
-        if not path.exists():
-            continue
-        try:
-            lines = path.read_text(encoding="utf-8").splitlines()
-        except OSError:
-            continue
-        for line in lines:
-            raw = line.strip().strip('"')
-            if not raw or raw.startswith("#"):
-                continue
-            bits = raw.replace("\t", " ").split(None, 1)
-            add(bits[0], bits[1] if len(bits) > 1 else "")
-    if found:
-        return found
-    pin = "".join(secrets.choice(ROOM_ALPHABET) for _ in range(6))
-    add(pin, "")
-    try:
-        PRESENTERS_FILE.write_text(
-            "# PIN  Full name as it should appear on the attendance file\n"
-            "# One person per line. Do not commit this file.\n"
-            "# On Render set PRESENTERS=PIN:Full Name;PIN:Full Name\n"
-            + pin
-            + "  Course lead\n",
-            encoding="utf-8",
-        )
-    except OSError:
-        pass
-    return found
-
-
-PRESENTERS = load_presenters()
-
-
-def request_host_secret(handler: SimpleHTTPRequestHandler) -> str:
-    parsed = urlparse(handler.path)
-    query = (parse_qs(parsed.query).get("host") or [""])[0]
-    return (handler.headers.get("X-Host-Token") or query or "").strip()
-
-
-def presenter_for_token(token: str) -> str:
-    return PRESENTERS.get(pin_key(token), "")
-
-
-def secret_is_host(token: str) -> bool:
-    if not token:
-        return False
-    if token == HOST_TOKEN:
-        return True
-    return pin_key(token) in PRESENTERS
-
-
-def clean_scene_image(raw: object) -> str:
-    text = str(raw or "").strip()
-    if re.fullmatch(r"assets/[A-Za-z0-9._-]+\.(png|jpe?g|webp)", text):
-        return text
-    return ""
-
-
-def blank_poll() -> dict:
-    return {
-        "id": None,
-        "kind": "choice",
-        "prompt": "",
-        "options": [],
-        "obs": {},
-        "correct": None,
-        "expectedTotal": None,
-        "expectedScale": None,
-        "teach": "",
-        "image": "",
-        "open": False,
-        "revealed": False,
-        "votes": {},
-    }
-
-
-class Room:
-    def __init__(self, rid: str) -> None:
-        self.id = rid
-        self.poll = blank_poll()
-        self.history: dict = {}
-        self.names: dict = {}
-        self.register_open = False
-        self.feedback_open = False
-        self.session_file: Path | None = None
-        self.session_name = ""
-        self.session_cloud = False
-        self.session_url = ""
-        self.bound = False
-        self.touched = time.monotonic()
-
-    def cert_path(self) -> Path:
-        return ROOT / ("certificates-{}.csv".format(self.id.lower()))
-
-
-def new_room_id() -> str:
-    for _ in range(20):
-        rid = "".join(secrets.choice(ROOM_ALPHABET) for _ in range(6))
-        if rid not in ROOMS:
-            return rid
-    return secrets.token_urlsafe(6).upper()[:8]
-
-
-def request_room_id(handler: SimpleHTTPRequestHandler) -> str:
-    parsed = urlparse(handler.path)
-    rid = (parse_qs(parsed.query).get("r") or [""])[0].strip().upper()
-    if not rid:
-        rid = (handler.headers.get("X-Room") or "").strip().upper()
-    return re.sub(r"[^A-Z0-9]", "", rid)[:8]
-
-
-def get_room(rid: str, create: bool = False) -> Room | None:
-    if rid and rid in ROOMS:
-        room = ROOMS[rid]
-        room.touched = time.monotonic()
-        attach_session(room)
-        return room
-    if not create:
-        return None
-    if rid and re.fullmatch(r"[A-Z0-9]{4,8}", rid):
-        room = Room(rid)
-        ROOMS[rid] = room
-        attach_session(room)
-        return room
-    fresh = new_room_id()
-    room = Room(fresh)
-    ROOMS[fresh] = room
-    attach_session(room)
-    return room
-
-
-def load_names() -> None:
-    return
-
-
-def extra_cert_paths() -> list[Path]:
-    paths = [ROOT / "COPD-CPD-certificate-names.csv"]
-    home = Path.home()
-    for folder in (home / "Documents", home / "OneDrive"):
-        if folder.exists():
-            paths.append(folder / "COPD-CPD-certificate-names.csv")
-    unique = []
-    seen = set()
-    for path in paths:
-        key = str(path.resolve()) if path.parent.exists() else str(path)
-        if key not in seen:
-            seen.add(key)
-            unique.append(path)
-    return unique
-
-
-def attend_file_sections(lines: list[str]) -> dict[str, dict[str, str]]:
-    sections: dict[str, dict[str, str]] = {
-        "dev": {"share": "", "folder": ""},
-        "live": {"share": "", "folder": ""},
-        "any": {"share": "", "folder": ""},
-    }
-    current = "any"
-    for line in lines:
-        raw = line.strip().strip('"')
-        if not raw:
-            continue
-        if raw.startswith("#"):
-            label = raw[1:].strip().upper()
-            if "DEV" in label:
-                current = "dev"
-            elif "LIVE" in label or "PROD" in label:
-                current = "live"
-            continue
-        lower = raw.lower()
-        slot = sections[current]
-        if lower.startswith("http://") or lower.startswith("https://"):
-            if not slot["share"]:
-                slot["share"] = raw
-        elif not slot["folder"]:
-            slot["folder"] = raw
-    return sections
+    return data
 
 
 def attend_config() -> tuple[str, Path | None]:
-    share = (os.environ.get("ATTEND_SHARE_URL") or "").strip().strip('"')
-    folder_raw = (os.environ.get("ATTEND_FOLDER") or "").strip().strip('"')
-    if ATTEND_CONFIG.exists() and not share:
+    share = (os.environ.get("ATTEND_SHARE_" + attend_env().upper()) or "").strip().strip('"')
+    if not share:
+        share = (os.environ.get("ATTEND_SHARE_URL") or "").strip().strip('"')
+    folder_raw = (os.environ.get("ATTEND_FOLDER_" + attend_env().upper()) or "").strip().strip('"')
+    if not folder_raw:
+        folder_raw = (os.environ.get("ATTEND_FOLDER") or "").strip().strip('"')
+    if ATTEND_CONFIG.exists() and (not share or not folder_raw):
         try:
             lines = ATTEND_CONFIG.read_text(encoding="utf-8").splitlines()
         except OSError:
             lines = []
         parts = attend_file_sections(lines)
-        chosen = parts["dev"]
+        env = attend_env()
+        chosen = parts.get(env) or parts["dev"]
         fallback = parts["any"]
-        other = parts["live"]
-        share = chosen["share"] or fallback["share"] or other["share"]
+        other = parts["live"] if env == "dev" else parts["dev"]
+        share = share or chosen["share"] or fallback["share"] or other["share"]
         if not folder_raw:
             folder_raw = chosen["folder"] or fallback["folder"] or other["folder"]
     if not folder_raw:
@@ -821,13 +1239,93 @@ def attend_dir() -> Path | None:
     return attend_config()[1]
 
 
-def session_filename(presenter: str = "", room_id: str = "") -> str:
+def attend_env() -> str:
+    return sheet_env_from(os.environ)
+
+
+def clean_dev_scratch() -> None:
+    """Drop leftover room CSVs and session binds in the project folder (DEV only)."""
+    if attend_env() != "dev":
+        return []
+    names = ["certificates.csv", "COPD-CPD-certificate-names.csv", "HF-CPD-certificate-names.csv"]
+    paths = [ROOT / name for name in names]
+    paths.extend(ROOT.glob("certificates-*.csv"))
+    paths.extend(ROOT.glob("session-*.json"))
+    removed = []
+    for path in paths:
+        if not path.is_file() or path.parent.resolve() != ROOT.resolve():
+            continue
+        try:
+            path.unlink()
+        except OSError:
+            continue
+        removed.append(path.name)
+    return removed
+
+
+def certificates_root() -> Path:
+    parent = attend_dir()
+    if parent is not None and parent.name.lower() in ("dev", "live"):
+        return parent.parent
+    if parent is not None:
+        return parent
+    return ROOT / "certificates"
+
+
+def attend_course_dir(course_id: str) -> Path | None:
+    root = certificates_root()
+    return root / course_folder_name(course_id) / attend_env()
+
+
+def repo_course_dir(course_id: str) -> Path:
+    return ROOT / "certificates" / course_folder_name(course_id) / attend_env()
+
+
+def attendance_search_roots(course_id: str | None = None) -> list[Path]:
+    folders = [course_folder_name(course_id)] if course_id else [course_folder_name(c["id"]) for c in COURSES.values()]
+    if not course_id or course_id == "copd":
+        if "COPD" not in folders:
+            folders.append("COPD")
+    roots: list[Path] = []
+    certs = ROOT / "certificates"
+    parent = certificates_root()
+    for name in folders:
+        for env in ("dev", "live"):
+            roots.append(parent / name / env)
+            roots.append(certs / name / env)
+            roots.append(certs / env / name)
+            roots.append(certs / name / "dev")
+        roots.append(parent / name)
+        roots.append(certs / name)
+    roots.extend([
+        certs / "dev",
+        certs / "live",
+        certs,
+        ROOT,
+    ])
+    extra = attend_dir()
+    if extra is not None:
+        roots.append(extra)
+    unique: list[Path] = []
+    seen: set[str] = set()
+    for root in roots:
+        key = str(root).casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(root)
+    return unique
+
+
+def session_filename(course_id: str = "copd", presenter: str = "", room_id: str = "") -> str:
     stamp = datetime.now().strftime("%Y-%m-%d-%H%M")
     person = filename_person(presenter)
     code = re.sub(r"[^A-Z0-9]", "", (room_id or "").upper())[:8]
+    course = course_record(course_id)
+    prefix = course["prefix"]
     if code:
-        return "COPD-CPD-attendance-{}-{}-{}.csv".format(stamp, person, code)
-    return "COPD-CPD-attendance-{}-{}.csv".format(stamp, person)
+        return "{}{}-{}-{}.csv".format(prefix, stamp, person, code)
+    return "{}{}-{}.csv".format(prefix, stamp, person)
 
 
 def session_bind_path(rid: str) -> Path:
@@ -841,6 +1339,7 @@ def save_session_bind(room: Room) -> None:
         "cloud": room.session_cloud,
         "url": room.session_url,
         "file": str(room.session_file) if room.session_file else "",
+        "course": getattr(room, "course_id", "copd") or "copd",
     }
     try:
         session_bind_path(room.id).write_text(json.dumps(payload), encoding="utf-8")
@@ -853,16 +1352,12 @@ def latest_attendance_file(room_id: str) -> Path | None:
     if not code:
         return None
     suffix = "-{}.csv".format(code)
-    _share, folder = attend_config()
-    roots = [ROOT, ROOT / "certificates", ROOT / "certificates" / "dev", ROOT / "certificates" / "live"]
-    if folder is not None:
-        roots.append(folder)
     found: list[Path] = []
     seen: set[str] = set()
-    for root in roots:
+    for root in attendance_search_roots():
         if not root.is_dir():
             continue
-        for path in root.glob("COPD-CPD-attendance-*" + suffix):
+        for path in root.glob("*-CPD-attendance-*" + suffix):
             key = str(path.resolve()) if path.exists() else str(path)
             if key in seen:
                 continue
@@ -910,6 +1405,11 @@ def restore_room_session(room: Room) -> None:
             room.session_name = name
             room.session_cloud = bool(data.get("cloud"))
             room.session_url = str(data.get("url") or "")
+            course = str(data.get("course") or "").strip().casefold()
+            if course in COURSES:
+                room.course_id = course
+            elif str(name).startswith("HF-CPD-"):
+                room.course_id = "hf"
             file_raw = str(data.get("file") or "")
             if file_raw:
                 room.session_file = Path(file_raw)
@@ -923,7 +1423,12 @@ def restore_room_session(room: Room) -> None:
 
 
 def attach_session(room: Room) -> None:
+    if room.bound:
+        return
+    restore_room_session(room)
     room.bound = True
+    if room.names and room.session_name:
+        threading.Thread(target=_flush_session, args=(room,), daemon=True).start()
 
 
 def _flush_session(room: Room) -> None:
@@ -1052,22 +1557,28 @@ def write_local_bytes(path: Path, body: bytes) -> Path | None:
     return None
 
 
-def od_list_names(session: dict) -> set[str]:
-    folder = quote(session["folder_rel"], safe="/")
-    raw = od_http(
-        "GET",
-        session["site"] + "/_api/web/GetFolderByServerRelativeUrl(@p)/Files?@p='" + folder + "'&$select=Name",
-        headers={
-            "Accept": "application/json;odata=verbose",
-            "Cookie": "FedAuth=" + session["fed"],
-        },
-    )
+def od_list_names(session: dict, folder_rel: str | None = None) -> set[str]:
+    rel = folder_rel or session["folder_rel"]
+    folder = quote(rel, safe="/")
+    try:
+        raw = od_http(
+            "GET",
+            session["site"] + "/_api/web/GetFolderByServerRelativeUrl(@p)/Files?@p='" + folder + "'&$select=Name",
+            headers={
+                "Accept": "application/json;odata=verbose",
+                "Cookie": "FedAuth=" + session["fed"],
+            },
+        )
+    except urllib.error.HTTPError as err:
+        if err.code in (404, 400):
+            return set()
+        raise
     rows = json.loads(raw.decode("utf-8")).get("d", {}).get("results") or []
     return {str(row.get("Name") or "") for row in rows}
 
 
-def od_download(session: dict, filename: str) -> bytes:
-    rel = urlparse(session["site"]).path.rstrip("/") + "/" + session["folder_rel"] + "/" + filename
+def od_download(session: dict, filename: str, folder_rel: str | None = None) -> bytes:
+    rel = urlparse(session["site"]).path.rstrip("/") + "/" + (folder_rel or session["folder_rel"]) + "/" + filename
     url = (
         session["site"]
         + "/_api/web/GetFileByServerRelativePath(decodedurl=@p)/$value?@p='"
@@ -1077,36 +1588,71 @@ def od_download(session: dict, filename: str) -> bytes:
     return od_http("GET", url, headers={"Cookie": "FedAuth=" + session["fed"]})
 
 
-def od_put(session: dict, filename: str, content: bytes) -> None:
+def od_folder_meta(session: dict, folder_rel: str) -> dict:
+    folder = quote(folder_rel, safe="/")
+    try:
+        raw = od_http(
+            "GET",
+            session["site"]
+            + "/_api/web/GetFolderByServerRelativeUrl(@p)?@p='"
+            + folder
+            + "'&$select=Name,Exists,UniqueId,ServerRelativeUrl",
+            headers={
+                "Accept": "application/json;odata=verbose",
+                "Cookie": "FedAuth=" + session["fed"],
+            },
+        )
+    except urllib.error.HTTPError as err:
+        if err.code in (404, 400):
+            return {"exists": False, "name": "", "unique_id": "", "url": ""}
+        raise
+    info = json.loads(raw.decode("utf-8")).get("d") or {}
+    unique = str(info.get("UniqueId") or "").strip("{}")
+    return {
+        "exists": bool(info.get("Exists")),
+        "name": str(info.get("Name") or ""),
+        "unique_id": unique,
+        "url": str(info.get("ServerRelativeUrl") or ""),
+    }
+
+
+def od_folder_exists(session: dict, folder_rel: str) -> bool:
+    return bool(od_folder_meta(session, folder_rel).get("exists"))
+
+
+def od_put(session: dict, filename: str, content: bytes, folder_rel: str | None = None) -> None:
     site = session["site"]
+    target = folder_rel or session["folder_rel"]
     headers = {
         "Accept": "application/json;odata=verbose",
         "Content-Type": "application/octet-stream",
         "Cookie": "FedAuth=" + session["fed"],
         "X-RequestDigest": session["digest"],
     }
-    folder = quote(session["folder_rel"], safe="/")
-    endpoints = [
-        (
-            site
-            + "/_api/web/GetFolderByServerRelativeUrl(@p)/Files/add(overwrite=true,url=@f)"
-            + "?@p='"
-            + folder
-            + "'&@f='"
-            + filename
-            + "'"
-        )
-    ]
-    guid = session.get("folder_guid") or ""
+    meta = od_folder_meta(session, target)
+    if not meta.get("exists"):
+        raise OSError("OneDrive folder does not exist")
+    endpoints = []
+    guid = meta.get("unique_id") or ""
     if guid:
         endpoints.append(
             site
             + "/_api/web/GetFolderById(guid'"
             + guid
             + "')/Files/add(overwrite=true,url=@f)?@f='"
-            + filename
+            + quote(filename, safe="")
             + "'"
         )
+    full = urlparse(session["site"]).path.rstrip("/") + "/" + target
+    endpoints.append(
+        site
+        + "/_api/web/GetFolderByServerRelativePath(decodedurl=@p)/Files/add(overwrite=true,url=@f)"
+        + "?@p='"
+        + quote(full, safe="/")
+        + "'&@f='"
+        + quote(filename, safe="")
+        + "'"
+    )
     last_error: OSError | None = None
     for endpoint in endpoints:
         try:
@@ -1119,6 +1665,49 @@ def od_put(session: dict, filename: str, content: bytes) -> None:
     if last_error:
         raise last_error
     raise OSError("OneDrive upload failed")
+
+
+def od_share_name(session: dict) -> str:
+    return session["folder_rel"].rstrip("/").split("/")[-1]
+
+
+def od_share_is_certificates_root(session: dict) -> bool:
+    return od_share_name(session).lower() == "certificates"
+
+
+def od_ensure_child(session: dict, child: str, parent: str | None = None) -> str:
+    parent = (parent or session["folder_rel"]).rstrip("/")
+    rel = parent + "/" + child
+    cache = session.setdefault("course_folders", {})
+    if rel in cache:
+        return cache[rel]
+    if od_folder_exists(session, rel):
+        cache[rel] = rel
+        return rel
+    headers = {
+        "Accept": "application/json;odata=verbose",
+        "Content-Type": "application/json;odata=verbose",
+        "Cookie": "FedAuth=" + session["fed"],
+        "X-RequestDigest": session["digest"],
+    }
+    endpoint = (
+        session["site"]
+        + "/_api/web/GetFolderByServerRelativeUrl(@p)/Folders/add(url=@n)"
+        + "?@p='"
+        + quote(parent, safe="/")
+        + "'&@n='"
+        + quote(child, safe="")
+        + "'"
+    )
+    try:
+        od_http("POST", endpoint, data=b"", headers=headers)
+    except urllib.error.HTTPError as err:
+        if err.code not in (409, 400) or not od_folder_exists(session, rel):
+            raise
+    if not od_folder_exists(session, rel):
+        raise OSError("Could not create the OneDrive {} folder".format(child))
+    cache[rel] = rel
+    return rel
 
 
 def get_od_session() -> dict:
@@ -1139,32 +1728,68 @@ def get_od_session() -> dict:
     return session
 
 
-def od_upload(filename: str, content: bytes) -> dict:
+def od_course_folder(session: dict, course_id: str) -> str:
+    """certificates / {course} / {env} when the share is the certificates parent."""
+    course = course_folder_name(course_id)
+    env = attend_env()
+    if env not in ("dev", "live"):
+        env = "dev"
+    if not od_share_is_certificates_root(session):
+        raise OSError(
+            "OneDrive share is '{}', not the certificates folder. "
+            "Share the parent certificates folder so files go in copd/dev and heart failure/dev.".format(
+                od_share_name(session)
+            )
+        )
+    course_rel = od_ensure_child(session, course)
+    dest = od_ensure_child(session, env, parent=course_rel)
+    leaf = dest.rstrip("/").split("/")[-1].lower()
+    if leaf not in ("dev", "live"):
+        raise OSError("Attendance files must go in a dev or live folder, not {}".format(leaf))
+    return dest
+
+
+def od_path_in_share(session: dict, folder_rel: str, filename: str) -> str:
+    root = session["folder_rel"].rstrip("/")
+    dest = (folder_rel or root).rstrip("/")
+    if dest == root:
+        return filename
+    if dest.startswith(root + "/"):
+        return dest[len(root) + 1 :] + "/" + filename
+    return filename
+
+
+def od_upload(filename: str, content: bytes, course_id: str = "") -> dict:
     session = get_od_session()
+    folder_rel = od_course_folder(session, course_id) if course_id else session["folder_rel"]
     try:
-        od_put(session, filename, content)
+        od_put(session, filename, content, folder_rel)
     except OSError:
         session = od_connect(attend_config()[0])
         global _OD
         _OD = session
-        od_put(session, filename, content)
-    if filename not in od_list_names(session):
+        folder_rel = od_course_folder(session, course_id) if course_id else session["folder_rel"]
+        od_put(session, filename, content, folder_rel)
+    if filename not in od_list_names(session, folder_rel):
         session = od_connect(attend_config()[0])
         _OD = session
-        od_put(session, filename, content)
-        if filename not in od_list_names(session):
+        folder_rel = od_course_folder(session, course_id) if course_id else session["folder_rel"]
+        od_put(session, filename, content, folder_rel)
+        if filename not in od_list_names(session, folder_rel):
             raise OSError("OneDrive did not keep the attendance file")
     return session
 
 
-def od_file_web_url(session: dict, filename: str) -> str:
+def od_file_web_url(session: dict, filename: str, course_id: str = "") -> str:
     share, _folder = attend_config()
+    folder_rel = od_course_folder(session, course_id) if course_id else session["folder_rel"]
+    nested = od_path_in_share(session, folder_rel, filename)
     token = encode_share_url(share) if share else ""
     if token:
         try:
             raw = od_http(
                 "GET",
-                "https://onedrive.live.com/_api/v2.0/shares/" + token + "/root:/" + quote(filename),
+                "https://onedrive.live.com/_api/v2.0/shares/" + token + "/root:/" + quote(nested),
                 headers={"Cookie": "FedAuth=" + session["fed"]},
             )
             item = json.loads(raw.decode("utf-8"))
@@ -1173,7 +1798,7 @@ def od_file_web_url(session: dict, filename: str) -> str:
                 return web
         except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, json.JSONDecodeError):
             pass
-    rel = urlparse(session["site"]).path.rstrip("/") + "/" + session["folder_rel"] + "/" + filename
+    rel = urlparse(session["site"]).path.rstrip("/") + "/" + folder_rel + "/" + filename
     try:
         raw = od_http(
             "GET",
@@ -1195,15 +1820,29 @@ def od_file_web_url(session: dict, filename: str) -> str:
     return share
 
 
-def session_status(room: Room) -> dict:
+def session_folder_label(course_id: str) -> str:
     share, folder = attend_config()
-    name = room.session_name or (room.session_file.name if room.session_file else "")
-    local = room.session_file if room.session_file and room.session_file.is_file() else None
+    child = course_folder_name(course_id)
     if share:
-        folder_label = "OneDrive certificates folder"
-        file_label = name
+        return "certificates/{}/{}".format(child, attend_env())
+    dest = attend_course_dir(course_id) or repo_course_dir(course_id)
+    return str(dest)
+
+
+def session_status(room: Room, course_id: str = "") -> dict:
+    share, folder = attend_config()
+    course = getattr(room, "course_id", "copd") or "copd"
+    if not room.session_name and course_id in COURSES:
+        course = course_id
+    child = course_folder_name(course)
+    name = room.session_name or ""
+    local = room.session_file if room.session_file and room.session_file.is_file() else None
+    started = bool(name)
+    if share:
+        folder_label = session_folder_label(course)
+        file_label = "{}/{}/{}".format(child, attend_env(), name) if started else ""
     else:
-        folder_label = str(folder) if folder else ""
+        folder_label = session_folder_label(course)
         file_label = str(local) if local else name
     return {
         "ok": True,
@@ -1213,9 +1852,11 @@ def session_status(room: Room) -> dict:
         "name": name,
         "count": len(room.names),
         "ready": bool(folder or share),
-        "exists": room.session_cloud or bool(local),
+        "exists": started and (room.session_cloud or bool(local)),
+        "started": started,
         "cloud": room.session_cloud,
         "url": room.session_url,
+        "course": course,
     }
 
 
@@ -1238,169 +1879,66 @@ def public_courses() -> list[dict]:
     return [
         {"id": c["id"], "title": c["title"], "detail": c["detail"]}
         for c in COURSES.values()
+        if course_published(c["id"])
     ]
 
 
-def name_key(raw: object) -> str:
-    return " ".join(clean_name(raw).casefold().split())
-
-
-def file_session_date(filename: str) -> str:
-    match = re.search(r"(\d{4}-\d{2}-\d{2})", filename or "")
-    return match.group(1) if match else ""
-
-
-def parse_attendance_csv(body: bytes, fallback_date: str = "") -> list[dict]:
-    text = body.decode("utf-8-sig", errors="replace")
-    rows = []
-    try:
-        reader = csv.DictReader(io.StringIO(text))
-    except csv.Error:
-        return rows
-    fields = {str(name or "").strip().casefold(): str(name or "") for name in (reader.fieldnames or [])}
-    name_field = fields.get("name")
-    esr_field = fields.get("esr")
-    at_field = fields.get("submitted_at") or fields.get("at")
-    if not name_field:
-        return rows
-    for row in reader:
-        who = clean_name(row.get(name_field))
-        esr = clean_esr(row.get(esr_field) if esr_field else "")
-        if len(who) < 2 or len(esr) < 4:
-            continue
-        when = str(row.get(at_field) or "").strip() if at_field else ""
-        rows.append({"name": who, "esr": esr, "at": when or fallback_date})
-    return rows
-
-
-def local_attendance_files(prefix: str) -> list[Path]:
-    _share, folder = attend_config()
-    roots = [ROOT, ROOT / "certificates"]
-    if folder is not None:
-        roots.append(folder)
-    found: list[Path] = []
-    seen: set[str] = set()
-    for root in roots:
-        if not root.is_dir():
-            continue
-        for path in root.glob(prefix + "*.csv"):
-            key = str(path.resolve()) if path.exists() else str(path)
-            if key in seen:
-                continue
-            seen.add(key)
-            found.append(path)
-    return found
-
-
-def collect_attendance_rows(prefix: str) -> list[dict]:
-    now = time.monotonic()
-    cached = _ATTEND_CACHE
-    if cached.get("prefix") == prefix and now - float(cached.get("at") or 0) < 45:
-        return list(cached.get("rows") or [])
-    rows: list[dict] = []
-    with LOCK:
-        for room in ROOMS.values():
-            for rec in room.names.values():
-                who = clean_name(rec.get("name"))
-                esr = clean_esr(rec.get("esr"))
-                if len(who) < 2 or len(esr) < 4:
-                    continue
-                rows.append({"name": who, "esr": esr, "at": rec.get("at") or ""})
-    for path in local_attendance_files(prefix):
+def write_course_copies(course_id: str, filename: str, body: bytes) -> Path | None:
+    written = None
+    extra = attend_course_dir(course_id)
+    repo = repo_course_dir(course_id)
+    dests = []
+    if extra is not None and extra.resolve() != repo.resolve():
+        dests.append(extra)
+    for folder in dests:
         try:
-            rows.extend(parse_attendance_csv(path.read_bytes(), file_session_date(path.name)))
+            path = write_local_bytes(folder / filename, body)
         except OSError:
             continue
-    try:
-        session = get_od_session()
-        names = sorted(
-            n for n in od_list_names(session) if n.startswith(prefix) and n.lower().endswith(".csv")
-        )
-        for filename in names[:200]:
-            try:
-                rows.extend(parse_attendance_csv(od_download(session, filename), file_session_date(filename)))
-            except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, json.JSONDecodeError):
-                continue
-    except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, json.JSONDecodeError) as err:
-        print("Certificate lookup OneDrive: {}".format(err), flush=True)
-    _ATTEND_CACHE.update({"at": now, "prefix": prefix, "rows": rows})
-    return rows
+        if path is not None:
+            written = path
+    return written
 
 
-def lookup_client(handler: SimpleHTTPRequestHandler) -> str:
-    forwarded = (handler.headers.get("X-Forwarded-For") or "").split(",")[0].strip()
-    return forwarded or handler.client_address[0]
-
-
-def lookup_allowed(ip: str) -> bool:
-    now = time.monotonic()
-    hits = [stamp for stamp in _LOOKUP_HITS.get(ip, []) if now - stamp < 600]
-    if len(hits) >= 20:
-        _LOOKUP_HITS[ip] = hits
-        return False
-    hits.append(now)
-    _LOOKUP_HITS[ip] = hits
-    return True
-
-
-def find_certificate(course_id: str, name: str, esr: str) -> dict | None:
-    course = COURSES.get(course_id)
-    if not course:
-        return None
-    want_name = name_key(name)
-    want_esr = clean_esr(esr)
-    if len(want_name) < 2 or len(want_esr) < 4:
-        return None
-    matched = [
-        row for row in collect_attendance_rows(course["prefix"])
-        if name_key(row.get("name")) == want_name and clean_esr(row.get("esr")) == want_esr
-    ]
-    if not matched:
-        return None
-    best = max(matched, key=lambda row: str(row.get("at") or ""))
-    return {
-        "name": best["name"],
-        "date": best.get("at") or "",
-        "title": course["title"],
-        "detail": course["detail"],
-    }
-
-
-def start_session_file(room: Room, presenter: str = "") -> tuple[str | None, str]:
+def start_session_file(room: Room, presenter: str = "", course_id: str = "copd") -> tuple[str | None, str]:
     lead = clean_name(presenter)
     if len(lead) < 2:
         return None, "Enter the name of the person delivering this session."
+    course = course_id if course_id in COURSES else "copd"
     share, folder = attend_config()
     if not share and folder is None:
-        return None, "No OneDrive folder is configured. Keep the folder share in attend-folder.txt, or set ATTEND_SHARE_URL."
+        return None, "No OneDrive folder is configured. Set ATTEND_SHARE_DEV and ATTEND_SHARE_LIVE in .env, or ATTEND_SHARE_URL on Render."
+    dest = attend_course_dir(course) or repo_course_dir(course)
     with LOCK:
-        name = session_filename(lead, room.id)
+        name = session_filename(course, lead, room.id)
         room.session_name = name
         room.session_cloud = False
-        room.session_file = folder / name if folder is not None else None
+        room.session_file = dest / name
         room.session_url = ""
         room.bound = True
+        room.course_id = course
         body = names_human_csv(room)
     if share:
         try:
-            od_session = od_upload(name, body)
-            web = od_file_web_url(od_session, name)
+            od_session = od_upload(name, body, course)
+            web = od_file_web_url(od_session, name, course)
             with LOCK:
                 room.session_cloud = True
                 room.session_url = web
-            if folder is not None:
-                try:
-                    write_local_bytes(folder / name, body)
-                except OSError:
-                    pass
+            written = write_course_copies(course, name, body)
+            if written is not None:
+                with LOCK:
+                    room.session_file = written
             save_session_bind(room)
-            print("Attendance file [{}]: {}".format(room.id, name), flush=True)
+            print("Attendance file [{}]: {}/{}/{}".format(room.id, course_folder_name(course), attend_env(), name), flush=True)
             return name, ""
         except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, json.JSONDecodeError) as err:
             print("OneDrive upload: {}".format(err), flush=True)
-            return None, "Could not create the file in the OneDrive certificates folder: {}".format(err)
+            return None, "Could not create the file in the OneDrive {}/{} folder: {}".format(
+                course_folder_name(course), attend_env(), err
+            )
     try:
-        written = write_local_bytes(folder / name, body)
+        written = write_course_copies(course, name, body)
     except OSError as err:
         return None, "Could not write the attendance file: {}".format(err)
     if written is None:
@@ -1418,7 +1956,6 @@ def write_human_csv(room: Room, path: Path) -> None:
 
 
 def save_names(room: Room) -> None:
-    _ATTEND_CACHE["at"] = 0
     restore_room_session(room)
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=["submitted_at", "voter", "name", "esr", "email"])
@@ -1432,32 +1969,28 @@ def save_names(room: Room) -> None:
             "email": row.get("email") or "",
         })
     room.cert_path().write_text(buf.getvalue(), encoding="utf-8-sig")
-    share, folder = attend_config()
+    course = getattr(room, "course_id", "copd") or "copd"
+    share, _folder = attend_config()
+    body = names_human_csv(room)
     if share and room.session_name:
         try:
-            od_upload(room.session_name, names_human_csv(room))
+            od_upload(room.session_name, body, course)
         except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, json.JSONDecodeError) as err:
             print("OneDrive upload: {}".format(err), flush=True)
         else:
             save_session_bind(room)
-        if folder is not None:
-            try:
-                write_human_csv(room, folder / room.session_name)
-            except OSError:
-                pass
+        written = write_course_copies(course, room.session_name, body)
+        if written is not None:
+            room.session_file = written
         return
     if share and not room.session_name:
-        print("Certificate name kept, but no OneDrive file is bound for [{}]. Click Start session.".format(room.id), flush=True)
+        print("Certificate name kept, but no OneDrive file is bound for [{}].".format(room.id), flush=True)
         return
-    target = room.session_file
-    if target is None and room.session_name and folder is not None:
-        target = folder / room.session_name
-    if target is not None:
-        try:
-            write_human_csv(room, target)
+    if room.session_name:
+        written = write_course_copies(course, room.session_name, body)
+        if written is not None:
+            room.session_file = written
             save_session_bind(room)
-        except OSError:
-            pass
 
 
 def notify_name(name: str, at: str, esr: str = "", email: str = "") -> None:
@@ -1485,11 +2018,15 @@ def names_csv(room: Room) -> bytes:
     return names_human_csv(room)
 
 
-def attach_poll_meta(room: Room, payload: dict, include_names: bool = False) -> dict:
+def with_room_meta(room: Room, payload: dict, include_names: bool = False) -> dict:
+    rec = course_record(getattr(room, "course_id", "copd") or "copd")
     payload["register"] = room.register_open
     payload["feedback"] = room.feedback_open
     payload["nameCount"] = len(room.names)
     payload["room"] = room.id
+    payload["course"] = rec["id"]
+    payload["courseTitle"] = rec["title"]
+    payload["courseDetail"] = rec["detail"]
     if include_names:
         payload["names"] = sorted(
             (row.get("name") or "" for row in room.names.values()),
@@ -1544,16 +2081,15 @@ def public_poll(room: Room, include_names: bool = False) -> dict:
             "expectedScale": poll.get("expectedScale"),
             "correct": None,
             "teach": poll["teach"] if revealed else "",
-            "image": poll.get("image") or "",
         }
-        return attach_poll_meta(room, out, include_names)
+        return with_room_meta(room, out, include_names)
     options = poll["options"]
     counts = [0] * len(options)
     for choice in poll["votes"].values():
         if isinstance(choice, int) and 0 <= choice < len(counts):
             counts[choice] += 1
     revealed = poll["revealed"]
-    return attach_poll_meta(room, {
+    return with_room_meta(room, {
         "live": True,
         "kind": "choice",
         "id": poll["id"],
@@ -1565,7 +2101,6 @@ def public_poll(room: Room, include_names: bool = False) -> dict:
         "total": sum(counts),
         "correct": poll["correct"] if revealed else None,
         "teach": poll["teach"] if revealed else "",
-        "image": poll.get("image") or "",
     }, include_names)
 
 
@@ -1751,7 +2286,6 @@ def reset_poll(poll: dict) -> None:
     poll["expectedTotal"] = None
     poll["expectedScale"] = None
     poll["teach"] = ""
-    poll["image"] = ""
     poll["revealed"] = False
     poll["votes"] = {}
 
@@ -1772,10 +2306,21 @@ class Handler(SimpleHTTPRequestHandler):
         super().log_message(fmt, *args)
 
     def room_for(self, create: bool = False) -> Room | None:
-        return get_room(request_room_id(self), create=create)
+        room = get_room(request_room_id(self), create=create)
+        if room is not None and not room.session_name:
+            course = request_course_id(self)
+            if course:
+                room.course_id = course
+        return room
 
     def do_GET(self) -> None:
         if redirect_legacy_host(self):
+            return
+        if serve_index_if_needed(self):
+            return
+        locked_course = unpublished_course_from_path(urlparse(self.path).path)
+        if locked_course and not draft_access(self, locked_course):
+            self.send_error(404, "Not found")
             return
         parsed = urlparse(self.path)
         path = parsed.path
@@ -1784,6 +2329,16 @@ class Handler(SimpleHTTPRequestHandler):
             loc = "/?view=vote"
             if rid:
                 loc += "&r=" + rid
+            course = request_course_id(self)
+            if not course and rid:
+                with LOCK:
+                    room = get_room(rid, create=False)
+                if room is not None:
+                    course = getattr(room, "course_id", "") or ""
+                    if course not in COURSES:
+                        course = ""
+            if course:
+                loc += "&course=" + course
             self.send_response(302)
             self.send_header("Location", loc)
             self.send_header("Cache-Control", "no-store")
@@ -1791,7 +2346,10 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if path in ("/feedback", "/feedback/"):
             rid = request_room_id(self)
+            course = request_course_id(self)
             loc = "/?view=feedback"
+            if course:
+                loc += "&course=" + quote(course)
             if rid:
                 loc += "&r=" + rid
             self.send_response(302)
@@ -1805,8 +2363,24 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             return
+        if path == "/handout.html":
+            self.send_response(302)
+            self.send_header("Location", "/copd/handout.html")
+            self.send_header("Cache-Control", "public, max-age=3600")
+            self.end_headers()
+            return
+        if path == "/handout-hf.html":
+            self.send_response(302)
+            self.send_header("Location", "/hf/handout.html")
+            self.send_header("Cache-Control", "public, max-age=3600")
+            self.end_headers()
+            return
         if path == "/api/courses":
             send_json(self, {"ok": True, "courses": public_courses()})
+            return
+        if path == "/api/draft":
+            asked = (parse_qs(parsed.query).get("course") or [""])[0].strip().casefold()
+            send_json(self, draft_status_payload(self, asked))
             return
         if path == "/healthz":
             send_json(self, {"ok": True})
@@ -1818,7 +2392,7 @@ class Handler(SimpleHTTPRequestHandler):
                 else:
                     room = self.room_for(create=False)
                 rid = room.id if room else ""
-                join = join_url(self, rid)
+                join = join_url(self, rid, getattr(room, "course_id", "") if room else "")
                 payload = {"live": True, "join": join, "room": rid, "ips": lan_ips(), "port": PORT}
                 if authorised_host(self):
                     payload["host"] = True
@@ -1842,11 +2416,17 @@ class Handler(SimpleHTTPRequestHandler):
             if not authorised_host(self):
                 send_json(self, {"ok": False, "error": "forbidden"}, 403)
                 return
+            course = request_course_id(self) or "copd"
             if path == "/api/feedback.csv":
-                send_bytes(self, feedback_csv(), "text/csv; charset=utf-8", filename="copd-cpd-feedback.csv")
+                send_bytes(
+                    self,
+                    feedback_csv(),
+                    "text/csv; charset=utf-8",
+                    filename="{}-cpd-feedback.csv".format(course),
+                )
                 return
             try:
-                body = feedback_workbook_bytes()
+                body = feedback_workbook_bytes(course)
             except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, ET.ParseError, zipfile.BadZipFile):
                 print("Feedback workbook download failed.", flush=True)
                 send_json(self, {"ok": False, "error": "could not read feedback"}, 500)
@@ -1858,8 +2438,34 @@ class Handler(SimpleHTTPRequestHandler):
                 self,
                 body,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                filename="copd-cpd-feedback.xlsx",
+                filename="{}-cpd-feedback.xlsx".format(course),
             )
+            return
+        if path == "/api/session":
+            if not authorised_host(self):
+                send_json(self, {"ok": False, "error": "forbidden"}, 403)
+                return
+            with LOCK:
+                room = self.room_for(create=False)
+            course = request_course_id(self) or "copd"
+            if room is None:
+                share, folder = attend_config()
+                send_json(self, {
+                    "ok": True,
+                    "room": "",
+                    "folder": session_folder_label(course) if (share or folder) else "",
+                    "file": "",
+                    "name": "",
+                    "count": 0,
+                    "ready": bool(folder or share),
+                    "exists": False,
+                    "started": False,
+                    "cloud": False,
+                    "url": "",
+                    "course": course,
+                })
+                return
+            send_json(self, session_status(room, course))
             return
         if path == "/api/results.csv":
             if not authorised_host(self):
@@ -1874,10 +2480,16 @@ class Handler(SimpleHTTPRequestHandler):
             send_bytes(self, body, "text/csv; charset=utf-8", filename="copd-cpd-results.csv")
             return
         if path == "/api/certificates.csv":
-            send_json(self, {
-                "ok": False,
-                "error": "Attendance and certificates are recorded by the Trust QR on the hosted session slide."
-            })
+            if not authorised_host(self):
+                send_json(self, {"ok": False, "error": "forbidden"}, 403)
+                return
+            with LOCK:
+                room = self.room_for(create=False)
+                if room is None:
+                    send_json(self, {"ok": False, "error": "no room"}, 404)
+                    return
+                body = names_csv(room)
+            send_bytes(self, body, "text/csv; charset=utf-8", filename="copd-cpd-certificates.csv")
             return
         if path == "/qr.svg":
             send_bytes(self, qr_svg(requested_join(self)), "image/svg+xml; charset=utf-8")
@@ -1890,6 +2502,26 @@ class Handler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         data = read_json(self)
+        if path == "/api/draft":
+            if not draft_attempt_allowed(self.client_address[0]):
+                send_json(self, {"ok": False, "error": "passcode"}, 429)
+                return
+            course = str(data.get("course") or "").strip().casefold()
+            if not draft_codes_match(str(data.get("code") or ""), draft_code()):
+                send_json(self, {"ok": False, "error": "passcode"}, 401)
+                return
+            payload = {"ok": True}
+            if course not in COURSES:
+                payload["missing"] = True
+            body = json.dumps(payload).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Set-Cookie", draft_cookie_header("all"))
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path == "/api/feedback":
             if not feedback_allowed(self.client_address[0]):
                 send_json(self, {"ok": False, "error": "try later"}, 429)
@@ -1902,8 +2534,16 @@ class Handler(SimpleHTTPRequestHandler):
             if email and not _EMAIL_RE.fullmatch(email):
                 send_json(self, {"ok": False, "error": "bad email"}, 400)
                 return
+            asked = str(data.get("course") or "").strip().casefold()
+            if asked in COURSES and not course_published(asked) and not draft_access(self, asked):
+                send_json(self, {"ok": False, "error": "not found"}, 404)
+                return
+            course = asked
+            if course not in COURSES:
+                course = request_course_id(self) or "copd"
             row = {
                 "submitted_at": utc_now(),
+                "course": course,
                 "room": re.sub(r"[^A-Z0-9]", "", str(data.get("room") or "").upper())[:8],
                 "useful": useful,
                 "comments": clean_feedback_text(data.get("comments"), 800),
@@ -1918,11 +2558,70 @@ class Handler(SimpleHTTPRequestHandler):
                 return
             send_json(self, {"ok": True})
             return
-        if path in ("/api/certificate/lookup", "/api/certificate"):
+        if path == "/api/certificate":
+            voter = str(data.get("voter") or "").strip()[:80]
+            name = clean_name(data.get("name"))
+            esr = clean_esr(data.get("esr"))
+            email = clean_email(data.get("email"))
+            if not voter or len(name) < 2:
+                send_json(self, {"ok": False, "error": "missing name"}, 400)
+                return
+            if len(esr) < 4:
+                send_json(self, {"ok": False, "error": "missing esr"}, 400)
+                return
+            if not email:
+                send_json(self, {"ok": False, "error": "missing email"}, 400)
+                return
+            with LOCK:
+                room = self.room_for(create=False)
+                if room is None:
+                    send_json(self, {"ok": False, "error": "no room"}, 404)
+                    return
+                if not room.register_open:
+                    send_json(self, {"ok": False, "error": "register closed"}, 400)
+                    return
+                if voter not in room.names and len(room.names) >= 400:
+                    send_json(self, {"ok": False, "error": "full"}, 400)
+                    return
+                room.names[voter] = {"name": name, "esr": esr, "email": email, "at": utc_now()}
+                at = room.names[voter]["at"]
+            try:
+                save_names(room)
+            except OSError:
+                pass
+            notify_name(name, at, esr, email)
+            rec = course_record(getattr(room, "course_id", "copd") or "copd")
             send_json(self, {
-                "ok": False,
-                "error": "Attendance and certificates are recorded by the Trust QR on the hosted session slide."
+                "ok": True,
+                "poll": public_poll(room),
+                "name": name,
+                "esr": esr,
+                "email": email,
+                "title": rec["title"],
+                "detail": rec["detail"],
+                "date": at,
             })
+            return
+        if path == "/api/session/start":
+            if not authorised_host(self):
+                print("Attendance file refused from {}".format(self.client_address[0]), flush=True)
+                send_json(self, {"ok": False, "error": "forbidden"}, 403)
+                return
+            presenter = presenter_for_token(request_host_secret(self)) or str(data.get("presenter") or "")
+            course = str(data.get("course") or "copd").strip().casefold()
+            if course not in COURSES:
+                course = "copd"
+            if not course_published(course) and not draft_access(self, course):
+                send_json(self, {"ok": False, "error": "not found"}, 404)
+                return
+            print("Attendance file from {} ({}) [{}]".format(self.client_address[0], presenter, course), flush=True)
+            with LOCK:
+                room = self.room_for(create=True)
+            path_out, err = start_session_file(room, presenter, course)
+            if path_out is None:
+                send_json(self, {"ok": False, "error": err}, 400)
+                return
+            send_json(self, {**session_status(room), "ok": True})
             return
         if path == "/api/vote":
             voter = str(data.get("voter") or "").strip()[:80]
@@ -2012,7 +2711,6 @@ class Handler(SimpleHTTPRequestHandler):
                     correct = data.get("correct")
                     poll["correct"] = int(correct) if isinstance(correct, int) else None
                     poll["teach"] = str(data.get("teach") or "")[:1200]
-                    poll["image"] = clean_scene_image(data.get("image"))
                     if kind == "news2":
                         try:
                             poll["expectedTotal"] = int(data.get("expectedTotal"))
@@ -2053,6 +2751,7 @@ class Handler(SimpleHTTPRequestHandler):
                     snapshot_poll(room)
                     reset_poll(poll)
                     room.register_open = True
+                    room.feedback_open = False
                 send_json(self, {"ok": True, "poll": public_poll(room, include_names=True)})
             return
         send_json(self, {"ok": False, "error": "not found"}, 404)
@@ -2080,21 +2779,46 @@ def main() -> None:
         print("Could not listen on port {} ({}).".format(PORT, err), flush=True)
         print("Stop the other process using that port (often `python -m http.server {}`).".format(PORT), flush=True)
         sys.exit(1)
+    cleared = clean_dev_scratch()
     ips = lan_ips()
+    share, folder = attend_config()
     print()
-    print("COPD CPD deck + live quiz", flush=True)
-    print("  Presenter:  http://127.0.0.1:{}/?view=presenter".format(PORT), flush=True)
+    print("Hub CPD deck + live quiz", flush=True)
+    if cleared:
+        print("  Cleared leftover session files: {}".format(", ".join(cleared)), flush=True)
+    print("  Home:       http://127.0.0.1:{}/".format(PORT), flush=True)
+    print("  COPD:       http://127.0.0.1:{}/?course=copd&view=presenter".format(PORT), flush=True)
+    print("  Heart Failure: http://127.0.0.1:{}/?course=hf&view=presenter".format(PORT), flush=True)
     if PRESENTERS:
         print("  Facilitator PINs (Hub staff type their own; they do not need Render):", flush=True)
         for pin, name in PRESENTERS.items():
-            print("    {}  {}".format(pin, name or "(add their name in presenters.txt)"), flush=True)
+            print("    {}  {}".format(pin, name or "(add their name in .env)"), flush=True)
+    env = attend_env()
+    flag = debug_flag(os.environ.get("DEBUG"))
+    if flag is True:
+        why = "DEBUG=true"
+    elif flag is False:
+        why = "DEBUG=false"
+    else:
+        why = "DEBUG is unset"
+    print("  Workbooks: {} ({})".format("DEV" if env == "dev" else "LIVE", why), flush=True)
+    if share:
+        print("  Attendance: certificates/{{course}}/{}".format(env), flush=True)
+        print("  OneDrive share must be the parent certificates folder, not certificates/dev or COPD/dev.", flush=True)
+        for course in COURSES.values():
+            print("    {}: {}".format(course["folder"], certificates_root() / course["folder"] / env), flush=True)
+    elif folder:
+        print("  Attendance: certificates/{{course}}/{}".format(env), flush=True)
+        for course in COURSES.values():
+            print("    {}: {}".format(course["folder"], certificates_root() / course["folder"] / env), flush=True)
+    feedback_ready = [course["id"] for course in COURSES.values() if feedback_share_url(course["id"])]
+    if feedback_ready:
+        print("  Feedback workbooks: {}".format(", ".join(feedback_ready)), flush=True)
     if ips:
         print("  Room phones: http://{}:{}/v".format(ips[0], PORT), flush=True)
         for extra in ips[1:]:
             print("           also: http://{}:{}/v".format(extra, PORT), flush=True)
         print("  Phones: same Wi-Fi as this laptop, mobile data OFF, http not https.", flush=True)
-    if feedback_share_url():
-        print("  Feedback: OneDrive workbook", flush=True)
     if PUBLIC_URL:
         print("  Teams join:  {}/v".format(PUBLIC_URL), flush=True)
         print("  Hosted presenter: {}/?view=presenter  (each facilitator uses their PIN)".format(PUBLIC_URL), flush=True)

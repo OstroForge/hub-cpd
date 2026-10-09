@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>COPD in Pre-hospital Care | Ambulance CPD</title>
+  <title>Hub CPD | Ambulance clinical refreshers</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/assets/hub-cpd-star.png" />
   <style>
     :root {
       --navy: #12382c;
@@ -22,29 +24,32 @@
       --green: #176b45;
       --green-bg: #e7f6ee;
       --stage: #081510;
-      --slide-w: min(100vw, 160vh);
-      --slide-h: calc(var(--slide-w) * 9 / 16);
+      --design-w: 1600px;
+      --design-h: 900px;
+      --slide-scale: 1;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background: var(--stage); color: var(--ink); font-family: "Segoe UI", Calibri, Arial, sans-serif; }
 
     .stage {
-      min-height: 100%;
+      height: 100%;
+      min-height: 0;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px 12px 56px;
+      padding: 10px 10px 56px;
+      overflow: hidden;
     }
 
     .deck {
       position: relative;
-      width: var(--slide-w);
-      height: var(--slide-h);
-      max-height: calc(100vh - 72px);
+      width: var(--design-w);
+      height: var(--design-h);
+      flex: none;
       overflow: hidden;
       isolation: isolate;
+      zoom: var(--slide-scale);
     }
     .slide {
       display: flex;
@@ -80,17 +85,162 @@
       transform: translateX(-28px);
       z-index: 1;
     }
+    body.theme-hf {
+      --navy: #1b2744;
+      --navy-2: #2c3f6a;
+      --ink: #1c2333;
+      --muted: #5c6578;
+      --paper: #e4e8f0;
+      --card: #eef1f7;
+      --line: #c5cddd;
+      --amber: #c45c3a;
+      --amber-bg: #f8e8e2;
+      --teal: #2d6a8f;
+      --teal-bg: #e3eef5;
+      --stage: #0a101c;
+    }
+    body.theme-hf .slide.title-slide,
+    body.theme-hf .slide.cert-slide {
+      background:
+        linear-gradient(90deg, rgba(10, 16, 36, 0.92) 0%, rgba(18, 28, 58, 0.58) 40%, rgba(27, 39, 68, 0.32) 100%),
+        linear-gradient(rgba(27, 39, 68, 0.34), rgba(12, 18, 40, 0.34)),
+        url("hf/assets/title-ambulance-hf.png") right center / cover no-repeat;
+    }
+    body.theme-hf .slide.title-slide h1,
+    body.theme-hf .slide.cert-slide h2 { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.75); }
+    body.theme-hf .slide.title-slide .subtitle { color: #e8eef8; }
+    body.theme-hf .slide.title-slide .meta { color: #c5d0e4; }
+    body.theme-hf .controls { background: #0c1220; color: #c5d0e4; }
+    body.theme-hf .controls button,
+    body.theme-hf .controls a.home-link { background: #243356; color: #e8eef8; }
+    body.theme-hf .controls button:hover,
+    body.theme-hf .controls a.home-link:hover { background: #31467a; }
+    body.theme-hf .progress { background: #243356; }
+    body.theme-hf .notes { background: #121a30; color: #e7ecf6; border-top-color: var(--amber); }
+    body.theme-hf .notes strong { color: #e8a07a; }
+    body.theme-hf .pv-live { background: #121a30; color: #e8eef8; border-color: #31467a; }
+    body.theme-hf .title-slide .footer-bar,
+    body.theme-hf .cert-slide .footer-bar { color: #9aaccc; }
+    body.theme-hf .vote-btn { background: #2c3f6a; }
+    body.theme-hf #voteTeach { background: #1b2744; }
+    body.theme-hf .cpd-cert-mark { background: #1b2744; }
+    body.theme-hf .cpd-cert-page h1,
+    body.theme-hf .cpd-cert-page .who,
+    body.theme-hf .cpd-cert-page .course { color: #1b2744; }
+    body.theme-hf .cpd-cert-page .who { border-bottom-color: #c45c3a; }
+    body.theme-hf .photo-frame,
+    body.theme-hf .photo-frame img { background: #0a101c; }
+
+    body.theme-asthma {
+      --navy: #14382c;
+      --navy-2: #1f5344;
+      --ink: #1a2a24;
+      --muted: #5c6b64;
+      --paper: #d7e6dc;
+      --card: #f2f7f4;
+      --line: #c3d4c9;
+      --amber: #8a5608;
+      --amber-bg: #f8f0dc;
+      --teal: #1f6b58;
+      --teal-bg: #e5f4ee;
+      --stage: #0c1c16;
+    }
+    body.theme-asthma .slide.title-slide,
+    body.theme-asthma .slide.cert-slide {
+      background-color: #0e241c;
+      background-image:
+        linear-gradient(rgba(8, 36, 28, 0.42), rgba(8, 36, 28, 0.42)),
+        linear-gradient(90deg, rgba(8, 28, 22, 0.9) 0%, rgba(8, 28, 22, 0.62) 38%, rgba(8, 28, 22, 0.12) 100%),
+        url("asthma/assets/title-ambulance-asthma.png?v=9");
+      background-repeat: no-repeat;
+      background-position: left center, left center, 46% center;
+      background-size: auto, auto, 70% auto;
+    }
+    body.theme-asthma .title-slide .title-logo {
+      top: 16px;
+      right: auto;
+      left: 28px;
+    }
+    body.theme-asthma .slide.title-slide {
+      align-items: flex-end;
+      text-align: right;
+    }
+    body.theme-asthma .slide.title-slide .kicker,
+    body.theme-asthma .slide.title-slide h1,
+    body.theme-asthma .slide.title-slide .subtitle,
+    body.theme-asthma .slide.title-slide .meta {
+      text-align: right;
+      margin-left: auto;
+    }
+    body.theme-asthma .slide.title-slide .subtitle {
+      max-width: min(58ch, 68%);
+    }
+    body.theme-asthma .slide.title-slide .meta {
+      max-width: min(36ch, 46%);
+    }
+    body.theme-asthma .slide.title-slide h1,
+    body.theme-asthma .slide.cert-slide h2 { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.75); }
+    body.theme-asthma .slide.title-slide .subtitle { color: #e7f3ec; }
+    body.theme-asthma .slide.title-slide .meta { color: #c9ddd2; }
+    body.theme-asthma .controls { background: #0e241c; color: #d7e6dc; }
+    body.theme-asthma .controls button,
+    body.theme-asthma .controls a.home-link { background: #1c4336; color: #f2f7f4; }
+    body.theme-asthma .controls button:hover,
+    body.theme-asthma .controls a.home-link:hover { background: #275744; }
+    body.theme-asthma .progress { background: #1c4336; }
+    body.theme-asthma .notes { background: #12261e; color: #e7f3ec; border-top-color: var(--amber); }
+    body.theme-asthma .notes strong { color: #e4c56a; }
+    body.theme-asthma .pv-live { background: #12261e; color: #e7f3ec; border-color: #275744; }
+    body.theme-asthma .title-slide .footer-bar,
+    body.theme-asthma .cert-slide .footer-bar { color: #c9ddd2; }
+    body.theme-asthma .vote-btn { background: #1f5344; }
+    body.theme-asthma #voteTeach { background: #14382c; }
+    body.theme-asthma .cpd-cert-mark { background: #14382c; }
+    body.theme-asthma .cpd-cert-page h1,
+    body.theme-asthma .cpd-cert-page .who,
+    body.theme-asthma .cpd-cert-page .course { color: #14382c; }
+    body.theme-asthma .cpd-cert-page .who { border-bottom-color: #1f6b58; }
+    body.theme-asthma .photo-frame,
+    body.theme-asthma .photo-frame img { background: #0c1c16; }
+    body.theme-asthma .monitor-photo {
+      display: block;
+      width: 100%;
+      max-height: 440px;
+      object-fit: contain;
+      background: transparent;
+    }
+    body.theme-asthma .treat-photo {
+      display: block;
+      height: 400px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      margin: 0 auto;
+      background: transparent;
+    }
+
     .slide.title-slide,
     .slide.cert-slide {
       background:
         linear-gradient(90deg, rgba(8, 28, 22, 0.92) 0%, rgba(10, 40, 32, 0.58) 40%, rgba(18, 56, 44, 0.32) 100%),
         linear-gradient(rgba(18, 56, 44, 0.34), rgba(12, 42, 32, 0.34)),
-        url("assets/title-ambulance.png") right center / cover no-repeat;
+        url("copd/assets/title-ambulance.png") right center / cover no-repeat;
     }
     .slide.title-slide {
       color: #f7f4ee;
       justify-content: flex-end;
       padding: 48px 56px 56px;
+    }
+    .title-slide .title-logo {
+      position: absolute;
+      top: 18px;
+      right: 40px;
+      width: min(340px, 36%);
+      height: auto;
+      background: var(--paper);
+      padding: 8px 14px 6px;
+      border-radius: 10px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
     }
     .slide.title-slide h1 { color: #fff; }
     .slide.title-slide .subtitle { color: #e4f0ea; }
@@ -112,7 +262,7 @@
     }
 
     .kicker {
-      font-size: 15px;
+      font-size: 18px;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--amber);
@@ -122,46 +272,141 @@
     .title-slide .kicker,
     .cert-slide .kicker { color: #f0c36a; }
     h1 {
-      font-size: clamp(32px, 4.4vw, 58px);
+      font-size: 60px;
       line-height: 1.08;
       font-weight: 750;
       letter-spacing: -0.03em;
       max-width: 16ch;
     }
     h2 {
-      font-size: clamp(26px, 2.7vw, 40px);
+      font-size: 48px;
       line-height: 1.15;
       letter-spacing: -0.03em;
       color: var(--navy);
       margin-bottom: 18px;
     }
-    .subtitle { margin-top: 18px; font-size: 22px; color: #d7e8df; max-width: 42ch; }
-    .meta { margin-top: 28px; color: #a8c4b6; font-size: 15px; }
+    .subtitle { margin-top: 18px; font-size: 30px; color: #d7e8df; max-width: 42ch; line-height: 1.3; }
+    .meta { margin-top: 28px; color: #a8c4b6; font-size: 20px; }
 
     .body {
       flex: 1;
       display: grid;
       gap: 16px;
-      font-size: 21px;
-      line-height: 1.35;
-      align-content: start;
-      align-items: start;
+      font-size: 26px;
+      line-height: 1.4;
+      align-content: stretch;
+      align-items: stretch;
+      min-height: 0;
     }
     .body.two { grid-template-columns: 1fr 1fr; }
+    .body.two.fill-side {
+      align-content: stretch;
+      align-items: stretch;
+      min-height: 0;
+    }
+    .body.two.fill-side > div {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .body.two.fill-side > div > ul {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.35;
+    }
+    .body.two.fill-side > div > ul li { margin: 0; }
+    .body.two.fill-side .photo-frame {
+      flex: 1;
+      min-height: 0;
+      height: auto;
+    }
+    .body.two.fill-side .card h3 { font-size: 22px; }
+    .body.two.fill-side .card p { font-size: 20px; line-height: 1.35; }
+    .body.two.hf-upright {
+      flex: 1;
+      min-height: 0;
+      align-items: stretch;
+      align-content: stretch;
+      grid-template-columns: 0.92fr 1.08fr;
+    }
+    .body.two.hf-upright .hf-upright-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+    .body.two.hf-upright .hf-upright-copy .card {
+      flex: 1;
+    }
+    .body.two.hf-upright .hf-upright-pic {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .body.two.hf-upright .photo-frame {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f3ead8;
+      border: 1px solid var(--line);
+    }
+    .body.two.hf-upright .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #f3ead8;
+    }
+    .body.hf-signs {
+      flex: 1;
+      min-height: 0;
+      grid-template-columns: 1.08fr 0.82fr;
+      align-items: stretch;
+      align-content: stretch;
+    }
+    .body.hf-signs .hf-signs-pic {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+    }
+    .body.hf-signs .hf-signs-pic .photo-frame {
+      flex: 1;
+      min-height: 0;
+      height: auto;
+      background: var(--paper);
+      border: 1px solid var(--line);
+    }
+    .body.hf-signs .hf-signs-pic .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center top;
+      background: var(--paper);
+    }
     .body.three { grid-template-columns: 1fr 1fr 1fr; }
     .body.quiz { grid-template-columns: 1fr 1fr; gap: 10px; }
     ul { padding-left: 1.1em; }
     li { margin: 0.38em 0; }
-    .small { font-size: 16px; color: var(--muted); }
+    .small { font-size: 20px; color: var(--muted); line-height: 1.3; }
 
     .card {
       background: var(--card);
       border: 1px solid var(--line);
-      padding: 16px 18px;
+      padding: 18px 20px;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
     }
-    .card h3 { font-size: 18px; color: var(--navy); margin-bottom: 8px; }
-    .card p, .card li { font-size: 17px; }
+    .card h3 { font-size: 26px; color: var(--navy); margin-bottom: 10px; }
+    .card p, .card li { font-size: 24px; }
     .myth { background: var(--red-bg); border-color: #f0b8b2; }
     .fact { background: var(--green-bg); border-color: #b7e0c8; }
     .warn { background: var(--amber-bg); border-color: #efd3a0; }
@@ -178,24 +423,26 @@
       align-items: baseline;
       padding: 5px 0;
       border-top: 1px solid #f0b8b2;
-      font-size: 16px;
+      font-size: 22px;
     }
     .think-again li:first-child { border-top: 0; padding-top: 0; }
     .think-again em {
       font-style: normal;
       font-weight: 700;
       color: var(--red);
-      font-size: 15px;
+      font-size: 20px;
     }
 
     .banner {
       background: var(--amber);
       color: #1a1206;
       font-weight: 750;
-      font-size: clamp(22px, 2.4vw, 32px);
-      padding: 16px 20px;
+      font-size: 32px;
+      padding: 12px 18px;
       letter-spacing: -0.02em;
-      line-height: 1.2;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
     }
     .banner.dark {
       background: var(--navy);
@@ -208,8 +455,8 @@
     .callout {
       border-left: 8px solid var(--amber);
       background: var(--amber-bg);
-      padding: 16px 18px;
-      font-size: 22px;
+      padding: 12px 16px;
+      font-size: 26px;
       font-weight: 650;
     }
 
@@ -217,15 +464,72 @@
       width: 100%;
       border-collapse: collapse;
       background: var(--card);
-      font-size: 16px;
+      font-size: 22px;
+    }
+    .slide > table {
+      flex: 1;
     }
     th, td {
       border: 1px solid var(--line);
-      padding: 10px 12px;
+      padding: 12px 14px;
       text-align: left;
-      vertical-align: top;
+      vertical-align: middle;
     }
     th { background: var(--navy); color: #fff; font-weight: 650; }
+    table.hf-diff {
+      font-size: 21px;
+      line-height: 1.35;
+      border: 2px solid #3d4a5c;
+    }
+    table.hf-diff th,
+    table.hf-diff td {
+      padding: 14px 12px;
+      border: 2px solid #3d4a5c;
+    }
+    table.hf-diff th:nth-child(4) { width: 18%; }
+    table.hf-diff td:first-child {
+      width: 1%;
+      white-space: nowrap;
+      font-weight: 750;
+      color: #fff;
+    }
+    table.hf-diff tr.ahf td { background: #e8b8a8; }
+    table.hf-diff tr.ahf td:first-child { background: #c45c3a; }
+    table.hf-diff tr.copd td { background: #b3d0e0; }
+    table.hf-diff tr.copd td:first-child { background: #2d6a8f; }
+    table.hf-diff tr.asthma td { background: #b5d9c4; }
+    table.hf-diff tr.asthma td:first-child { background: #176b45; }
+    table.hf-diff tr.infection td { background: #e4d090; }
+    table.hf-diff tr.infection td:first-child { background: #8a6a1f; }
+    table.hf-diff tr.pe td { background: #cbbfe0; }
+    table.hf-diff tr.pe td:first-child { background: #5c4a8a; }
+    table.hf-diff tr.acs td { background: #e8b0ac; }
+    table.hf-diff tr.acs td:first-child { background: #b42318; }
+    .slide:has(.hf-diff-punch.show) .kicker,
+    .slide:has(.hf-diff-punch.show) h2,
+    .slide:has(.hf-diff-punch.show) table.hf-diff {
+      opacity: 0.28;
+      filter: saturate(0.45);
+      transition: opacity 0.35s ease, filter 0.35s ease;
+    }
+    .banner.hf-diff-punch.build.show {
+      position: absolute;
+      left: 56px;
+      right: 56px;
+      top: 50%;
+      z-index: 6;
+      margin: 0;
+      padding: 28px 32px;
+      font-size: 40px;
+      line-height: 1.25;
+      text-align: center;
+      box-shadow: 0 16px 48px rgba(12, 18, 32, 0.35);
+      animation: hfPunchIn 0.4s ease both;
+    }
+    @keyframes hfPunchIn {
+      from { opacity: 0; transform: translateY(-50%) scale(0.94); }
+      to { opacity: 1; transform: translateY(-50%) scale(1); }
+    }
     td.score { text-align: center; font-weight: 750; font-size: 24px; }
     .bad { background: var(--red-bg); color: var(--red); }
     .good { background: var(--green-bg); color: var(--green); }
@@ -241,11 +545,23 @@
       color: var(--muted);
       letter-spacing: 0;
     }
-    .footer-bar span:first-child {
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+    .footer-mark {
+      height: 22px;
+      width: auto;
+      flex: none;
+    }
+    .title-slide .footer-mark,
+    .cert-slide .footer-mark {
+      filter: brightness(0) invert(1);
     }
     .title-slide .footer-bar,
     .cert-slide .footer-bar { color: #8fb3a6; left: 56px; right: 56px; }
@@ -358,6 +674,10 @@
       object-fit: contain;
       margin: 0 auto;
     }
+    .photo-frame.fill img {
+      object-fit: cover;
+      object-position: center;
+    }
     .o2-methods {
       flex: 1;
       display: flex;
@@ -379,16 +699,60 @@
       min-width: 0;
     }
     .o2-kit .photo-frame.cutout img {
-      height: min(32vh, 250px);
+      height: 250px;
     }
     .o2-kit h3 {
-      font-size: 16px;
+      font-size: 22px;
       color: var(--navy);
       margin: 8px 0 2px;
     }
     .o2-kit p {
-      font-size: 14px;
+      font-size: 18px;
       line-height: 1.3;
+    }
+    .body.two.neb-hero {
+      align-items: stretch;
+      min-height: 0;
+    }
+    .body.two.neb-hero .photo-frame.cutout {
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .body.two.neb-hero .photo-frame.cutout img {
+      width: auto;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .body.two.neb-hero .card {
+      padding: 12px 16px;
+    }
+    .body.two.neb-hero .card h3 {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    .body.two.neb-hero .card li {
+      font-size: 20px;
+      line-height: 1.25;
+      margin: 0.12em 0;
+    }
+    .cn-extract {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: 280px;
+      object-fit: contain;
+      object-position: left top;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+    .photo-caption {
+      font-size: 16px;
+      color: var(--muted);
+      margin-top: 6px;
     }
     .o2-rows {
       display: flex;
@@ -417,50 +781,17 @@
       object-position: center 16%;
       display: block;
     }
-    .o2-methods .step { padding: 10px 14px; }
     .o2-row h3 {
-      font-size: clamp(24px, 2.3vw, 32px);
+      font-size: 32px;
       color: var(--navy);
       margin: 0 0 6px;
       line-height: 1.1;
     }
     .o2-row p {
-      font-size: clamp(18px, 1.7vw, 23px);
+      font-size: 24px;
       line-height: 1.3;
       margin: 0;
     }
-    .o2-methods .step h3 { font-size: 20px; }
-    .o2-methods .step p,
-    .o2-methods .step li { font-size: 18px; line-height: 1.35; }
-    .body.two.neb-hero {
-      align-items: center;
-    }
-    .body.two.neb-hero .photo-frame.cutout img {
-      height: min(44vh, 340px);
-    }
-    .cn-extract {
-      display: block;
-      width: 100%;
-      height: auto;
-      max-height: 280px;
-      object-fit: contain;
-      object-position: left top;
-      background: #fff;
-      border: 1px solid var(--line);
-    }
-    .photo-caption {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-    .diagram-row {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(4, 1fr);
-      margin-top: 8px;
-    }
-    .diagram-row.two { grid-template-columns: 1fr 1fr; }
-    .diagram-row.three { grid-template-columns: 1fr 1.1fr 1fr; }
     .job-flow {
       flex: 1;
       min-height: 0;
@@ -492,15 +823,24 @@
     }
     .job-step.decide .job-num { background: var(--red); }
     .job-step.hand .job-num { background: var(--navy); }
+    .job-num.job-pill {
+      width: auto;
+      height: auto;
+      align-self: flex-start;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
     .job-step h3 {
-      font-size: clamp(20px, 1.8vw, 26px);
+      font-size: 28px;
       color: var(--navy);
       margin: 0 0 10px;
       line-height: 1.15;
     }
     .job-step ul { margin: 0; padding-left: 18px; }
     .job-step li {
-      font-size: clamp(15px, 1.25vw, 18px);
+      font-size: 22px;
       line-height: 1.28;
       margin: 7px 0;
     }
@@ -528,23 +868,204 @@
       opacity: 1;
       transform: none;
     }
+    .step-row {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+    .step-row .job-step {
+      display: flex;
+      flex-direction: column;
+    }
+    .step-row > .job-step.build:not(.show) {
+      display: flex;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .step-row > .job-step.build.show {
+      display: flex;
+      animation: job-in 0.45s ease both;
+    }
+    .job-step.amber { border-top-color: var(--amber); }
+    .job-step.amber .job-num { background: var(--amber); color: #1a1206; }
     @keyframes job-in {
       from { opacity: 0; transform: translateX(36px); }
       to { opacity: 1; transform: none; }
     }
+    .shock-layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(260px, 38%) 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+    .shock-monitor {
+      width: 100%;
+      max-height: 460px;
+      object-fit: contain;
+      display: block;
+    }
+    .shock-scene-line {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.35;
+    }
+    .shock-vitals {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .shock-vitals div {
+      background: var(--navy);
+      color: #fff;
+      text-align: center;
+      padding: 10px 6px 8px;
+    }
+    .shock-vitals strong {
+      display: block;
+      font-size: 40px;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .shock-vitals span {
+      display: block;
+      margin-top: 4px;
+      font-size: 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #f0c36a;
+    }
+    .shock-actions {
+      margin: 0;
+      padding-left: 1.15em;
+    }
+    .shock-actions li {
+      font-size: 22px;
+      line-height: 1.3;
+      margin: 7px 0;
+    }
+    .hf-shock-defs {
+      margin: 0 0 10px;
+      gap: 10px;
+    }
+    .hf-shock-defs .card {
+      padding: 10px 14px;
+    }
+    .hf-shock-defs h3 {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    .hf-shock-defs p {
+      font-size: 22px;
+      margin: 0;
+      line-height: 1.3;
+    }
+    .hf-oedema-diff {
+      padding: 12px 16px;
+    }
+    .hf-oedema-diff h3 {
+      margin-bottom: 10px;
+    }
+    .hf-oedema-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 20px;
+    }
+    .hf-oedema-diff-grid p {
+      margin: 0 0 4px;
+      font-size: 20px;
+      color: var(--navy);
+    }
+    .hf-oedema-diff-grid ul {
+      margin: 0;
+    }
+    .hf-oedema-diff-grid li {
+      font-size: 20px;
+      margin: 0.28em 0;
+    }
+    .diagram-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 8px;
+    }
+    .diagram-row.two { grid-template-columns: 1fr 1fr; }
+    .diagram-row.three { grid-template-columns: 1fr 1.1fr 1fr; }
+    .diagram-row.quad {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 14px;
+      flex: 1;
+      min-height: 0;
+      align-content: stretch;
+    }
+    .diagram-row.quad .step {
+      position: relative;
+      overflow: hidden;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 0;
+      height: 100%;
+    }
+    .diagram-row.quad .step::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: min(70%, 280px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease;
+    }
+    .diagram-row.quad .step.pic-heart::after { background-image: url("hf/assets/hf-icon-heart.svg"); }
+    .diagram-row.quad .step.pic-lungs::after { background-image: url("hf/assets/hf-icon-lungs.svg"); }
+    .diagram-row.quad .step.pic-pills::after { background-image: url("hf/assets/hf-icon-pills.svg"); }
+    .diagram-row.quad .step.pic-also::after { background-image: url("hf/assets/hf-icon-also.svg"); }
+    .diagram-row.quad .step.gold {
+      color: #fff;
+      background: #9a3a26;
+    }
+    .diagram-row.quad .step.gold h3 { color: #f6e2c0; }
+    .diagram-row.quad .step:has(h3.build.show)::after { opacity: 0.16; }
+    .diagram-row.quad .step h3,
+    .diagram-row.quad .step p {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+    }
+    .diagram-row.quad .step h3 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    .diagram-row.quad .step p,
+    .diagram-row.quad .step li {
+      font-size: 20px;
+      line-height: 1.4;
+    }
     .step {
-      padding: 12px 14px;
+      padding: 16px 18px;
       color: #fff;
       min-height: 0;
     }
-    .step h3 { color: #f0c36a; font-size: 15px; margin-bottom: 6px; }
-    .step p, .step li { font-size: 14px; line-height: 1.35; }
+    .step h3 { color: #f0c36a; font-size: 22px; margin-bottom: 8px; }
+    .step p, .step li { font-size: 20px; line-height: 1.35; }
     .step.red { background: var(--red); }
     .step.green { background: var(--navy-2); }
     .step.gold { background: var(--amber); color: #1a1206; }
     .step.gold h3 { color: #1a1206; }
     .step.dark { background: var(--navy); }
-    .bars { display: flex; width: 100%; height: 52px; margin: 6px 0 4px; font-size: 12px; font-weight: 700; }
+    .bars { display: flex; width: 100%; height: 64px; margin: 6px 0 4px; font-size: 18px; font-weight: 700; }
     .bars span {
       display: flex;
       flex-direction: column;
@@ -565,9 +1086,95 @@
       display: block;
       animation: rise 0.45s ease both;
     }
+    .callout.build.hold-space:not(.show),
+    .banner.build.hold-space:not(.show) {
+      display: block;
+      visibility: hidden;
+      pointer-events: none;
+      animation: none;
+    }
+    .callout.build.hold-space.show,
+    .banner.build.hold-space.show {
+      visibility: visible;
+    }
     @keyframes rise {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: none; }
+    }
+    @keyframes picTeachIn {
+      from { opacity: 0; transform: translateX(22px); }
+      to { opacity: 1; transform: none; }
+    }
+    .body.pic-strip {
+      display: grid;
+      grid-template-columns: 1.15fr 0.95fr 0.95fr;
+      gap: 14px;
+      align-items: start;
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .body.pic-strip .photo-frame {
+      transform-origin: top left;
+    }
+    .pic-teach {
+      font-size: 20px;
+      line-height: 1.32;
+      margin-top: 8px;
+    }
+    .slide.active .body.pic-strip .photo-frame {
+      animation: none;
+    }
+    .slide.pic-zoomed .body.pic-strip {
+      padding-bottom: 22px;
+    }
+    .slide.pic-zoomed .body.pic-strip > figure:not(.zoom-on) {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .slide.pic-zoomed .body.pic-strip > figure.zoom-on .photo-frame {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 58%;
+      height: min(520px, calc(var(--slide-h) - 200px)) !important;
+      z-index: 3;
+    }
+    .slide.pic-zoomed .body.pic-strip > figure.zoom-on .photo-caption {
+      position: absolute;
+      left: 0;
+      top: min(528px, calc(var(--slide-h) - 192px));
+      width: 58%;
+      z-index: 3;
+    }
+    .slide.pic-zoomed .body.pic-strip > figure.zoom-on .pic-teach {
+      position: absolute;
+      left: calc(58% + 28px);
+      right: 8px;
+      top: 24px;
+      bottom: 36px;
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      line-height: 1.38;
+      margin-top: 0;
+      z-index: 4;
+    }
+    .slide.pic-zoomed:not(.pic-flipping) .body.pic-strip > figure.zoom-on .pic-teach {
+      animation: picTeachIn 0.5s ease both;
+    }
+    .slide.pic-zoomed:not(.pic-flipping) .body.pic-strip > figure.zoom-on .photo-caption {
+      animation: picTeachIn 0.4s ease 0.08s both;
+    }
+    .slide.pic-flipping .pic-teach,
+    .slide.pic-flipping .photo-caption {
+      opacity: 0 !important;
+      animation: none !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .slide.pic-zoomed .body.pic-strip > figure.zoom-on .pic-teach,
+      .slide.pic-zoomed .body.pic-strip > figure.zoom-on .photo-caption { animation: none; }
     }
     .slide.active .card:not(.build),
     .slide.active .banner:not(.build),
@@ -623,11 +1230,12 @@
     body.audience #next,
     body.audience #startBtn,
     body.vote #startBtn { display: none; }
-    body.audience .stage { padding-bottom: 12px; }
-    body.self .poll-join { display: none !important; }
-    body.self .poll-slide:not(.poll-news2):not(.poll-results) .kicker,
-    body.self .poll-slide:not(.poll-news2):not(.poll-results) h2,
-    body.self .poll-slide:not(.poll-news2):not(.poll-results) .poll-top {
+    body.audience .stage { padding: 0; }
+    body.audience .controls { display: none; }
+    body.self .poll-join:not(.feedback-join) { display: none !important; }
+    body.self .poll-slide .kicker,
+    body.self .poll-slide h2,
+    body.self .poll-slide .poll-top {
       padding-right: 0;
     }
     body.self .self-hint {
@@ -652,11 +1260,17 @@
     body.home .controls,
     body.home .pv-side { display: none !important; }
     .home-panel {
-      width: min(920px, 100%);
+      width: min(1080px, 100%);
       background: var(--paper);
       color: var(--ink);
       border: 1px solid #1c3f34;
       padding: 36px 40px 32px;
+    }
+    .home-logo {
+      display: block;
+      width: min(560px, 100%);
+      height: auto;
+      margin: 0 0 18px;
     }
     .home-kicker {
       font-size: 13px;
@@ -672,6 +1286,11 @@
       letter-spacing: -0.03em;
       line-height: 1.15;
       margin-bottom: 12px;
+    }
+    .home-logo-title {
+      font-size: 0;
+      line-height: 0;
+      margin: 0 0 6px;
     }
     .home-lead {
       font-size: 18px;
@@ -710,10 +1329,80 @@
       color: var(--muted);
       line-height: 1.4;
     }
+    .hub-courses {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 340px));
+      gap: 16px;
+      margin-top: 28px;
+    }
+    .hub-course {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 20px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .hub-course.hf {
+      border-color: #b7c4db;
+      background: #eef1f7;
+    }
+    .home-draft-note {
+      margin: 18px 0 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .draft-mark {
+      margin-left: 8px;
+      letter-spacing: 0.08em;
+    }
+    .hub-tag {
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #8a5608;
+    }
+    .hub-course.hf .hub-tag { color: #c45c3a; }
+    .hub-course h2 {
+      font-size: 22px;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .hub-course.hf h2 { color: #1b2744; }
+    .hub-course p { font-size: 15px; color: var(--muted); line-height: 1.4; }
+    .hub-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+    .hub-links a {
+      background: var(--navy);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 8px 12px;
+    }
+    .hub-course.hf .hub-links a { background: #1b2744; }
+    .hub-course.asthma {
+      border-color: #b7d0c4;
+      background: #e7f2eb;
+    }
+    .hub-course.asthma .hub-tag { color: #1f6b58; }
+    .hub-course.asthma h2 { color: #14382c; }
+    .hub-course.asthma .hub-links a { background: #14382c; }
+    .hub-links a:hover,
+    .hub-links a:focus-visible { filter: brightness(1.12); }
     @media (max-width: 720px) {
       .home-panel { padding: 24px 20px 20px; }
       .home-choices { grid-template-columns: 1fr; }
       .home-choices a { min-height: 0; }
+      .hub-courses { grid-template-columns: 1fr; }
     }
     .controls a.home-link {
       background: #1c4236;
@@ -726,27 +1415,36 @@
     .controls a.home-link:hover { background: #2a5c4a; }
     body:not(.self) a.home-link { display: none; }
 
-    #lookup {
+    #pinGate {
       display: none;
       min-height: 100%;
       padding: 28px 18px 40px;
       align-items: center;
       justify-content: center;
     }
-    body.lookup { overflow: auto; }
-    body.lookup #lookup { display: flex; }
-    body.lookup .stage,
-    body.lookup .controls,
-    body.lookup .pv-side { display: none !important; }
-    .lookup-form label {
+    body.pin-needed { overflow: auto; }
+    body.pin-needed #pinGate { display: flex; }
+    body.pin-needed .stage,
+    body.pin-needed .controls,
+    body.pin-needed .pv-side { display: none !important; }
+    .pin-panel {
+      width: min(520px, 100%);
+      background: var(--paper);
+      color: var(--ink);
+      padding: 28px 24px 22px;
+      border: 1px solid var(--line);
+    }
+    .pin-panel h2 { font-size: 28px; margin: 6px 0 10px; }
+    .pin-panel p { color: var(--muted); font-size: 16px; line-height: 1.4; }
+    .pin-panel .pin-status { margin: 14px 0 4px; color: var(--ink); font-weight: 650; }
+    .pin-panel label {
       display: block;
       font-size: 15px;
       font-weight: 700;
       color: var(--navy);
       margin: 14px 0 6px;
     }
-    .lookup-form input,
-    .lookup-form select {
+    .pin-panel input {
       width: 100%;
       font: inherit;
       font-size: 18px;
@@ -754,25 +1452,53 @@
       border: 1px solid var(--line);
       background: #fff;
       color: var(--ink);
+      letter-spacing: 0.12em;
     }
-    .lookup-form button {
+    .pin-panel button[type="submit"] {
       display: block;
       width: 100%;
       margin-top: 18px;
       background: var(--navy);
-      color: #f7f4ee;
+      color: #fff;
       border: 0;
-      padding: 14px 16px;
+      padding: 14px;
       font: inherit;
-      font-size: 18px;
-      font-weight: 750;
+      font-weight: 700;
       cursor: pointer;
     }
-    .lookup-form button:disabled { opacity: 0.45; cursor: not-allowed; }
-    .lookup-status { margin-top: 12px; color: var(--muted); font-size: 16px; }
-    .lookup-home {
-      display: inline-block;
-      margin-top: 18px;
+    .pin-panel button[type="submit"]:disabled { opacity: 0.45; cursor: not-allowed; }
+    .pin-panel .pin-self {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      background: transparent;
+      color: var(--navy);
+      border: 1px solid var(--line);
+      padding: 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+    #draftGate {
+      display: none;
+      min-height: 100%;
+      padding: 28px 18px 40px;
+      align-items: center;
+      justify-content: center;
+    }
+    body.draft-needed { overflow: auto; }
+    body.draft-needed #draftGate { display: flex; }
+    body.draft-needed #home,
+    body.draft-needed .stage,
+    body.draft-needed .controls,
+    body.draft-needed .pv-side,
+    body.draft-needed #pinGate,
+    body.draft-needed #voteApp,
+    body.draft-needed #feedback { display: none !important; }
+    #draftGate .pin-panel input { letter-spacing: 0; }
+    #draftGate .draft-home {
+      display: block;
+      margin-top: 14px;
+      text-align: center;
       color: var(--navy);
       font-weight: 700;
     }
@@ -807,16 +1533,9 @@
       grid-row: 2;
       position: static;
     }
-    body.presenter .deck {
-      width: 100%;
-      height: 100%;
-      max-height: none;
-    }
-    body.presenter .slide {
-      width: 100%;
-      height: 100%;
-      aspect-ratio: auto;
-      max-height: none;
+    body.presenter .stage {
+      height: auto;
+      align-self: stretch;
     }
     body.presenter .notes {
       display: block;
@@ -896,144 +1615,146 @@
       min-height: 0;
       align-items: stretch;
     }
-    .poll-slide:not(.poll-news2):not(.poll-results) .kicker,
-    .poll-slide:not(.poll-news2):not(.poll-results) h2,
-    .poll-slide:not(.poll-news2):not(.poll-results) .poll-top {
+    .poll-slide .kicker,
+    .poll-slide h2,
+    .poll-slide .poll-top {
       padding-right: 180px;
     }
-    .poll-slide:not(.poll-news2):not(.poll-results) .poll-top {
+    .poll-slide .poll-top {
       display: block;
       width: 100%;
       max-width: 100%;
     }
-    .poll-slide:not(.poll-news2):not(.poll-results) .poll-join {
+    .slide .poll-join {
       position: absolute;
       top: 22px;
       right: 40px;
       z-index: 4;
     }
-    .poll-slide .shock-zoll {
-      min-height: 0;
+    .poll-slide .photo-frame.shock-zoll {
+      min-height: auto;
+      height: auto;
+      overflow: visible;
     }
     .poll-slide .shock-zoll img {
-      height: min(48vh, 390px);
+      height: 320px;
       width: auto;
       max-width: 100%;
     }
-    .shock-layout {
-      flex: 1;
-      min-height: 0;
-      display: grid;
-      grid-template-columns: minmax(260px, 38%) 1fr;
-      gap: 28px;
-      align-items: center;
-    }
-    .shock-monitor {
-      width: 100%;
-      max-height: min(52vh, 460px);
-      object-fit: contain;
-      display: block;
-    }
-    .shock-scene-line {
-      margin: 0;
-      font-size: clamp(17px, 1.5vw, 20px);
-      line-height: 1.35;
-    }
-    .shock-vitals {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin: 14px 0;
-    }
-    .shock-vitals div {
-      background: var(--navy);
-      color: #fff;
-      text-align: center;
-      padding: 10px 6px 8px;
-    }
-    .shock-vitals strong {
-      display: block;
-      font-size: clamp(26px, 2.6vw, 40px);
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
-    .shock-vitals span {
-      display: block;
-      margin-top: 4px;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #f0c36a;
-    }
-    .shock-actions {
-      margin: 0;
-      padding-left: 1.15em;
-    }
-    .shock-actions li {
-      font-size: clamp(16px, 1.45vw, 20px);
-      line-height: 1.3;
-      margin: 7px 0;
-    }
-    .trust-slide .kicker:empty { display: none; }
-    .trust-attend {
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-    }
-    .trust-qr {
-      flex: 1;
-      min-height: 0;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px;
-    }
-    .trust-qr img {
-      width: auto;
-      height: 100%;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-    .trust-qr .trust-qr-missing {
-      margin: 0;
-      max-width: 36ch;
-      text-align: center;
-      color: var(--navy);
-      font-size: 22px;
-      line-height: 1.35;
+    .shock-scene .photo-frame.cutout img {
+      height: 220px;
     }
     .poll-top {
       display: grid;
-      grid-template-columns: minmax(0, auto) 148px;
+      grid-template-columns: minmax(0, auto) 210px;
       gap: 16px;
       align-items: start;
       width: max-content;
       max-width: 100%;
     }
     .poll-prompt {
-      font-size: clamp(22px, 2.6vw, 34px);
+      font-size: 36px;
       font-weight: 750;
       line-height: 1.2;
       color: var(--navy);
       max-width: 52ch;
     }
+    .poll-slide:has(.shock-zoll) .body {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.95fr) minmax(280px, 1.15fr);
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+    }
+    .poll-slide:has(.shock-zoll) .poll-top {
+      grid-column: 1 / -1;
+    }
     .poll-slide:has(.shock-zoll) .poll-prompt {
       max-width: none;
     }
-    .poll-slide:has(.shock-zoll) .poll-opts {
-      flex: 0 0 auto;
-    }
     .poll-slide:has(.shock-zoll) .shock-zoll {
-      flex: 1;
+      grid-column: 1;
+      grid-row: 2;
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      height: 100%;
+    }
+    .poll-slide:has(.shock-zoll):not(:has(.poll-ecg)) .shock-zoll img {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .poll-slide:has(.shock-zoll) .poll-opts {
+      grid-column: 2;
+      grid-row: 2;
+      flex: none;
+      justify-content: center;
+    }
+    .poll-slide:has(.shock-zoll) .poll-teach,
+    .poll-slide:has(.shock-zoll) .poll-host {
+      grid-column: 1 / -1;
+    }
+    .poll-slide:has(.shock-zoll) .poll-opt {
+      padding: 10px 12px;
+    }
+    .poll-slide:has(.shock-zoll) .poll-lab {
+      font-size: 28px;
+    }
+    .poll-slide:has(.poll-ecg) .body {
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.95fr);
+      grid-template-rows: auto auto auto auto;
+    }
+    .poll-slide:has(.poll-ecg) .poll-ecg {
+      grid-column: 1;
+      grid-row: 2 / 4;
+      margin: 0;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .poll-slide:has(.poll-ecg) .poll-ecg .photo-frame {
+      flex: 0 1 auto;
+      min-height: 0;
+      height: auto;
+      background: transparent;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .poll-slide:has(.poll-ecg) .poll-ecg img {
+      width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+      object-position: center top;
+      background: transparent;
+      display: block;
+    }
+    .poll-slide:has(.poll-ecg) .poll-ecg .photo-caption {
+      margin-top: 4px;
+    }
+    .poll-slide:has(.poll-ecg) .shock-zoll {
+      grid-column: 2;
+      grid-row: 2;
+      justify-content: center;
+    }
+    .poll-slide:has(.poll-ecg) .shock-zoll img {
+      height: 280px;
+    }
+    .poll-slide:has(.poll-ecg) .poll-opts {
+      grid-column: 2;
+      grid-row: 3;
+      justify-content: flex-start;
     }
     .poll-join {
       display: none;
-      width: 148px;
+      width: 210px;
       text-align: center;
       background: var(--card);
       border: 1px solid var(--line);
@@ -1051,47 +1772,107 @@
       margin: 0 auto;
     }
     .poll-join img {
-      width: 132px;
-      height: 132px;
+      width: 186px;
+      height: 186px;
       max-width: 100%;
       display: block;
       margin: 0 auto;
     }
     .poll-url {
-      font-size: 11px;
+      font-size: 16px;
       color: var(--muted);
       word-break: break-all;
       margin-top: 6px;
       line-height: 1.3;
     }
     .poll-phones {
-      font-size: 13px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--teal);
       margin-top: 4px;
     }
+    .trust-slide .kicker:empty { display: none; }
+    .trust-attend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      height: 100%;
+    }
+    .trust-qr {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+    .trust-qr img {
+      display: block;
+      width: auto;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    .trust-qr img[hidden] { display: none !important; }
+    .trust-qr .trust-qr-missing {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--navy);
+    }
     .poll-join.feedback-join {
+      position: absolute;
+      top: 22px;
+      right: 40px;
+      z-index: 4;
       display: flex;
       flex-direction: column;
       align-items: center;
       width: 240px;
-      max-width: 100%;
     }
-    .poll-join.feedback-join img {
-      width: 180px;
-      height: 180px;
+    .poll-join.feedback-join .feedback-qr {
+      width: 200px;
+      height: 200px;
     }
-    body.self .feedback-join { display: none !important; }
-    .feedback-open {
-      display: inline-block;
-      margin-top: 16px;
-      background: var(--navy);
-      color: #fff;
-      text-decoration: none;
-      font-weight: 750;
-      padding: 12px 16px;
+    .poll-join.feedback-join .poll-url {
+      width: 100%;
+      text-align: center;
     }
-    .feedback-layout { align-items: center; }
+    .slide:has(.feedback-join) .kicker,
+    .slide:has(.feedback-join) h2,
+    .slide:has(.feedback-join) .feedback-layout {
+      padding-right: 270px;
+    }
+    .feedback-brand {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 18px 24px 4px;
+    }
+    .feedback-brand .feedback-logo {
+      width: min(340px, 48%);
+      height: auto;
+      display: block;
+    }
+    .feedback-brand .feedback-home {
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: 650;
+      color: var(--navy);
+      letter-spacing: 0.01em;
+    }
+    .body.two.feedback-layout {
+      display: block;
+    }
+    .feedback-layout .banner {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .feedback-layout { align-items: start; }
     #feedback {
       display: none;
       min-height: 100%;
@@ -1104,7 +1885,9 @@
     body.feedback .stage,
     body.feedback .controls,
     body.feedback .pv-side,
-    body.feedback #home { display: none !important; }
+    body.feedback #home,
+    body.feedback #voteApp,
+    body.feedback #pinGate { display: none !important; }
     .feedback-form label {
       display: block;
       margin: 14px 0 6px;
@@ -1147,21 +1930,25 @@
     .feedback-form button:disabled { opacity: 0.5; cursor: default; }
     .feedback-status { margin-top: 12px; color: var(--muted); }
     .feedback-home { display: inline-block; margin-top: 16px; color: var(--navy); }
-    .poll-opts { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; width: 100%; }
+    .poll-opts { display: flex; flex-direction: column; justify-content: center; gap: 12px; flex: 1; min-height: 0; width: 100%; }
     .poll-opt {
       display: grid;
       grid-template-columns: 1fr auto;
       grid-template-rows: auto auto;
+      align-content: center;
       gap: 4px 12px;
       text-align: left;
       border: 1px solid var(--line);
       background: var(--card);
-      padding: 12px 14px;
+      padding: 18px 18px;
       position: relative;
       width: 100%;
+      flex: 1 1 auto;
+      max-height: 120px;
+      min-height: 84px;
     }
-    .poll-lab { font-size: 20px; font-weight: 650; color: var(--navy); z-index: 1; }
-    .poll-n { font-size: 20px; font-weight: 750; color: var(--navy); z-index: 1; }
+    .poll-lab { font-size: 40px; font-weight: 700; color: var(--navy); z-index: 1; }
+    .poll-n { font-size: 28px; font-weight: 750; color: var(--navy); z-index: 1; }
     .poll-bar {
       grid-column: 1 / -1;
       height: 8px;
@@ -1194,7 +1981,7 @@
       background: var(--green-bg);
       border: 1px solid #b7e0c8;
       padding: 12px 14px;
-      font-size: 17px;
+      font-size: 22px;
     }
     .poll-slide.revealed .poll-teach { display: block; }
     .poll-host { display: none; font-size: 13px; color: var(--muted); }
@@ -1202,11 +1989,11 @@
     body.fallback .poll-opt { cursor: pointer; }
     body.fallback .poll-bar,
     body.fallback .poll-n,
-    body.fallback .poll-join { display: none; }
+    body.fallback .poll-join:not(.feedback-join) { display: none; }
 
-    .poll-case h2 { font-size: clamp(22px, 2.3vw, 32px); margin-bottom: 8px; }
+    .poll-case h2 { font-size: 36px; margin-bottom: 8px; }
     .poll-case .poll-prompt {
-      font-size: clamp(18px, 2vw, 24px);
+      font-size: 26px;
       max-width: none;
     }
     .poll-case .body { gap: 8px; }
@@ -1222,19 +2009,18 @@
       border: 1px solid var(--line);
       padding: 10px 12px;
     }
-    .poll-facts h3 { font-size: 15px; color: var(--navy); margin-bottom: 4px; }
-    .poll-facts li { font-size: 15px; margin: 0.18em 0; }
-    .poll-case .bars { height: 40px; font-size: 11px; margin: 4px 0; }
+    .poll-facts h3 { font-size: 20px; color: var(--navy); margin-bottom: 4px; }
+    .poll-facts li { font-size: 20px; margin: 0.18em 0; }
+    .poll-case .bars { height: 48px; font-size: 16px; margin: 4px 0; }
     .poll-case .poll-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 0; }
     .poll-case .poll-opt { padding: 10px 12px; }
-    .poll-case .poll-lab { font-size: 17px; }
+    .poll-case .poll-lab { font-size: 22px; }
 
-    .poll-news2 h2 { font-size: clamp(18px, 2vw, 26px); margin-bottom: 4px; }
-    .poll-news2 .poll-prompt { font-size: clamp(14px, 1.45vw, 18px); max-width: none; }
+    .poll-news2 h2 { font-size: 32px; margin-bottom: 4px; }
+    .poll-news2 .poll-prompt { font-size: 22px; max-width: none; }
     .poll-news2 .body { gap: 6px; flex: 1; min-height: 0; overflow: hidden; }
     .poll-news2 .poll-top {
       flex: 0 0 auto;
-      grid-template-columns: minmax(0, 1fr) 112px;
       width: 100%;
       max-width: 100%;
       gap: 10px;
@@ -1253,7 +2039,7 @@
       background: var(--card);
       border: 1px solid var(--line);
       padding: 3px 8px;
-      font-size: 12px;
+      font-size: 16px;
       margin: 0;
     }
     .poll-news2 .poll-detail {
@@ -1321,6 +2107,66 @@
       object-fit: contain;
       object-position: top center;
     }
+    .slide:not(.poll-news2) .n2-official img {
+      width: auto;
+      max-width: 100%;
+      max-height: 350px;
+      margin: 0 auto;
+    }
+    .body.two.scale-pair {
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 10px;
+      align-items: stretch;
+      grid-template-columns: 0.82fr 1.18fr;
+    }
+    .body.two.scale-pair > div {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+    }
+    .body.two.scale-pair > div > p {
+      font-size: 22px;
+      line-height: 1.35;
+      margin: 0 0 8px;
+    }
+    .body.two.scale-pair .photo-frame.cutout {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .body.two.scale-pair .photo-frame.cutout img {
+      width: auto;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .body.two.scale-pair .n2-official {
+      height: 100%;
+      min-height: 0;
+    }
+    .body.two.scale-pair .n2-form-scroll,
+    .body.two.scale-pair .n2-form-wrap {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .slide:not(.poll-news2) .body.two.scale-pair .n2-official img {
+      width: 100%;
+      height: 100%;
+      max-height: none;
+      object-fit: contain;
+      object-position: center center;
+    }
+    .body.two.scale-pair .n2-cite { display: none; }
+    table.scale-score { flex: none; }
+    table.scale-score th,
+    table.scale-score td { padding: 8px 12px; }
     .n2-form-wrap { position: relative; }
     .n2-form-wrap img { pointer-events: none; }
     .n2-form-grid { position: absolute; inset: 0; }
@@ -1810,15 +2656,6 @@
       line-height: 1.35;
     }
     #votePrompt li { margin: 0.4em 0; }
-    #voteScene {
-      display: block;
-      width: auto;
-      max-width: 100%;
-      max-height: 46vh;
-      height: auto;
-      margin: 0 auto 14px;
-    }
-    #voteScene[hidden] { display: none !important; }
     .vote-feedback label {
       display: block;
       margin: 14px 0 6px;
@@ -1886,8 +2723,8 @@
 
     @media print {
       body { background: #fff; }
-      .stage { padding: 0; display: block; }
-      .deck { height: auto; max-height: none; }
+      .stage { padding: 0; display: block; height: auto; overflow: visible; }
+      .deck { zoom: 1; width: auto; height: auto; }
       .controls, .notes, .pv-side { display: none !important; }
       .slide {
         position: relative !important;
@@ -1908,8 +2745,7 @@
       body.cert-printing .controls,
       body.cert-printing .pv-side,
       body.cert-printing #voteApp,
-      body.cert-printing #home,
-      body.cert-printing #lookup { display: none !important; }
+      body.cert-printing #home { display: none !important; }
       body.cert-printing #cpdCert { display: block !important; }
       body.cert-printing { background: #fff; }
       body.cert-printing .cpd-cert-page {
@@ -1931,68 +2767,11 @@
 <body>
   <main id="home">
     <div class="home-panel">
-      <p class="home-kicker">Hub CPD  ·  JRCALC Chronic Obstructive Pulmonary Disease</p>
-      <h1>COPD, Type 2 Respiratory Failure and NEWS2</h1>
-      <p class="home-lead">30 minutes CPD session, refreshing JRCALC guidance and application of RCP NEWS2. Always ensure you use the current live guidance..</p>
-      <div class="home-choices">
-        <a href="?view=self">
-          <h2>Self-guided</h2>
-          <p>Work through the slides yourself. Check questions as you go. No live vote or register.</p>
-        </a>
-        <a href="?view=presenter">
-          <h2>Presenter-guided</h2>
-          <p>Deliver the session in the room or on Teams. Hub PIN required. Live vote. The Trust attendance QR is on the last slide, and only after a session is hosted.</p>
-        </a>
-        <a href="handout.html">
-          <h2>Handout</h2>
-          <p>Two A4 pages. Print or save as PDF.</p>
-        </a>
-      </div>
+      <h1 class="home-logo-title"><img class="home-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers."></h1>
+      <p class="home-lead">30-minute JRCALC sessions for the room, Teams, or self-guided study. Always use the live guideline on the day.</p>
+      <div class="hub-courses" id="hubCourses"></div>
     </div>
   </main>
-  <div class="stage" id="stage"></div>
-  <div class="pv-side" id="pvSide">
-    <div class="pv-kicker">Next slide</div>
-    <p class="pv-next-title" id="nextTitle"></p>
-    <div class="pv-live" id="pvLive" hidden>
-      <div class="pv-kicker">Live scores</div>
-      <p class="pv-live-counts" id="pvLiveCounts"></p>
-      <div class="n2-spread" id="pvLiveSpread"></div>
-    </div>
-    <aside class="notes" id="notes"></aside>
-    <div class="pv-join-box">
-      <div class="pv-kicker">Room + Teams join</div>
-      <p id="roomCode" class="pv-join-url"></p>
-      <p class="pv-join-url" id="joinDisplay">Start python serve.py for a live vote link.</p>
-      <button type="button" id="copyJoin">Copy join link</button>
-      <button type="button" id="hostedJoin">Use hosted QR (works off this Wi-Fi)</button>
-      <button type="button" id="feedbackBtn">Download feedback</button>
-      <p id="certCount" class="pv-join-url" hidden></p>
-      <input id="joinOverride" type="url" placeholder="Or paste https://hub-cpd.onrender.com/v" />
-    </div>
-    <button type="button" class="pv-timer" id="timer" title="Click to reset timer">00:00</button>
-    <p class="pv-hint" id="pvHint">Share the Audience window with the projector and in Teams. Keep this window on your laptop.</p>
-  </div>
-  <div class="controls">
-    <button type="button" id="prev">Back</button>
-    <button type="button" id="next">Next</button>
-    <button type="button" id="startBtn" title="First slide (Home)">Return to start</button>
-    <a class="home-link" href="./">Home</a>
-    <div class="progress"><span id="bar"></span></div>
-    <span id="count"></span>
-    <button type="button" id="notesBtn">Notes (N)</button>
-    <button type="button" id="pvBtn">Presenter view (S)</button>
-    <button type="button" id="copyJoinBtn">Copy join link</button>
-    <button type="button" id="fsBtn">Fullscreen (F)</button>
-  </div>
-  <div id="voteApp" hidden>
-    <p class="vote-kicker">COPD CPD</p>
-    <p id="voteStatus">Connecting to the room…</p>
-    <p id="votePrompt"></p>
-    <img id="voteScene" alt="" hidden />
-    <div id="voteOpts"></div>
-    <p id="voteTeach"></p>
-  </div>
   <main id="feedback">
     <form class="home-panel feedback-form" id="feedbackForm">
       <p class="home-kicker">Hub CPD</p>
@@ -2016,9 +2795,163 @@
       <p class="feedback-status" id="feedbackStatus" role="status"></p>
     </form>
   </main>
+  <div class="stage" id="stage"></div>
+  <div class="pv-side" id="pvSide">
+    <div class="pv-kicker">Next slide</div>
+    <p class="pv-next-title" id="nextTitle"></p>
+    <div class="pv-live" id="pvLive" hidden>
+      <div class="pv-kicker">Live scores</div>
+      <p class="pv-live-counts" id="pvLiveCounts"></p>
+      <div class="n2-spread" id="pvLiveSpread"></div>
+    </div>
+    <aside class="notes" id="notes"></aside>
+    <div class="pv-join-box">
+      <div class="pv-kicker">Session</div>
+      <p id="roomCode" class="pv-join-url"></p>
+      <div class="pv-kicker" style="margin-top:14px">Room + Teams join</div>
+      <p class="pv-join-url" id="joinDisplay">Start python serve.py for a live vote link.</p>
+      <button type="button" id="copyJoin">Copy join link</button>
+      <button type="button" id="feedbackBtn">Download feedback</button>
+      <button type="button" id="hostedJoin">Use hosted QR (works off this Wi-Fi)</button>
+      <p id="certCount" class="pv-join-url"></p>
+      <input id="joinOverride" type="url" placeholder="Or paste https://hub-cpd.co.uk/v" />
+    </div>
+    <button type="button" class="pv-timer" id="timer" title="Click to reset timer">00:00</button>
+    <p class="pv-hint" id="pvHint">Share the Audience window with the projector and in Teams. Keep this window on your laptop.</p>
+  </div>
+  <div class="controls">
+    <button type="button" id="prev">Back</button>
+    <button type="button" id="next">Next</button>
+    <button type="button" id="startBtn" title="First slide (Home)">Return to start</button>
+    <a class="home-link" href="./">Home</a>
+    <div class="progress"><span id="bar"></span></div>
+    <span id="count"></span>
+    <button type="button" id="notesBtn">Notes (N)</button>
+    <button type="button" id="pvBtn">Presenter view (S)</button>
+    <button type="button" id="copyJoinBtn">Copy join link</button>
+    <button type="button" id="fsBtn">Fullscreen (F)</button>
+  </div>
+  <div id="pinGate" hidden>
+    <form class="pin-panel" id="pinForm">
+      <p class="home-kicker">Presenter</p>
+      <h2>Hub PIN</h2>
+      <p>Each facilitator has their own PIN. Every topic uses the same PINs. You do not need a Render account.</p>
+      <p class="pin-status" id="pinStatus">Enter your Hub PIN to open presenter view.</p>
+      <label for="pinInput">PIN</label>
+      <input id="pinInput" name="pin" type="password" autocomplete="off" inputmode="text" maxlength="32" required />
+      <button type="submit">Open presenter view</button>
+      <button type="button" class="pin-self" id="pinSelf">Self-guided instead</button>
+    </form>
+  </div>
+  <div id="draftGate" hidden>
+    <form class="pin-panel" id="draftForm">
+      <p class="home-kicker">Hub CPD</p>
+      <h2>Session passcode</h2>
+      <p>This address is not one of the sessions on the home page. Enter the passcode to open it.</p>
+      <p class="pin-status" id="draftStatus"></p>
+      <label for="draftInput">Passcode</label>
+      <input id="draftInput" name="draft" type="password" autocomplete="off" maxlength="80" />
+      <button type="submit">Open session</button>
+      <a class="draft-home" href="./">Home</a>
+    </form>
+  </div>
+  <div id="voteApp" hidden>
+    <p class="vote-kicker">Hub CPD</p>
+    <p id="voteStatus">Connecting to the room…</p>
+    <p id="votePrompt"></p>
+    <div id="voteOpts"></div>
+    <p id="voteTeach"></p>
+  </div>
+  <div id="cpdCert" hidden>
+    <div class="cpd-cert-page">
+      <div class="cpd-cert-frame">
+        <span class="cpd-cert-corner bl"></span>
+        <span class="cpd-cert-corner br"></span>
+        <div class="cpd-cert-mark">Hub CPD</div>
+        <div class="cpd-cert-layout">
+          <div class="cpd-cert-main">
+            <p class="kicker">Ambulance CPD</p>
+            <h1>Certificate of attendance</h1>
+            <p class="lead">This is to certify that</p>
+            <p class="who" id="cpdCertName"></p>
+            <p class="lead">attended</p>
+            <p class="course" id="cpdCertCourse">COPD, Type 2 Respiratory Failure and NEWS2</p>
+            <p class="meta" id="cpdCertDate"></p>
+          </div>
+          <aside class="cpd-cert-qr">
+            <img id="cpdCertQr" alt="Open Hub CPD home" width="128" height="128" />
+            <p>Scan for Hub CPD home</p>
+          </aside>
+        </div>
+        <div class="cpd-cert-bottom">
+          <p class="cpd-cert-issued">Issued by Hub CPD</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <script src="copd/slides.js?v=aace1"></script>
+  <script src="hf/slides.js?v=steps1"></script>
+  <script src="asthma/slides.js?v=steps1"></script>
+  <script id="hubPublished" type="application/json">{"copd":true,"hf":false,"asthma":false}</script>
   <script>
+    function hubPublished(id, fallback) {
+      const node = document.getElementById("hubPublished");
+      if (!node) return fallback;
+      try {
+        const map = JSON.parse(node.textContent || "{}");
+        if (Object.prototype.hasOwnProperty.call(map, id)) return map[id] === true;
+      } catch (err) { /* use the fallback */ }
+      return fallback;
+    }
     const NEWS2_CITE = "Reproduced from: Royal College of Physicians. <em>National Early Warning Score (NEWS) 2: Standardising the assessment of acute-illness severity in the NHS.</em> Updated report of a working party. London: RCP, 2017.";
+    const params = new URLSearchParams(location.search);
+    const COURSE_CATALOG = {
+      copd: {
+        id: "copd",
+        title: "COPD, Type 2 Respiratory Failure and NEWS2",
+        short: "COPD CPD",
+        footer: "Hub CPD · JRCALC Chronic Obstructive Pulmonary Disease",
+        handout: "copd/handout.html",
+        store: "copd-cpd-state",
+        selfStore: "copd-cpd-self-state",
+        channel: "copd-cpd-deck",
+        attendKey: "copd-cpd-register",
+        published: hubPublished("copd", true)
+      },
+      hf: {
+        id: "hf",
+        title: "Heart Failure in Pre-hospital Care",
+        short: "Heart Failure CPD",
+        footer: "Hub CPD · JRCALC Heart Failure",
+        handout: "hf/handout.html",
+        store: "hf-cpd-state",
+        selfStore: "hf-cpd-self-state",
+        channel: "hf-cpd-deck",
+        attendKey: "hf-cpd-register",
+        published: hubPublished("hf", false)
+      },
+      asthma: {
+        id: "asthma",
+        title: "Acute Asthma",
+        short: "Acute Asthma CPD",
+        footer: "Hub CPD · Acute Asthma",
+        handout: "asthma/handout.html",
+        store: "asthma-cpd-state",
+        selfStore: "asthma-cpd-self-state",
+        channel: "asthma-cpd-deck",
+        attendKey: "asthma-cpd-register",
+        published: hubPublished("asthma", false)
+      }
+    };
+    const courseKey = String(params.get("course") || "").trim().toLowerCase();
+    const catalogCourse = Object.prototype.hasOwnProperty.call(COURSE_CATALOG, courseKey)
+      ? COURSE_CATALOG[courseKey]
+      : null;
+    const COURSE = catalogCourse || COURSE_CATALOG.copd;
+    const courseNeedsPass = Boolean(courseKey) && (!catalogCourse || catalogCourse.published === false);
+    if (COURSE.id === "hf") document.body.classList.add("theme-hf");
+    if (COURSE.id === "asthma") document.body.classList.add("theme-asthma");
     const NEWS2_FORM = {
       cols: [20.04, 31.24, 42.43, 53.62, 64.81, 76.01, 87.20, 98.61],
       rows: [
@@ -2048,891 +2981,28 @@
     }
     function news2OfficialChart(form) {
       const hits = form ? news2FormHits(form) : "";
-      return `<figure class="n2-official${form ? " n2-form" : ""}"><div class="n2-form-scroll"><div class="n2-form-wrap"><img src="assets/news2-chart-1.png" alt="NEWS2 Chart 1: The NEWS scoring system">${hits}</div></div><figcaption class="n2-cite">${NEWS2_CITE}</figcaption></figure>`;
+      return `<figure class="n2-official${form ? " n2-form" : ""}"><div class="n2-form-scroll"><div class="n2-form-wrap"><img src="copd/assets/news2-chart-1.png" alt="NEWS2 Chart 1: The NEWS scoring system">${hits}</div></div><figcaption class="n2-cite">${NEWS2_CITE}</figcaption></figure>`;
     }
-    const slideSource = [
-      {
-        type: "title",
-        kicker: "Ambulance Staff CPD  ·  30 minutes",
-        title: "COPD, Type 2 Respiratory Failure and NEWS2",
-        subtitle: "Pre-hospital assessment and treatment of acute exacerbations, with a hard look at NEWS2 Scale 2.",
-        meta: "JRCALC / AACES COPD guidance v20.40 (updated 6 September 2023), JRCALC oxygen and medicines, and RCP NEWS2. Always follow the live JRCALC entry and local Trust policy.",
-        notes: "Open with the title statement. Next slide is the icebreaker — leave it up while phones scan the QR."
-      },
-      {
-        type: "poll",
-        pollId: "hands",
-        resultsTitle: "Default NEWS2 scale — how the room voted",
-        kicker: "Hands up  ·  live vote",
-        title: "Before we start — phones out",
-        prompt: "When dealing with a known COPD patient, what is your default SpO<sub>2</sub> scale when using the NEWS2 chart?",
-        votePrompt: "When dealing with a known COPD patient, what is your default SpO<sub>2</sub> scale when using the NEWS2 chart?",
-        options: [
-          "Scale 1",
-          "Scale 2"
-        ],
-        correct: 0,
-        teach: "Unless there is clear documented history that the patient has type 2 respiratory failure (or they carry an alert card) then <strong>ALWAYS use Scale 1</strong>. COPD in itself does not mean Scale 2.",
-        notes: "Leave this up while people scan the QR. Typical wrong answer is Scale 2 because they have COPD. Space goes to the results (numbers only). Space or click once more to paint Scale 1 green and show the teaching point."
-      },
-      {
-        kicker: "Core messages",
-        title: "Learning objectives",
-        html: `
-          <div class="card" style="margin-bottom:12px">
-            <h3>By the end you will have refreshed how to:</h3>
-            <ul style="columns:2;column-gap:28px">
-              <li>Recognise and treat an acute exacerbation of COPD using JRCALC principles</li>
-              <li>Give controlled oxygen without withholding it from the critically ill</li>
-              <li>Use NEWS2 Scale 1 unless type 2 failure is already documented</li>
-              <li>Hand over a score that receiving staff can trust</li>
-            </ul>
-          </div>
-          <div class="body two">
-            <div class="card">
-              <h3>Oxygen target</h3>
-              <p>In known or suspected COPD, start with a target of <strong>88–92%</strong> (or the alert-card range) unless the patient is critically ill.</p>
-              <p class="small" style="margin-top:10px">This is a treatment decision from JRCALC.</p>
-            </div>
-            <div class="card">
-              <h3>NEWS2 scale</h3>
-              <p>Use <strong>Scale 1</strong> unless type 2 respiratory failure is clearly documented in their medical history, they carry an alert card or are able to categorically inform you that they do have type 2 (hypercapnic) respiratory failure.</p>
-              <p class="small" style="margin-top:10px">Routinely, look for that record before Scale 2. There can be exceptions — if you use Scale 2 without it, say why at handover.</p>
-              <p class="small" style="margin-top:10px">This is a scoring decision from RCP NEWS2. The oxygen target does not, by itself, choose the scale.</p>
-            </div>
-          </div>
-          <div class="banner build" style="margin-top:12px">COPD ≠ type 2 respiratory failure</div>
-          <div class="banner teal build" style="margin-top:8px">COPD ≠ automatic NEWS2 Scale 2</div>
-          <p class="callout build" style="margin-top:12px">These are two separate decisions. They do not automatically travel together.</p>`,
-        notes: "Outcomes in 30 seconds. Then oxygen vs NEWS2. Space reveals the two banners, then the callout. Drop the old ‘usually missed’ card — the banners are that point."
-      },
-      {
-        kicker: "JRCALC Guideline 'Chronic Obstructive Pulmonary Disease' — the actual wording",
-        title: "Does not treat every COPD patient as type 2",
-        html: `
-          <div class="banner dark">“Some patients with COPD are at increased risk of hypercapnic respiratory failure (Type 2)”</div>
-          <div class="body two" style="margin-top:16px">
-            <div class="card fact">
-              <h3>What that sentence does</h3>
-              <ul>
-                <li>The word is <strong>some</strong>, not all</li>
-                <li>COPD raises the risk of type 2 failure. It does not diagnose it</li>
-                <li>Those with a <strong>history</strong> of type 2 failure should know their baseline saturations and carry an alert card</li>
-                <li>That group may need a tailored oxygen approach</li>
-              </ul>
-            </div>
-            <div class="card warn">
-              <h3>What the guideline does not say about NEWS2</h3>
-              
-              <p style="margin-top:10px">It does <strong>not</strong> say “COPD = Scale 2”, and it does not advise an on-scene Scale 2 decision.</p>
-            </div>
-          </div>`,
-        notes: "Read the quote slowly. This is the user’s requested highlight, now in JRCALC’s own words. Then: JRCALC / AACES COPD guidance’s NEWS2 instruction is ‘calculate a NEWS2 score (refer to Sepsis)’ — no scale switch. RCP still governs how Scale 2 is used."
-      },
-      {
-        kicker: "Background",
-        title: "COPD in one minute",
-        html: `
-          <div class="body two">
-            <div>
-              <ul>
-                <li>Chronic progressive airflow obstruction</li>
-                <li>Usually diagnosed over 35 in current or ex-smokers</li>
-                <li>Treat as COPD if over 50, long-term smoker, exertional breathlessness, and no other known cause</li>
-                <li>Baseline SpO<sub>2</sub> is often lower than in healthy adults — ask what “normal for them” is</li>
-                <li>An exacerbation is a worsening of a previously stable condition; 30% have no identified cause</li>
-              </ul>
-            </div>
-            <div>
-              <div class="photo-frame" style="height:250px">
-                <img src="assets/copd-exacerbation-cxr.jpg" alt="Anteroposterior chest X-ray of a COPD exacerbation">
-              </div>
-              <p class="photo-caption">AP chest X-ray in a COPD exacerbation (Mikael Häggström, MD, public domain / CC0).</p>
-              <div class="card warn" style="margin-top:10px">
-                <h3>Pre-hospital trap</h3>
-                <p>COPD is a risk factor for hypercapnia. It is not proof of hypercapnia. Only a blood gas (now or previously documented) confirms type 2 respiratory failure.</p>
-              </div>
-            </div>
-          </div>`,
-        notes: `<strong>What COPD is</strong>
-Airways narrowed; alveoli lose their spring. Usually smoking. Air goes in more easily than it comes out, so the chest stays over-inflated.
-<strong>What that causes</strong>
-Breathless, cough, often a lower SpO<sub>2</sub> when well. Some retain CO<sub>2</sub> — that is type 2 failure, and it is not automatic.
-<strong>Asthma vs COPD</strong>
-Asthma: mostly reversible narrowing of the tubes. Often younger / atopic. Can be nearly normal between attacks.<br>
-COPD: largely irreversible damage. Older smokers. Never fully ‘back to normal’. Lungs stay over-inflated.<br>
-Some people have features of both.
-<strong>On scene</strong>
-They can look the same: breathless, wheezy, coughing. History (age, smoking, baseline) separates them — not the sound of the chest.
-<strong>Land this</strong>
-Do not lecture pathophysiology. The trap box is the only part that must land.`
-      },
-      {
-        kicker: "Look again",
-        title: "Is this an exacerbation — or something else?",
-        html: `
-          <div class="body two">
-            <div class="card">
-              <h3>Supports an exacerbation</h3>
-              <ul>
-                <li>Increased dyspnoea, especially on exertion</li>
-                <li>Increased sputum volume or purulence</li>
-                <li>Increased cough, wheeze, chest tightness</li>
-                <li>Reduced exercise tolerance, fatigue, fluid retention</li>
-                <li>Acute confusion or a worsening of a previously stable condition</li>
-              </ul>
-            </div>
-            <div class="card myth">
-              <h3>Think again if you find</h3>
-              <ul class="think-again">
-                <li><span>Chest pain — sudden or pleuritic</span><em>ACS, PE, pneumothorax</em></li>
-                <li><span>Fever</span><em>Pneumonia</em></li>
-                <li><span>Sudden severe breathlessness</span><em>PE, pneumothorax</em></li>
-                <li><span>Unilateral silent chest or tracheal shift</span><em>Pneumothorax, effusion</em></li>
-                <li><span>Pink frothy sputum or orthopnoea</span><em>LVF / pulmonary oedema</em></li>
-                <li><span>Stridor or haemoptysis</span><em>Upper airway, PE, cancer</em></li>
-              </ul>
-            </div>
-          </div>`,
-        notes: "Left box is a simple flare. Right box: clue on the left, other impression on the right. JRCALC / AACES COPD guidance flags chest pain and fever as uncommon. Do not turn this into a lecture on every differential — one example per row is enough."
-      },
-      {
-        kicker: "Assessment",
-        title: "What to ask and what to measure",
-        html: `
-          <div class="body three">
-            <div class="card">
-              <h3>Ask</h3>
-              <ul>
-                <li>Baseline saturations when well, and previous problems with oxygen</li>
-                <li>Alert card, individualised plan, or Hub special message</li>
-                <li>Home oxygen, previous NIV / ITU</li>
-                <li>Have they already taken steroids or antibiotics?</li>
-                <li>Encourage their usual breathing-control techniques if they help</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Examine</h3>
-              <ul>
-                <li>&lt;C&gt;ABCDE, including work of breathing</li>
-                <li>SpO<sub>2</sub>, RR, pulse, BP, temperature</li>
-                <li>Blood glucose if appropriate</li>
-                <li>12-lead ECG if indicated (JRCALC / AACES COPD guidance update 2023)</li>
-                <li>NEWS2 Scale 1 unless a hospital or specialist record of type 2 failure is already in front of you</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>Red flags</h3>
-              <ul>
-                <li>Exhaustion or tiring</li>
-                <li>Silent chest</li>
-                <li>SpO<sub>2</sub> &lt;88% unresponsive to oxygen</li>
-                <li>Drowsiness or new confusion</li>
-                <li>Major ABCD failure</li>
-              </ul>
-            </div>
-          </div>`,
-        notes: "The patient and carers often know their baseline better than we do. An oxygen alert card is gold, but its absence does not prove they are not a retainer — and its presence still does not automatically select NEWS2 Scale 2 unless HCRF is documented."
-      },
-      {
-        kicker: "Time critical",
-        title: "When COPD becomes time-critical",
-        html: `
-          <div class="body">
-            <div class="body two">
-              <div class="card">
-                <h3>Time-critical features</h3>
-                <ul>
-                <li>Major &lt;C&gt;ABCDE problems</li>
-                <li>Extreme breathing difficulty against their usual condition</li>
-                <li>Cyanosis — though peripheral cyanosis may be “normal” for some</li>
-                <li>Exhaustion</li>
-                <li>SpO<sub>2</sub> &lt;88% unresponsive to oxygen</li>
-                </ul>
-              </div>
-              <div class="card">
-                <h3>Then</h3>
-                <ul>
-                <li>Start correcting &lt;C&gt;ABCDE</li>
-                <li>Do not withhold high-concentration oxygen if the primary illness needs it</li>
-                <li>TIME-CRITICAL transfer and an ATMIST call</li>
-                <li>Continue treatment en-route</li>
-                </ul>
-              </div>
-            </div>
-            <p class="small" style="margin-top:12px">JRCALC / AACES COPD guidance: in the short time a patient is in ambulance care, hypoxia presents a much greater risk than hypercapnia in most cases. Pulse oximetry does not show CO<sub>2</sub>. Type 2 failure is confirmed on a blood gas.</p>
-            <div class="banner red build" style="margin-top:12px">Do not withhold high-concentration oxygen from the critically ill COPD patient</div>
-          </div>`,
-        notes: "Talk the two cards first. Click or Space brings in the red line. Kill the old fear that ‘oxygen will stop them breathing’ as a reason to leave someone hypoxic. Titrate once they are no longer critically ill. Good to know, not for the slide: waveform capnography is available but not used routinely on front-line vehicles. It shows end-tidal CO2 (EtCO2), not arterial CO2, so it does not confirm type 2 failure and it does not choose Scale 2. A normal EtCO2 is about 4.0–5.7 kPa (35–45 mmHg). A trace staying above about 6 kPa (45 mmHg), or rising, suggests CO2 retention. In COPD the end-tidal number often sits below the arterial PaCO2, so a normal trace does not rule type 2 failure out."
-      },
-      {
-        kicker: "On-scene map",
-        title: "Critically ill, or controlled oxygen?",
-        html: `
-          <div class="card" style="margin-bottom:12px;text-align:center">
-            <p style="font-size:22px;font-weight:750;color:var(--navy);margin:0">Breathless patient. Known or suspected COPD.</p>
-          </div>
-          <p style="text-align:center;font-weight:750;margin:0 0 10px;font-size:22px;color:var(--navy)">Are they critically ill or tiring?</p>
-          <div class="diagram-row two">
-            <div class="step red">
-              <h3>YES — time-critical</h3>
-              <ul>
-                <li>Do not withhold high-flow oxygen</li>
-                <li>Correct &lt;C&gt;ABCDE</li>
-                <li>TIME-CRITICAL transfer and ATMIST</li>
-                <li>Titrate 88–92% once they are no longer critical</li>
-              </ul>
-            </div>
-            <div class="step green">
-              <h3>NO — controlled oxygen</h3>
-              <ul>
-                <li>Target 88–92% (or the alert card)</li>
-                <li>Start the 28% white Venturi this service stocks</li>
-                <li>Salbutamol 5 mg, 6-minute oxygen drive</li>
-                <li>Ipratropium once if severe</li>
-              </ul>
-            </div>
-          </div>
-          <div class="step dark" style="margin-top:12px">
-            <h3>Both paths — NEWS2</h3>
-            <p>Scale 1 unless type 2 failure is already documented. Look for that record — an alert card, specialist plan or previous blood gas. 88–92% is the oxygen target. It is not, by itself, Scale 2.</p>
-          </div>`,
-        notes: "Scene first: breathless, known or suspected COPD. Then the split: critically ill or not. Navy bar last: both paths still Scale 1 unless type 2 is already documented. Look for the alert card. Oxygen target is not the NEWS2 scale. There can be exceptions — say why if Scale 2 is used without that record."
-      },
-      {
-        kicker: "Physiology that changes the score",
-        title: "Two types of respiratory failure",
-        html: `
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>Type 1</th>
-                <th>Type 2 (hypercapnic)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Blood gas</strong></td>
-                <td>Low PaO<sub>2</sub> (&lt;8 kPa). PaCO<sub>2</sub> normal or low.</td>
-                <td>Low PaO<sub>2</sub> and high PaCO<sub>2</sub> (&gt;6 kPa).</td>
-              </tr>
-              <tr>
-                <td><strong>What it means</strong></td>
-                <td>The lungs are not oxygenating. Ventilation of CO<sub>2</sub> is still working.</td>
-                <td>The patient is failing to ventilate. High-flow oxygen can worsen CO<sub>2</sub> retention.</td>
-              </tr>
-              <tr>
-                <td><strong>In COPD</strong></td>
-                <td>Common. COPD does not protect anyone from type 1 failure.</td>
-                <td>Important, but not automatic. Needs blood gas confirmation, now or previously documented.</td>
-              </tr>
-              <tr>
-                <td><strong>NEWS2</strong></td>
-                <td>Scale 1</td>
-                <td>Scale 1 unless type 2 failure is already documented. Look for an alert card or specialist record before Scale 2.</td>
-              </tr>
-            </tbody>
-          </table>`,
-        notes: "Walk through the table slowly. Ask: ‘If you have no blood gas and no documented HCRF, which type do you know this patient has?’ Answer: neither. You know they are at risk. That is why you titrate oxygen. It is not why you switch NEWS2 scale."
-      },
-      {
-        kicker: "Evidence",
-        title: "Most COPD patients do not present with hypercapnia",
-        html: `
-          <div class="body two">
-            <div class="card">
-              <h3>What the evidence says</h3>
-              <ul>
-                <li>Around 1 in 5 hospitalised AECOPD patients has respiratory acidosis — so most do not</li>
-                <li>RCP NEWS2 authors: Scale 2 was designed only for documented hypercapnic respiratory failure, “explicitly noting that most acutely ill patients with AECOPD will not present with HCRF”</li>
-                <li>RCP 2020: putting COPD patients without hypercapnia on Scale 2 “is not in line with NEWS2 guidance”</li>
-              </ul>
-            </div>
-            <div class="card fact">
-              <h3>So what?</h3>
-              <p>If you default every COPD job to Scale 2, you will under-score hypoxia in the majority. A patient with SpO<sub>2</sub> 90% can look “stable” on Scale 2 and “red” on Scale 1.</p>
-            </div>
-          </div>
-          <div class="callout" style="margin-top:14px">If there is no documented evidence of type 2 respiratory failure, assume type 1 and use <strong>Scale 1</strong> on the NEWS2 chart. That does not mean treating them as if they do not have COPD — still titrate oxygen to <strong>88–92%</strong>.</div>`,
-        notes: "Plant ~20% acidosis; RCP: most AECOPD do not have HCRF. Then the callout: no documented type 2 → assume type 1 → Scale 1. Still COPD, still 88–92%. Scoring scale and oxygen target are separate."
-      },
-      {
-        kicker: "NEWS2",
-        title: "When Scale 2 can be applied",
-        html: `
-          <div class="body two">
-            <div class="card fact">
-              <h3>When Scale 2 may be applied</h3>
-              <ul>
-                <li>Hypercapnic (type 2) failure already confirmed on blood gas — previous admission or this hospital stay</li>
-                <li>A hospital doctor, ANP or specialist has already recorded that decision</li>
-                <li>You can see that documentation: alert card stating type 2 / raised CO<sub>2</sub>, specialist care plan, previous ABG, or Hub special message</li>
-              </ul>
-              <p style="margin-top:10px"><strong>The usual role on scene is to apply that record. Look for it before you use Scale 2.</strong></p>
-            </div>
-            <div class="card myth">
-              <h3>COPD alone is not a reason to choose Scale 2</h3>
-              <ul>
-                <li>Not because the patient “has COPD”</li>
-                <li>Not because they are on home oxygen</li>
-                <li>Not because they “look like a retainer”</li>
-                <li>Not because you are targeting 88–92%</li>
-                <li>Not because the ePR offered Scale 2 when you typed COPD</li>
-              </ul>
-            </div>
-          </div>
-          <p class="small" style="margin-top:12px">If you cannot see that record, use Scale 1 and say so at handover. JRCALC is less absolute than a hard ban, and there can be exceptions — if you use Scale 2 without the record, say why. Receiving staff can confirm after a blood gas.</p>`,
-        notes: "RCP’s ‘competent clinical decision-maker’ is usually a hospital doctor, ANP or specialist after a blood gas. The routine ambulance role is to look for an alert card or other record of type 2 / raised CO2 / previous hypercapnia, not to start Scale 2 because the patient has COPD. JRCALC is vaguer, and there can be exceptions. An alert card that only says ‘COPD, target 88–92’ is an oxygen target, not by itself a Scale 2 record."
-      },
-      {
-        kicker: "Worked example",
-        title: "Same patient, two scales, two very different risks",
-        html: `
-          <div class="body two" style="margin-bottom:10px;align-items:stretch">
-            <div>
-              <p style="margin-bottom:10px;font-size:18px">68-year-old with known COPD. No alert card. No documented blood gas. SpO<sub>2</sub> <strong>90% on air</strong>, elevated pulse and respiratory rate. Other observations unremarkable.</p>
-              <div class="photo-frame cutout">
-                <img src="assets/zoll_1.png" alt="Zoll monitor showing pulse 110, blood pressure 144 over 87, respiratory rate 24, SpO2 90 percent">
-              </div>
-              <p class="photo-caption"</p>
-            </div>
-            ${news2OfficialChart()}
-          </div>
-          <table>
-            <thead>
-              <tr><th>Scale</th><th>SpO<sub>2</sub> 90% on air</th><th>What the score tells the next clinician</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Scale 1 — correct default</strong></td>
-                <td class="score bad">3</td>
-                <td>Single red parameter. This person is hypoxic on the standard scale and needs a proper look.</td>
-              </tr>
-              <tr>
-                <td><strong>Scale 2 — incorrect habit</strong></td>
-                <td class="score good">0</td>
-                <td>Looks “fine”. Hypoxia has been normalised away. Deterioration is easier to miss.</td>
-              </tr>
-            </tbody>
-          </table>
-          <p class="callout build" style="margin-top:12px">Wrong scale does not just tidy the paperwork. It can hide a hypoxic patient.</p>`,
-        notes: "Emphasise the importance of recognising that 91% and lower is hypoxia, even if it is 'normal' for the patient. Automatically using scale 2 for a non T2RF patient will hide the hypoxia."
-      },
-      {
-        kicker: "Why Scale 1 is still right",
-        title: "A usual SpO₂ of 90% scoring 3 is not a reason to switch scale",
-        html: `
-          <div class="body two">
-            <div class="card">
-              <h3>That 3 is doing its job</h3>
-              <ul>
-                <li>Scale 1 was built on a normal SpO<sub>2</sub> of 96%+. 90% is hypoxia on that scale, even if it is “normal for them”</li>
-                <li>RCP designed that score to prompt a look. It does not, by itself, mean you must change scale or turn the oxygen up</li>
-                <li>Keep targeting 88–92% (or the alert card). The oxygen target and the scoring scale are separate decisions</li>
-              </ul>
-            </div>
-            <div class="card warn">
-              <h3>Scale 2 is still the wrong fix</h3>
-              <ul>
-                <li>Switching scale because 90% is “usual for them” scores that hypoxia as 0 and hides it</li>
-                <li>Scale 2 is only for documented type 2 failure — not for a comfortable NEWS</li>
-                <li>Handover: “NEWS 3, all from sats, usual 90% on air, Scale 1, targeting 88–92%.”</li>
-              </ul>
-            </div>
-          </div>`,
-        notes: "The 3 is working — it flags hypoxia on the standard scale. Do not switch to Scale 2 to make the score look nicer. Still 88–92%. Next slide is the room’s pre-alert worry and CN-436."
-      },
-      {
-        kicker: "CN-436",
-        title: "Doesn't this mean I will pre-alert every COPD patient with normal sats for them?",
-        html: `
-          <div class="callout" style="margin-bottom:14px">“Doesn't the Trust state that a single 3 in a NEWS2 category requires me to alert the ED? I am going to be alerting a lot of patients unnecessarily.”</div>
-          <div class="build">
-            <div class="body two" style="align-items:stretch">
-              <div>
-                <img class="cn-extract" src="assets/cn-436-sats.png" alt="CN-436: O2 saturations on oxygen less than or equal to 91 percent, or 83 percent in chronic hypercapnic respiratory failure">
-                <p class="photo-caption">CN-436 Pre-alerting of Patients V8, 20 July 2026. Highlight added.</p>
-              </div>
-              <div class="card fact">
-                <h3>The sats line is not “any single 3”</h3>
-                <ul>
-                  <li>90% <strong>on air</strong> scores 3 on Scale 1. It does <strong>not</strong> meet this criterion</li>
-                  <li>90% <strong>on oxygen</strong> does — unless chronic hypercapnic failure is already documented, when the alert sat is ≤83%</li>
-                  <li>Other red physiology on this list still alerts. So does significant clinical concern</li>
-                </ul>
-              </div>
-            </div>
-            <div class="banner teal" style="margin-top:12px">The sats pre-alert is ≤91% <strong>on oxygen</strong> — not 90% on air</div>
-          </div>`,
-        notes: "Leave the question up. Space brings CN-436. Hit ‘on oxygen’ and ≤91% out loud. 90% on air at baseline is a Scale 1 3, not a CN-436 sats alert. Other red physiology (RR ≤8 or ≥25, SBP ≤90, pulse ≤40 or ≥131, GCS <13) still alerts. Concern still allows an alert."
-      },
-      {
-        kicker: "Worked example 2",
-        title: "When Scale 2 is the safer score",
-        html: `
-          <p style="margin-bottom:12px;font-size:20px">Same age, known COPD, oxygen alert card: previous type 2 failure, target 88–92%. SpO<sub>2</sub> <strong>90% on 28% Venturi</strong>.</p>
-          <table>
-            <thead>
-              <tr><th>Scale</th><th>SpO<sub>2</sub> score</th><th>Oxygen</th><th>SpO<sub>2</sub> + O<sub>2</sub></th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Scale 1</strong></td>
-                <td class="score bad">3</td>
-                <td class="score mid">+2</td>
-                <td class="score bad">5</td>
-              </tr>
-              <tr>
-                <td><strong>Scale 2 — appropriate here</strong></td>
-                <td class="score good">0</td>
-                <td class="score mid">+2</td>
-                <td class="score mid">2</td>
-              </tr>
-            </tbody>
-          </table>
-          <p style="margin-top:14px">Scale 1 would keep alarming because 90% looks too low. Staff then creep the oxygen up to “improve the NEWS”. Scale 2 exists to stop that, where type 2 failure is already documented. The usual role on scene is to apply that record. There can be exceptions — say why if you use Scale 2 without it.</p>`,
-        notes: "This is why Scale 2 was invented. Austin 2010: high-flow pre-hospital oxygen increased mortality in suspected COPD compared with titrated oxygen. NEWS2 Scale 2 is a scoring fix for confirmed retainers, not a treatment protocol for all COPD."
-      },
-      {
-        kicker: "Oxygen",
-        title: "How to give oxygen in COPD",
-        html: `
-          <div class="o2-methods">
-            <div class="o2-rows">
-              <article class="o2-row">
-                <img src="assets/o2-white-venturi-70.png" alt="Woman in her 70s wearing a white 28 percent Venturi oxygen mask">
-                <div>
-                  <h3>White Venturi 28%</h3>
-                  <p>Start here. <strong>4 L/min</strong>. Target <strong>88–92%</strong>, or the alert card.</p>
-                </div>
-              </article>
-              <article class="o2-row">
-                <img src="assets/o2-red-venturi-70.png" alt="Woman in her 70s wearing a red 40 percent Venturi oxygen mask">
-                <div>
-                  <h3>Red Venturi 40%</h3>
-                  <p>Step up if 28% is not reaching target. There is no simple face mask on the vehicle.</p>
-                </div>
-              </article>
-              <article class="o2-row">
-                <img src="assets/o2-nebuliser-70.png" alt="Woman in her 70s wearing an oxygen-driven nebuliser mask">
-                <div>
-                  <h3>Oxygen-driven nebuliser</h3>
-                  <p>Salbutamol or ipratropium. Oxygen may <strong>drive</strong> it for <strong>6 minutes</strong>, then stop and aim 88–92%.</p>
-                </div>
-              </article>
-            </div>
-            <div class="diagram-row three">
-              <div class="step dark">
-                <h3>Reservoir mask</h3>
-                <p>If 40% is not enough, or they are critically ill. Do not withhold high-concentration oxygen. Aim 94–98%, then titrate back.</p>
-              </div>
-              <div class="step gold">
-                <h3>RR &gt;30 on a Venturi</h3>
-                <p>Increase flow to <strong>50% above the mask minimum</strong>. Same mask — the percentage does not change.</p>
-              </div>
-              <div class="step red">
-                <h3>6 minutes is neb drive only</h3>
-                <p>Not a timer on oxygen given for hypoxia. If they become drowsy, reduce oxygen and support ventilation.</p>
-              </div>
-            </div>
-          </div>`,
-        notes: "Point at the kit: white 28% start, then red 40% if that is not reaching target, then a reservoir mask for high-flow. The green chamber is a nebuliser, not high-flow. 50% flow bump is JRCALC Oxygen on a Venturi — same mask. Six minutes is neb drive only. Over 50, long-term smoker, exertional breathlessness, no other cause: treat as COPD."
-      },
-      {
-        kicker: "Treatment",
-        title: "Bronchodilators, nebulisers and the 6-minute rule",
-        html: `
-          <div class="body two neb-hero" style="flex:1">
-            <div class="photo-frame cutout">
-              <img src="assets/o2-nebuliser-70.png" alt="Woman in her 70s wearing an oxygen-driven nebuliser mask">
-            </div>
-            <div>
-              <div class="card">
-                <h3>Adult doses from live JRCALC</h3>
-                <ul>
-                  <li>Sit forwards if blood pressure allows</li>
-                  <li><strong>Salbutamol 5 mg</strong> neb. Repeat every <strong>5 minutes</strong> unless side-effects dominate (tremor, HR &gt;140). No maximum number of salbutamol doses</li>
-                  <li><strong>Ipratropium 500 micrograms</strong> neb <strong>once</strong> in severe cases, or if unresponsive to salbutamol</li>
-                  <li>Protect the eyes — caution in glaucoma</li>
-                  <li><strong>Hydrocortisone 100 mg</strong> slow IV (≥2 min) or IM</li>
-                </ul>
-              </div>
-              <div class="card warn" style="margin-top:10px">
-                <h3>What the 6 minutes actually limits</h3>
-                <ul>
-                  <li>How long <strong>oxygen drives each nebuliser</strong> — not a written maximum number of nebs</li>
-                  <li>This is <strong>not</strong> a timer on oxygen therapy</li>
-                  <li>Do not leave an oxygen-driven neb running for a full 10–15 minutes</li>
-                  <li>Applies if <strong>COPD is a possibility</strong> — not only proven type 2 failure</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="diagram-row" style="margin-top:12px">
-            <div class="step green"><h3>1. Salbutamol 5 mg</h3><p>Oxygen drive for <strong>6 minutes</strong></p></div>
-            <div class="step gold"><h3>2. Stop the drive</h3><p>Off the neb mask. Aim <strong>88–92%</strong></p></div>
-            <div class="step dark"><h3>3. Still symptomatic?</h3><p>Further 6-minute run if clinically indicated</p></div>
-            <div class="step red" style="background:var(--green)"><h3>Ipratropium</h3><p>500 micrograms <strong>once only</strong></p></div>
-          </div>`,
-        notes: "Concede this if challenged: JRCALC / AACES COPD guidance does not say ‘maximum two oxygen-powered nebs’. It says limit oxygen-driven nebulisation to 6 minutes. Salbutamol may still be repeated. Each O2-driven episode should still be a 6-minute run, not a continuous neb. High-flow oxygen for critical illness has no 6-minute cap."
-      },
-      {
-        kicker: "The guideline text",
-        title: "Where the 6-minute rule is written",
-        html: `
-          <div class="body">
-            <div class="card">
-              <h3>JRCALC / AACES COPD guidance — Bronchodilators</h3>
-              <p style="font-size:18px">“Limit oxygen-driven nebulisation to 6 minutes. If journey time is significant, consider a further 6 minutes of nebulisation therapy ONLY if clinically indicated, but aim for a target saturation within the range of 88–92%.”</p>
-            </div>
-            <div class="card" style="margin-top:10px">
-              <h3>JRCALC Salbutamol and Ipratropium</h3>
-              <p style="font-size:18px">Both monographs: “If COPD is a possibility limit nebulisation with oxygen to 6 minutes.”</p>
-              <p class="small" style="margin-top:8px">That is COPD as a possibility — not “only if type 2 failure is proven”.</p>
-            </div>
-          </div>`,
-        notes: "Read the quotes. Then say what they do not say: there is no sentence that reads ‘maximum of two oxygen-powered nebs’. The 6 minutes is the duration of oxygen as the driving gas. Salbutamol may be repeated. Ipratropium once."
-      },
-      {
-        kicker: "Treatment",
-        title: "What to do after a 6-minute oxygen-driven neb",
-        html: `
-          <div class="body two">
-            <div class="card">
-              <h3>What JRCALC / AACES COPD guidance actually says</h3>
-              <ul>
-                <li>Limit oxygen-driven nebulisation to 6 minutes</li>
-                <li>If the journey is significant, consider a further 6 minutes only if clinically indicated</li>
-                <li>Aim 88–92% throughout</li>
-                <li>Salbutamol may be repeated at regular intervals. Ipratropium once</li>
-              </ul>
-            </div>
-            <div class="card warn">
-              <h3>What it does not say</h3>
-              <ul>
-                <li>It does <strong>not</strong> write a maximum of two oxygen-powered nebs for the whole job</li>
-                <li>If they still need bronchodilator and oxygen is the only driving gas you have, a further 6-minute oxygen-driven neb can be argued as clinically indicated</li>
-                <li>What you must not do is leave oxygen driving the neb continuously, or for 10–15 minutes at a time</li>
-                <li>Between runs: off the neb mask, titrate to 88–92%</li>
-              </ul>
-            </div>
-          </div>`,
-        notes: "Teach the 6-minute duration limit. Do not teach a two-neb cap that is not in the text. If someone in the room makes that point, agree. The operational rule is: 6 minutes of oxygen drive, stop, titrate, repeat as 6-minute episodes if they still need the drug and you have no air compressor. Ipratropium remains once only. Time-critical features still override."
-      },
-      {
-        kicker: "Package of care",
-        title: "The rest of the job",
-        html: `
-          <div class="job-flow">
-            <section class="job-step">
-              <div class="job-num">1</div>
-              <h3>On scene / en route</h3>
-              <ul>
-                <li>Follow the alert card / individualised plan — the patient often knows what works</li>
-                <li>12-lead ECG if indicated</li>
-                <li>Pain score, fluids if required, blood glucose if appropriate</li>
-                <li>Watch for tiring, not just the SpO<sub>2</sub> number</li>
-                <li>Consider Call Before You Convey, or an alternative pathway, if the patient does not need alerting to hospital</li>
-              </ul>
-            </section>
-            <div class="job-arrow" aria-hidden="true"></div>
-            <section class="job-step decide build">
-              <div class="job-num">2</div>
-              <h3>Hospital, not home, if</h3>
-              <ul>
-                <li>Cannot cope at home, living alone, or not coping</li>
-                <li>Severe breathlessness, poor or deteriorating condition</li>
-                <li>Cyanosis, new or worsening oedema, impaired consciousness, acute confusion</li>
-                <li>Already on LTOT, rapid onset, or significant comorbidity</li>
-                <li>SpO<sub>2</sub> &lt;90%</li>
-              </ul>
-            </section>
-            <div class="job-arrow" aria-hidden="true"></div>
-            <section class="job-step hand build">
-              <div class="job-num">3</div>
-              <h3>Then say this</h3>
-              <ul>
-                <li>NEWS2 total <strong>and the components</strong> — “3, all from sats”</li>
-                <li>Scale 1, unless type 2 failure is already documented</li>
-                <li>Usual saturations if known, current SpO<sub>2</sub>, target, device</li>
-                <li>Alert card, previous NIV, or previous hypercapnia if known</li>
-              </ul>
-            </section>
-          </div>`,
-        notes: "Step 1 is already up. Click or Space brings in step 2, then step 3. Step 1 includes Call Before You Convey or an alternative pathway when the patient does not need a hospital alert. Receiving staff should not have to guess the scale. ‘NEWS 3 on Scale 1, targeting 88–92, 90% on 28% Venturi, no documented type 2’ is a high-quality sentence."
-      },
-      {
-        type: "poll",
-        pollId: "q-t2",
-        layout: "news2",
-        kind: "news2",
-        expectedScale: 2,
-        expectedTotal: 7,
-        resultsTitle: "How the room scored patient 1",
-        kicker: "Your turn  ·  live NEWS2  ·  patient 1",
-        title: "62, known COPD — score this patient",
-        prompt: "Score this patient on the NEWS2 chart on your phone. Tap one cell on each row. For SpO<sub>2</sub>, tap Scale 1 or Scale 2.",
-        votePrompt: "Score this patient on the NEWS2 chart. Tap one cell on each row. For SpO<sub>2</sub>, tap Scale 1 or Scale 2.",
-        options: [],
-        obs: {
-          hx: "62, known COPD. Alert card: previous type 2 respiratory failure, target 88–92%. Currently on 28% Venturi. Increased SOB. No pyrexia.",
-          rr: "24 /min",
-          spo2: "96% on oxygen",
-          o2: "Oxygen (28% Venturi)",
-          sbp: "118 mmHg",
-          pulse: "92 /min",
-          con: "Alert",
-          temp: "36.5 °C"
-        },
-        scene: [
-          "62 years old, known COPD",
-          "Alert card: previous type 2 respiratory failure, target 88–92%",
-          "Currently on 28% Venturi",
-          "Increased shortness of breath",
-          "No pyrexia",
-          "Alert",
-          "Temp 36.5 °C"
-        ],
-        detail: `
-          <div class="poll-detail">
-            <div class="photo-frame n2-monitor">
-              <img src="assets/patient1-monitor.png" alt="Zoll monitor showing pulse 92, blood pressure 118 over 72, MAP 87, respiratory rate 24, SpO2 96 percent">
-            </div>
-            <div class="n2-chart-slot"></div>
-          </div>`,
-        teach: "<strong>NEWS 7 on Scale 2.</strong> Type 2 failure is already documented on the alert card, so Scale 2 is the SpO<sub>2</sub> scale — not because they have COPD. RR 24 scores 2. SpO<sub>2</sub> 96% <strong>on oxygen</strong> scores 2 on Scale 2 (95–96 on oxygen); on air, ≥93% would score 0. On Scale 1, 96% scores 0. Oxygen scores 2, pulse 92 scores 1. Total <strong>7</strong>. Still target 88–92%.",
-        notes: "Now they apply the teaching. Patient 1 has documented T2RF — Scale 2. Correct is NEWS 7. Typical error: Scale 1 because they are ‘just COPD’, so 96% scores 0."
-      },
-      {
-        type: "poll",
-        pollId: "q-not2",
-        layout: "news2",
-        kind: "news2",
-        expectedScale: 1,
-        expectedTotal: 6,
-        resultsTitle: "How the room scored patient 2",
-        kicker: "Your turn  ·  live NEWS2  ·  patient 2",
-        title: "78, known COPD — score this patient",
-        prompt: "Score this patient on the NEWS2 chart on your phone. Tap one cell on each row. For SpO<sub>2</sub>, tap Scale 1 or Scale 2.",
-        votePrompt: "Score this patient on the NEWS2 chart. Tap one cell on each row. For SpO<sub>2</sub>, tap Scale 1 or Scale 2.",
-        options: [],
-        obs: {
-          hx: "78, known COPD. Not on home oxygen. Increased SOB and secretions. Talking in short sentences. No alert card. No documented type 2 failure.",
-          rr: "22 /min",
-          spo2: "90% on air",
-          o2: "Air",
-          sbp: "152 mmHg",
-          pulse: "104 /min",
-          con: "Alert",
-          temp: "36.9 °C"
-        },
-        scene: [
-          "78 years old, known COPD",
-          "Not on home oxygen — scoring on air",
-          "Increased shortness of breath and secretions",
-          "Talking in short sentences",
-          "No alert card, no documented type 2 failure",
-          "Alert",
-          "Temp 36.9 °C"
-        ],
-        detail: `
-          <div class="poll-detail">
-            <div class="photo-frame n2-monitor">
-              <img src="assets/patient2-monitor.png" alt="Zoll monitor showing pulse 104, blood pressure 152 over 88, MAP 109, respiratory rate 22, SpO2 90 percent">
-            </div>
-            <div class="n2-chart-slot"></div>
-          </div>`,
-        teach: "<strong>NEWS 6 on Scale 1.</strong> COPD, extra secretions and 90% on air do not document type 2 failure, so stay on Scale 1. RR 22 scores 2, SpO<sub>2</sub> 90% on air scores 3, air 0, SBP 152 scores 0, pulse 104 scores 1, Alert 0, temp 36.9 scores 0. Total <strong>6</strong>. Scale 2 would score 90% as 0 (88–92) and give NEWS <strong>3</strong>, hiding the hypoxia. Still target 88–92%.",
-        notes: "Patient 2 has no documented T2RF — Scale 1. Correct is NEWS 6. Typical error: Scale 2 because they have COPD, so 90% scores 0."
-      },
-      {
-        kicker: "Critically unwell",
-        title: "This patient needs high-flow oxygen now",
-        html: `
-          <div class="shock-layout">
-            <img class="shock-monitor" src="assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, MAP 62, respiratory rate 32, SpO2 80 percent">
-            <div>
-              <p class="shock-scene-line">64, known COPD. Alert card: previous type 2 failure, target 88–92%, on a 28% Venturi. Exhausted, cyanosed, barely responding.</p>
-              <div class="shock-vitals">
-                <div><strong>80%</strong><span>SpO2</span></div>
-                <div><strong>86/50</strong><span>BP</span></div>
-                <div><strong>128</strong><span>Pulse</span></div>
-                <div><strong>32</strong><span>RR</span></div>
-              </div>
-              <ul class="shock-actions">
-                <li>Do not withhold oxygen for COPD, the alert card, or the 88–92% target</li>
-                <li>Reservoir mask now. <strong>TIME-CRITICAL.</strong> ATMIST</li>
-                <li>Titrate once they are no longer critically ill. If they become drowsy, reduce flow and support ventilation</li>
-                <li><strong>Scale 2</strong> because type 2 is already documented — not because of the high-flow oxygen</li>
-              </ul>
-            </div>
-          </div>
-          <div class="banner red" style="margin-top:12px">The 6-minute rule is neb drive only. It is not a timer on oxygen for hypoxia</div>`,
-        notes: "Land this as the critically unwell exception, not a ‘take the oxygen off’ story. High-flow now. The 6-minute clock does not apply to oxygen therapy. Alert-card 88–92% is for when they are not critically ill. Scale 2 is from the documented type 2, not from the oxygen you just put on."
-      },
-      {
-        type: "poll",
-        pollId: "q1",
-        kicker: "Check  1 of 5",
-        title: "True or false?",
-        prompt: "Every COPD patient should be scored on NEWS2 Scale 2.",
-        options: ["True", "False"],
-        correct: 1,
-        teach: "False. JRCALC / AACES COPD guidance says some patients are at increased risk of type 2 failure — not all. Look for an alert card or other record before Scale 2. The default is Scale 1. There can be exceptions — say why if you use Scale 2 without that record.",
-        notes: "First assessment of whether the session worked. Space reveals. If the room goes True, slow down on the take-home."
-      },
-      {
-        type: "poll",
-        pollId: "q2",
-        kicker: "Check  2 of 5",
-        title: "Oxygen target vs scale",
-        prompt: "Can you target SpO<sub>2</sub> 88–92% while still using Scale 1?",
-        options: ["Yes", "No"],
-        correct: 0,
-        teach: "Yes. JRCALC / AACES COPD guidance targets 88–92% and still only asks you to calculate a NEWS2 score. RCP: Scale 2 is a separate, documented decision.",
-        notes: "Second assessment question. This is the distinction most staff blur."
-      },
-      {
-        type: "poll",
-        pollId: "q3",
-        kicker: "Check  3 of 5",
-        title: "The critically ill",
-        prompt: "Known COPD patient presents with the observations below. Do we give high-flow or low-flow oxygen?",
-        options: [
-          "They are hypoxic and in shock — give high-flow, then titrate if they improve",
-          "They have COPD — give low-flow oxygen"
-        ],
-        correct: 0,
-        image: "assets/patient-shock-monitor.png",
-        detail: `
-          <div class="photo-frame cutout shock-zoll">
-            <img src="assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, MAP 62, respiratory rate 32, SpO2 80 percent">
-          </div>`,
-        teach: "<strong>High-flow.</strong> This is shock, not a “usual COPD”. JRCALC / AACES COPD guidance: do not withhold high-concentration oxygen if the primary illness needs it. Hypoxia is the greater short-term risk. Titrate 88–92% once they are no longer critically ill. The 6-minute rule does not apply here — that only limits oxygen as the driving gas of a nebuliser.",
-        notes: "Watch for people still giving controlled oxygen in shock because of COPD. The Zoll is the argument: 80%, 86/50, 128, RR 32."
-      },
-      {
-        type: "poll",
-        pollId: "q4",
-        kicker: "Check  4 of 5",
-        title: "Nebuliser drive",
-        prompt: "An oxygen-driven neb in COPD. How long may oxygen drive it?",
-        options: ["2 minutes", "6 minutes", "Until the chamber is empty"],
-        correct: 1,
-        teach: "6 minutes per run, then stop the oxygen drive and aim 88–92%. JRCALC / AACES COPD guidance does not write a maximum number of nebs. Salbutamol may be repeated as further 6-minute oxygen-driven episodes if that is the only method you have. Ipratropium once. Applies if COPD is a possibility — not only type 2 failure.",
-        notes: "If they say until empty, correct firmly. Duration is the drive time, not a two-neb cap."
-      },
-      {
-        type: "poll",
-        pollId: "q5",
-        kicker: "Check  5 of 5",
-        title: "Not every breathless COPD is an exacerbation",
-        prompt: "Chest pain and fever in “COPD” — what now?",
-        options: ["Treat as a simple exacerbation", "Reconsider the diagnosis"],
-        correct: 1,
-        teach: "Uncommon in simple exacerbation. Reconsider pneumonia, ACS, PE, pneumothorax, heart failure. COPD does not choose Scale 2. A previous hospital or specialist record of type 2 failure does.",
-        notes: "Finish the quiz on differential, then the take-home lines."
-      },
-      {
-        kicker: "Take home",
-        title: "Five key points to remember",
-        html: `
-          <div class="body">
-            <div class="banner build">1. Some COPD patients are at risk of type 2 failure — not all.</div>
-            <div class="banner teal build" style="margin-top:8px">2. Do not put every COPD patient on NEWS2 Scale 2.</div>
-            <div class="banner green build" style="margin-top:8px">3. Target 88–92% oxygen in COPD — that does not choose the scale.</div>
-            <div class="banner dark build" style="margin-top:8px">4. Look for a record of type 2 failure before Scale 2. COPD alone is not enough.</div>
-            <div class="banner red build" style="margin-top:8px">5. Never leave a critically ill COPD patient hypoxic.</div>
-          </div>`,
-        notes: "Read them slowly. Space reveals each line."
-      },
-      {
-        kicker: "Sources",
-        title: "References",
-        html: `
-          <div class="body two">
-            <div class="card">
-              <h3>Clinical guidance</h3>
-              <ul>
-                <li>JRCALC / AACES COPD guidance v20.40 (6 September 2023)</li>
-                <li>JRCALC Oxygen — 4 L/min 28% Venturi, target 88–92%</li>
-                <li>JRCALC Salbutamol D0300, Ipratropium D0200, Hydrocortisone D0180</li>
-                <li>WMAS clinical notices and local PGDs where they apply — including CN-436</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h3>NEWS2</h3>
-              <ul>
-                <li>RCP, National Early Warning Score (NEWS) 2, 2017 — Chart 1 reproduced unmodified, in colour</li>
-                <li><a href="https://www.rcp.ac.uk/resources/national-early-warning-score-news-2/" style="color:inherit">rcp.ac.uk/resources/national-early-warning-score-news-2</a></li>
-                <li>RCP NEWS2 additional implementation guidance, March 2020 — oxygen scales</li>
-                <li>Williams B. Clin Med 2019;19:94–95 — most AECOPD patients do not have HCRF</li>
-                <li>WMAS CN-436 Pre-alerting of Patients V8 (20 July 2026) — sats on oxygen ≤91%, or ≤83% in chronic hypercapnic respiratory failure</li>
-              </ul>
-            </div>
-          </div>
-          <p class="small" style="margin-top:12px">Teaching summary of JRCALC Plus, not a substitute for the live guideline. ${NEWS2_CITE} NEWS2 Chart 1 is reproduced unmodified and in colour; the RCP places no copyright restriction on NEWS2 provided those conditions are met. Chest X-ray: Mikael Häggström, MD, via Wikimedia Commons, CC0 public domain. Other diagrams in this deck are original teaching graphics, not official JRCALC artwork. Recheck local PGDs and stock — prednisolone is named in JRCALC / AACES COPD guidance but is not currently available in WMAS.</p>`,
-        notes: "Ask staff to open JRCALC / AACES COPD guidance after the session. If the ePR auto-selects Scale 2 from a COPD tick-box, that is a governance issue worth feeding back."
-      },
-      {
-        questions: true,
-        kicker: "Close",
-        title: "Any questions?",
-        html: `
-          <div class="body">
-            <div class="banner dark" style="font-size:clamp(28px,3.2vw,42px);padding:28px 24px">Thank you for attending</div>
-            <div class="banner teal" style="margin-top:12px;padding:22px 24px">We hope it has been useful</div>
-            <div class="banner" style="margin-top:12px;padding:22px 24px">Ask now, or email: <a href="mailto:jon.ostrowski@wmas.nhs.uk" style="color:inherit;text-decoration:underline">jon.ostrowski@wmas.nhs.uk</a></div>
-            <div class="banner green" style="margin-top:12px;padding:22px 24px">The next slide is for feedback, and ideas for another 30-minute CPD.</div>
-          </div>`,
-        notes: "Leave this up. Offer to stay for ePR / local pathway queries. The next slide collects feedback and topic ideas. Then the CPD certificate QR — only in a hosted session. Leave that one up for the room to scan."
-      },
-      {
-        feedback: true,
-        kicker: "Feedback",
-        title: "Help shape the next session",
-        html: `
-          <div class="body two feedback-layout">
-            <div>
-              <div class="banner teal">How useful was this half hour?</div>
-              <div class="banner" style="margin-top:12px">What should the next 30-minute CPD be?</div>
-              <a class="feedback-open" href="?view=feedback">Open the feedback form</a>
-            </div>
-            <aside class="poll-join feedback-join">
-              <img alt="Open the feedback form" width="180" height="180" hidden />
-              <p class="poll-url"></p>
-            </aside>
-          </div>`,
-        notes: "Leave this up. Phones already on the vote page get the form by themselves. Anyone else can scan the QR. Download feedback from the presenter sidebar."
-      },
-      {
-        hostedOnly: true,
-        kicker: "",
-        title: "Record Attendance for CPD Certificate",
-        html: `
-          <div class="body trust-attend">
-            <div class="trust-qr">
-              <img src="assets/copd-certificate-qr.png" alt="CPD certificate QR code" onerror="var p=this.parentElement;this.remove();var m=p&&p.querySelector('.trust-qr-missing');if(m)m.hidden=false" />
-              <p class="trust-qr-missing" hidden>Save the QR image as assets/copd-certificate-qr.png, then refresh.</p>
-            </div>
-          </div>`,
-        notes: "This slide is only in a hosted session, after a Hub PIN. It is not in the self-guided deck. Leave it up so the room can scan. Save the Trust QR as assets/copd-certificate-qr.png and hard-refresh."
-      }
-    ];
-
-    const selfMode = new URLSearchParams(location.search).get("view") === "self";
+    const selfMode = params.get("view") === "self";
+    const slideSource = (COURSE.id === "hf" && typeof heartFailureSlides === "function")
+      ? heartFailureSlides()
+      : (COURSE.id === "asthma" && typeof asthmaSlides === "function")
+      ? asthmaSlides()
+      : copdSlides();
     const slides = slideSource.flatMap((s) => {
       if (selfMode && (s.collectNames || s.hostedOnly || s.questions)) return [];
-      if (selfMode && s.type === "title" && s.title.indexOf("COPD, Type 2") === 0) {
-        return [{ ...s, kicker: "Self-guided CPD  ·  about 30 minutes" }];
-      }
       if (s.type !== "poll") return [s];
       if (selfMode) {
         const copy = Object.assign({}, s);
         if (s.pollId === "hands") {
           copy.kicker = "Check yourself";
           copy.title = "Default NEWS2 scale in COPD";
+        } else if (s.pollId === "hf-hands") {
+          copy.kicker = "Check yourself";
+          copy.title = "GTN blood pressure in acute heart failure";
+        } else if (s.pollId === "asthma-hands") {
+          copy.kicker = "Check yourself";
+          copy.title = "Oxygen target in acute asthma";
         } else if (s.layout === "news2") {
           copy.kicker = String(s.kicker || "").replace("live NEWS2", "check yourself");
           copy.prompt = "Work out the NEWS2 from the observations. Space shows the scoring.";
@@ -3001,9 +3071,8 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     const timerEl = document.getElementById("timer");
     const pvBtn = document.getElementById("pvBtn");
     const pvHint = document.getElementById("pvHint");
-    const STORE = selfMode ? "copd-cpd-self-state" : "copd-cpd-state";
-    const CHANNEL = "copd-cpd-deck";
-    const params = new URLSearchParams(location.search);
+    const STORE = selfMode ? COURSE.selfStore : COURSE.store;
+    const CHANNEL = COURSE.channel;
     const requested = params.get("view");
     let view = requested === "presenter" || requested === "audience" || requested === "vote" || requested === "self" || requested === "feedback"
       ? requested
@@ -3044,106 +3113,191 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     let audienceWin = null;
     const channel = (!selfMode && typeof BroadcastChannel === "function") ? new BroadcastChannel(CHANNEL) : null;
 
+    function presenterServerUrl() {
+      return "http://127.0.0.1:8765/?course=" + encodeURIComponent(COURSE.id) + "&view=presenter";
+    }
+
+    function pinStatusText(reason) {
+      if (reason === "server") {
+        return "The live Hub server is not answering, so this PIN cannot be checked. Run python serve.py, then open " +
+          presenterServerUrl() +
+          " — not the HTML file, the GitHub copy, or the live COPD site (Heart Failure is not live there yet).";
+      }
+      if (reason === "pin") {
+        return "That PIN was not accepted. Heart Failure uses the same Hub PINs as COPD.";
+      }
+      return "Enter your Hub PIN to open presenter view.";
+    }
+
+    function finishPinGate() {
+      const gate = document.getElementById("pinGate");
+      document.body.classList.remove("pin-needed");
+      if (gate) gate.hidden = true;
+    }
+
+    function clearStoredHost() {
+      hub.token = "";
+      hub.presenter = "";
+      try {
+        sessionStorage.removeItem("copd-host-token");
+        sessionStorage.removeItem("copd-presenter-name");
+      } catch (err) { /* ignore */ }
+    }
+
     async function confirmHostToken(token) {
       const value = String(token || "").trim();
-      if (!value) return false;
+      if (!value) return { ok: false, reason: "empty" };
       try {
         const res = await fetch("/api/join", {
           headers: { "X-Host-Token": value },
           cache: "no-store"
         });
-        if (!res.ok) return false;
-        const data = await res.json();
-        if (!(data.host || data.hostToken)) return false;
+        const text = await res.text();
+        let data = {};
+        try { data = JSON.parse(text); } catch (err) {
+          return { ok: false, reason: "server" };
+        }
+        if (!res.ok) return { ok: false, reason: "server" };
+        if (!(data.host || data.hostToken)) return { ok: false, reason: "pin" };
         if (data.presenter) {
           hub.presenter = data.presenter;
           try { sessionStorage.setItem("copd-presenter-name", data.presenter); } catch (err) { /* ignore */ }
         }
-        return true;
+        return { ok: true };
       } catch (err) {
-        return false;
+        return { ok: false, reason: "server" };
       }
+    }
+
+    function askPresenterPin(message) {
+      const gate = document.getElementById("pinGate");
+      const form = document.getElementById("pinForm");
+      const input = document.getElementById("pinInput");
+      const status = document.getElementById("pinStatus");
+      const selfBtn = document.getElementById("pinSelf");
+      if (!gate || !form || !input) {
+        const typed = window.prompt(message);
+        if (typed == null) return Promise.resolve(null);
+        return Promise.resolve(String(typed));
+      }
+      document.body.classList.add("pin-needed");
+      gate.hidden = false;
+      if (status) status.textContent = message;
+      input.value = "";
+      input.disabled = false;
+      const submitBtn = form.querySelector("button[type='submit']");
+      if (submitBtn) submitBtn.disabled = false;
+      window.setTimeout(() => input.focus(), 50);
+      return new Promise((resolve) => {
+        form.onsubmit = (e) => {
+          e.preventDefault();
+          resolve(input.value);
+        };
+        if (selfBtn) selfBtn.onclick = () => resolve(null);
+      });
     }
 
     function openSelfGuidedDeck() {
       const url = new URL(location.href);
       url.searchParams.set("view", "self");
+      url.searchParams.set("course", COURSE.id);
       url.searchParams.delete("host");
       url.searchParams.delete("r");
       location.replace(url.toString());
     }
 
-    function chooseRetryOrSelfGuided(message) {
-      return window.confirm(
-        message + "\n\nOK to try again, or Cancel for the self-guided deck (same slides, no live vote or register)."
-      );
-    }
-
     async function requirePresenterAccess() {
       if (view !== "presenter") return true;
-      let token = hub.token || "";
-      if (token && !(await confirmHostToken(token))) {
-        token = "";
-        hub.token = "";
-        hub.presenter = "";
-        try {
-          sessionStorage.removeItem("copd-host-token");
-          sessionStorage.removeItem("copd-presenter-name");
-        } catch (err) { /* ignore */ }
+      const accept = (value) => {
+        hub.token = value;
+        try { sessionStorage.setItem("copd-host-token", value); } catch (err) { /* ignore */ }
+        finishPinGate();
+        return true;
+      };
+      let hint = pinStatusText("");
+      const stored = hub.token || "";
+      if (stored) {
+        const check = await confirmHostToken(stored);
+        if (check.ok) return accept(stored);
+        if (check.reason === "pin") clearStoredHost();
+        hint = pinStatusText(check.reason);
       }
-      while (!token) {
-        const typed = window.prompt(
-          "Your Hub PIN\n\nEach facilitator has their own PIN. You do not need a Render account."
-        );
+      while (true) {
+        const typed = await askPresenterPin(hint);
         if (typed == null) {
-          if (!chooseRetryOrSelfGuided("A PIN is needed to present.")) {
-            openSelfGuidedDeck();
-            return false;
-          }
-          continue;
-        }
-        const value = String(typed).trim();
-        if (!value) continue;
-        if (await confirmHostToken(value)) {
-          token = value;
-          break;
-        }
-        if (!chooseRetryOrSelfGuided("That PIN was not accepted.")) {
+          finishPinGate();
           openSelfGuidedDeck();
           return false;
         }
+        const value = String(typed).trim();
+        if (!value) {
+          hint = "Enter your Hub PIN.";
+          continue;
+        }
+        const form = document.getElementById("pinForm");
+        const input = document.getElementById("pinInput");
+        const status = document.getElementById("pinStatus");
+        const submitBtn = form && form.querySelector("button[type='submit']");
+        if (status) status.textContent = "Checking PIN…";
+        if (input) input.disabled = true;
+        if (submitBtn) submitBtn.disabled = true;
+        const check = await confirmHostToken(value);
+        if (input) input.disabled = false;
+        if (submitBtn) submitBtn.disabled = false;
+        if (check.ok) return accept(value);
+        hint = pinStatusText(check.reason);
       }
-      hub.token = token;
-      try { sessionStorage.setItem("copd-host-token", token); } catch (err) { /* ignore */ }
-      return true;
     }
+
+    function fitDeck() {
+      const deck = stage.querySelector(".deck");
+      if (!deck) return;
+      const cs = getComputedStyle(stage);
+      const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+      const padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+      const availW = stage.clientWidth - padX;
+      const availH = stage.clientHeight - padY;
+      if (availW < 80 || availH < 80) return;
+      const root = getComputedStyle(document.documentElement);
+      const designW = parseFloat(root.getPropertyValue("--design-w")) || 1600;
+      const designH = parseFloat(root.getPropertyValue("--design-h")) || 900;
+      const scale = Math.min(availW / designW, availH / designH);
+      const next = Math.max(0.4, Math.round(scale * 1000) / 1000);
+      const prev = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--slide-scale"));
+      if (Number.isFinite(prev) && Math.abs(prev - next) < 0.002) return;
+      document.documentElement.style.setProperty("--slide-scale", String(next));
+    }
+    if (window.ResizeObserver) new ResizeObserver(() => fitDeck()).observe(stage);
+    window.addEventListener("resize", fitDeck);
+    document.addEventListener("fullscreenchange", fitDeck);
 
     function applyView() {
       document.body.classList.toggle("presenter", view === "presenter");
       document.body.classList.toggle("audience", view === "audience");
       document.body.classList.toggle("self", view === "self");
+      document.body.classList.toggle("feedback", view === "feedback");
       if (view === "presenter") {
-        document.title = "COPD CPD — Presenter";
+        document.title = COURSE.short + " — Presenter";
         pvBtn.textContent = "Audience window";
         notesEl.classList.add("visible");
         pvHint.textContent = audienceWin && !audienceWin.closed
           ? "Share the Audience window with the room projector and in Teams (Share window). Keep this presenter screen on your laptop. Paste the join link in the Teams chat so remote staff can vote."
           : "Popup blocked? Open a second copy and add ?view=audience to the address. Share that window in the room and in Teams.";
       } else if (view === "audience") {
-        document.title = "COPD CPD — Audience";
+        document.title = COURSE.short + " — Audience";
         pvBtn.hidden = true;
         notesEl.classList.remove("visible");
       } else if (view === "self") {
-        document.title = "COPD CPD — Self-guided";
+        document.title = COURSE.short + " — Self-guided";
         pvBtn.textContent = "Printable handout";
         notesEl.classList.remove("visible");
         setHubLive(false);
       } else if (view === "home") {
-        document.title = "COPD CPD | Hub CPD";
+        document.title = "Hub CPD";
       } else if (view === "feedback") {
-        document.title = "Session feedback | Hub CPD";
+        document.title = COURSE.short + " — Feedback";
       } else {
-        document.title = "COPD in Pre-hospital Care | Ambulance CPD";
+        document.title = COURSE.title + " | Hub CPD";
         pvBtn.textContent = "Presenter view (S)";
       }
     }
@@ -3151,11 +3305,12 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     function slideMarkup(s, idx) {
       if (s.type === "title") {
         return `<section class="slide title-slide" data-i="${idx}">
+          <img class="title-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers.">
           <div class="kicker">${s.kicker}</div>
           <h1>${s.title}</h1>
           <p class="subtitle">${s.subtitle || ""}</p>
           ${s.meta ? `<p class="meta">${s.meta}</p>` : ""}
-          <div class="footer-bar"><span>Hub CPD · JRCALC Chronic Obstructive Pulmonary Disease v20.40</span><span>${idx + 1} / ${slides.length}</span></div>
+          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
         </section>`;
       }
       if (s.type === "poll") {
@@ -3206,7 +3361,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             ${selfMode && s.teach ? `<div class="poll-teach">${s.teach}</div>` : ""}
             <p class="poll-host"></p>
           </div>
-          <div class="footer-bar"><span>Hub CPD · JRCALC Chronic Obstructive Pulmonary Disease v20.40 · RCP NEWS2</span><span>${idx + 1} / ${slides.length}</span></div>
+          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
         </section>`;
       }
       if (s.type === "poll-results") {
@@ -3237,25 +3392,133 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             ${spread}
             <div class="poll-teach build"></div>
           </div>
-          <div class="footer-bar"><span>Hub CPD · JRCALC Chronic Obstructive Pulmonary Disease v20.40 · RCP NEWS2</span><span>${idx + 1} / ${slides.length}</span></div>
+          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
         </section>`;
       }
       return `<section class="slide${s.collectNames ? " cert-slide" : ""}${s.hostedOnly ? " trust-slide" : ""}" data-i="${idx}">
         <div class="kicker">${s.kicker}</div>
         <h2>${s.title}</h2>
         ${s.html}
-        <div class="footer-bar"><span>Hub CPD · JRCALC Chronic Obstructive Pulmonary Disease v20.40 · RCP NEWS2</span><span>${idx + 1} / ${slides.length}</span></div>
+        <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
       </section>`;
     }
 
     function buildsOn(idx) {
       const el = stage.querySelectorAll(".slide")[idx];
-      return el ? el.querySelectorAll(".build").length : 0;
+      if (!el) return 0;
+      const zooms = el.querySelectorAll("[data-zoom]").length;
+      if (zooms) return zooms;
+      return el.querySelectorAll(".build").length;
     }
 
     function persist() {
       localStorage.setItem(STORE, JSON.stringify({ i, b: build, r: hub.room || "" }));
       if (channel) channel.postMessage({ i, b: build, r: hub.room || "", join: hub.join || "" });
+    }
+
+    let picZoomSlide = -1;
+    let picZoomGen = 0;
+
+    function picZoomRects(frames) {
+      return frames.map((fr) => fr.getBoundingClientRect());
+    }
+
+    function picZoomFlip(fr, first, duration, easing) {
+      const last = fr.getBoundingClientRect();
+      if (!first || last.width < 2 || last.height < 2) return null;
+      const dx = first.left - last.left;
+      const dy = first.top - last.top;
+      const sx = first.width / last.width;
+      const sy = first.height / last.height;
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(sx - 1) < 0.02 && Math.abs(sy - 1) < 0.02) return null;
+      fr.getAnimations().forEach((a) => a.cancel());
+      fr.style.transformOrigin = "top left";
+      return fr.animate(
+        [
+          { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` },
+          { transform: "none" }
+        ],
+        { duration, easing: easing || "cubic-bezier(0.22, 1, 0.36, 1)" }
+      );
+    }
+
+    function afterPicZoomAnim(anim, fn) {
+      if (anim && anim.finished) anim.finished.then(fn, fn);
+      else fn();
+    }
+
+    function setPicZoomClasses(slide, figures, n) {
+      slide.classList.toggle("pic-zoomed", n > 0);
+      figures.forEach((fig) => {
+        fig.classList.toggle("zoom-on", Number(fig.getAttribute("data-zoom")) === n);
+        fig.style.opacity = "";
+      });
+    }
+
+    function applyPicZoom(slide, n) {
+      const strip = slide.querySelector(".body.pic-strip");
+      if (!strip) {
+        slide.classList.remove("pic-zoomed", "pic-flipping");
+        return;
+      }
+      const gen = ++picZoomGen;
+      const figures = [...strip.querySelectorAll("[data-zoom]")];
+      const frames = figures.map((fig) => fig.querySelector(".photo-frame")).filter(Boolean);
+      const prev = Number(slide.dataset.picZoom || 0);
+      const slideChanged = picZoomSlide !== i;
+      picZoomSlide = i;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const shouldAnim = !reduce && !slideChanged && prev !== n && frames.length;
+      slide.dataset.picZoom = String(n);
+
+      const stillThis = () => gen === picZoomGen && Number(slide.dataset.picZoom) === n;
+
+      const zoomIn = (fromRects) => {
+        if (!stillThis()) return;
+        slide.classList.add("pic-flipping");
+        setPicZoomClasses(slide, figures, n);
+        void strip.offsetWidth;
+        const hero = figures.find((fig) => Number(fig.getAttribute("data-zoom")) === n);
+        const idx = figures.indexOf(hero);
+        const anim = hero && frames[idx] ? picZoomFlip(frames[idx], fromRects[idx], 620) : null;
+        afterPicZoomAnim(anim, () => {
+          if (stillThis()) slide.classList.remove("pic-flipping");
+        });
+      };
+
+      const zoomOut = (fromRects, then) => {
+        if (!stillThis()) return;
+        slide.classList.add("pic-flipping");
+        frames.forEach((fr) => fr.getAnimations().forEach((a) => a.cancel()));
+        setPicZoomClasses(slide, figures, 0);
+        void strip.offsetWidth;
+        const hero = figures.find((fig) => Number(fig.getAttribute("data-zoom")) === prev);
+        const idx = figures.indexOf(hero);
+        const anim = hero && frames[idx] ? picZoomFlip(frames[idx], fromRects[idx], 480, "cubic-bezier(0.4, 0, 0.2, 1)") : null;
+        afterPicZoomAnim(anim, () => {
+          if (!stillThis()) return;
+          slide.classList.remove("pic-flipping");
+          if (!then) return;
+          setTimeout(() => { if (stillThis()) then(); }, 90);
+        });
+      };
+
+      if (!shouldAnim) {
+        slide.classList.remove("pic-flipping");
+        setPicZoomClasses(slide, figures, n);
+        return;
+      }
+
+      const firsts = picZoomRects(frames);
+      if (prev > 0 && n > 0) {
+        zoomOut(firsts, () => zoomIn(picZoomRects(frames)));
+        return;
+      }
+      if (n === 0) {
+        zoomOut(firsts);
+        return;
+      }
+      zoomIn(firsts);
     }
 
     function applySlide() {
@@ -3270,6 +3533,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         [...current.querySelectorAll(".build")].forEach((el, n) => {
           el.classList.toggle("show", n < build);
         });
+        applyPicZoom(current, current.querySelector("[data-zoom]") ? build : 0);
         current.classList.toggle("answer-on", slides[i] && slides[i].type === "poll-results" && build > 0);
       }
       paintNotes();
@@ -3312,6 +3576,70 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         }
       }
       return true;
+    }
+
+    const ATTEND_KEY = COURSE.attendKey;
+    const PRESENTER_KEY = "copd-cpd-presenter";
+    let sessionFile = "";
+    let sessionFolder = "";
+    let sessionUrl = "";
+    let sessionApi = false;
+
+    function rememberAttendance(names) {
+      if (view === "audience" || view === "vote" || view === "self") return;
+      if (!sessionFile) return;
+      if (!Array.isArray(names)) return;
+      const unique = [...new Set(names.map((n) => String(n || "").trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+      if (!unique.length && hub.poll && (hub.poll.nameCount || 0) > 0) return;
+      const rec = {
+        date: new Date().toISOString().slice(0, 10),
+        file: sessionFile,
+        names: unique,
+        updated: new Date().toISOString()
+      };
+      localStorage.setItem(ATTEND_KEY, JSON.stringify(rec));
+    }
+
+    function applySessionStatus(data) {
+      if (!data || typeof data !== "object") return;
+      if (data.room) setRoom(data.room);
+      sessionFolder = data.folder || "";
+      sessionUrl = data.url || "";
+      const csvName = String(data.name || "").trim();
+      const looksLikeCsv = /\.csv$/i.test(csvName);
+      sessionFile = (data.started || data.exists || looksLikeCsv) ? csvName : "";
+      paintSessionFile();
+      paintNotes();
+    }
+
+    function paintSessionFile() {
+      const el = document.getElementById("sessionFile");
+      if (!el || !sessionFile) return;
+      const where = sessionFolder ? sessionFolder + "/" + sessionFile : sessionFile;
+      el.textContent = "Saving names to OneDrive: " + where;
+    }
+
+    async function refreshSessionStatus() {
+      if (view === "audience" || view === "vote" || view === "self") return;
+      try {
+        const res = await fetch("/api/session?course=" + encodeURIComponent(COURSE.id), {
+          headers: apiHeaders(),
+          cache: "no-store"
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        sessionApi = true;
+        applySessionStatus(data);
+      } catch (err) { /* local-only */ }
+    }
+
+    function registerFromStore() {
+      try {
+        const rec = JSON.parse(localStorage.getItem(ATTEND_KEY) || "null") || { date: "", names: [] };
+        if (sessionFile && rec.file === sessionFile) return rec;
+      } catch (err) { /* ignore */ }
+      return { date: "", names: [] };
     }
 
     function go(n, fromRemote) {
@@ -3386,6 +3714,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       try {
         const u = new URL(join, location.origin);
         u.searchParams.set("r", hub.room);
+        if (COURSE.id) u.searchParams.set("course", COURSE.id);
         return u.toString();
       } catch (err) {
         return join;
@@ -3396,6 +3725,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       const headers = Object.assign({}, extra || {});
       if (hub.token) headers["X-Host-Token"] = hub.token;
       if (hub.room) headers["X-Room"] = hub.room;
+      if (COURSE.id) headers["X-Course"] = COURSE.id;
       return headers;
     }
 
@@ -3411,7 +3741,9 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
 
     function pageJoinFallback() {
       const h = location.hostname;
-      if (h && h !== "localhost" && h !== "127.0.0.1") return location.origin + "/v";
+      if (h && h !== "localhost" && h !== "127.0.0.1") {
+        return location.origin + "/v?course=" + encodeURIComponent(COURSE.id);
+      }
       return "";
     }
 
@@ -3444,7 +3776,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       }
     }
 
-    const HOSTED_JOIN = "https://hub-cpd.onrender.com/v";
+    const HOSTED_JOIN = "https://hub-cpd.co.uk/v";
     const JOIN_STORE = "copd-public-join";
 
     function setJoin(url, broadcast) {
@@ -3455,18 +3787,39 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       if (broadcast !== false && channel) channel.postMessage({ join });
     }
 
+    function siteHomeUrl() {
+      try {
+        const u = new URL(hub.join || hub.feedbackOrigin || location.href);
+        return u.origin;
+      } catch (err) {
+        return location.origin;
+      }
+    }
+
     function feedbackUrl() {
       try {
-        const u = hub.join ? new URL(hub.join) : new URL(location.href);
+        const u = new URL(hub.join || hub.feedbackOrigin || location.href);
         u.pathname = "/";
         u.search = "";
         u.hash = "";
         u.searchParams.set("view", "feedback");
+        if (COURSE.id) u.searchParams.set("course", COURSE.id);
         if (hub.room) u.searchParams.set("r", hub.room);
         return u.toString();
       } catch (err) {
-        return "?view=feedback";
+        return "?course=" + encodeURIComponent(COURSE.id) + "&view=feedback";
       }
+    }
+
+    async function ensureFeedbackOrigin() {
+      if (hub.join && !/localhost|127\.0\.0\.1/i.test(hub.join)) return;
+      try {
+        const res = await fetch("/api/join", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.join) hub.feedbackOrigin = data.join;
+      } catch (err) { /* keep the page address */ }
+      fillJoin();
     }
 
     function fillJoin() {
@@ -3478,6 +3831,22 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
           ? hub.join
           : "Start python serve.py for a live vote link.";
       }
+      const feedback = feedbackUrl();
+      const home = siteHomeUrl();
+      stage.querySelectorAll(".feedback-home").forEach((el) => {
+        el.textContent = home;
+      });
+      stage.querySelectorAll(".feedback-join").forEach((box) => {
+        const img = box.querySelector(".feedback-qr");
+        const url = box.querySelector(".poll-url");
+        if (img && img.dataset.src !== feedback) {
+          img.dataset.src = feedback;
+          img.alt = "Open the feedback form";
+          img.src = "/qr.svg?u=" + encodeURIComponent(feedback);
+          img.hidden = false;
+        }
+        if (url) url.textContent = feedback.replace(/([/?&=])/g, "$1\u200b");
+      });
       if (!hub.join) return;
       stage.querySelectorAll(".poll-join:not(.feedback-join)").forEach((box) => {
         const img = box.querySelector("img");
@@ -3488,31 +3857,12 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         }
         if (url) url.textContent = hub.join;
       });
-      const feedback = feedbackUrl();
-      const phoneCanOpen = hub.join && !/localhost|127\.0\.0\.1/i.test(feedback);
-      stage.querySelectorAll(".feedback-open").forEach((link) => { link.href = feedback; });
-      stage.querySelectorAll(".feedback-join").forEach((box) => {
-        const img = box.querySelector("img");
-        const url = box.querySelector(".poll-url");
-        if (!phoneCanOpen) {
-          if (img) img.hidden = true;
-          if (url) url.textContent = "";
-          return;
-        }
-        if (img && img.dataset.src !== feedback) {
-          img.dataset.src = feedback;
-          img.alt = "Open the feedback form";
-          img.src = "/qr.svg?u=" + encodeURIComponent(feedback);
-          img.hidden = false;
-        }
-        if (url) url.textContent = feedback;
-      });
     }
 
     async function downloadFeedback() {
-      if (view === "audience" || view === "vote" || view === "self") return;
+      if (view === "audience" || view === "vote" || view === "self" || view === "feedback") return;
       try {
-        const res = await fetch("/api/feedback.xlsx", { headers: apiHeaders(), cache: "no-store" });
+        const res = await fetch("/api/feedback.xlsx?course=" + encodeURIComponent(COURSE.id), { headers: apiHeaders(), cache: "no-store" });
         if (res.status === 404) {
           window.alert("No feedback yet.");
           return;
@@ -3525,7 +3875,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         const stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = `copd-cpd-feedback-${stamp}.xlsx`;
+        a.download = COURSE.id + "-cpd-feedback-" + stamp + ".xlsx";
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -3616,12 +3966,47 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
 
     function paintNotes() {
       if (!notesEl || !slides[i]) return;
-      const html = `<strong>Presenter notes</strong><br>${slides[i].notes}`;
+      const live = (hub.poll && Array.isArray(hub.poll.names)) ? hub.poll.names : [];
+      rememberAttendance(live);
+      const names = sessionFile ? (live.length ? live : (registerFromStore().names || [])) : [];
+      const esc = (text) => String(text).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[ch]));
+      let html = `<strong>Presenter notes</strong><br>${slides[i].notes}`;
+      if (sessionFile) {
+        const label = esc(sessionFile.split(/[/\\]/).pop() || sessionFile);
+        html += `<strong>Attendance file</strong>`;
+        html += sessionUrl
+          ? `<p><a href="${esc(sessionUrl)}" target="_blank" rel="noopener">${label}</a></p>`
+          : `<p>${label}</p>`;
+      }
+      if (slides[i].collectNames) {
+        const list = names.length
+          ? `<ol class="cert-names">${names.map((n) => `<li>${esc(n)}</li>`).join("")}</ol>`
+          : `<p class="cert-empty">None in yet. They appear here as phones send them.</p>`;
+        html += `<strong>Attendance list (${names.length})</strong>${list}`;
+      }
       if (notesEl.innerHTML !== html) notesEl.innerHTML = html;
     }
 
-    function paintPoll() {
+    function paintCertCount() {
+      const liveNames = (hub.poll && Array.isArray(hub.poll.names)) ? hub.poll.names : [];
+      rememberAttendance(liveNames);
+      const stored = registerFromStore().names || [];
+      const liveCount = (hub.poll && hub.poll.nameCount) || 0;
+      const n = liveCount || liveNames.length || (sessionFile ? stored.length : 0);
+      stage.querySelectorAll(".cert-total").forEach((el) => { el.textContent = String(n); });
+      const side = document.getElementById("certCount");
+      if (side) {
+        side.textContent = n
+          ? n + " on the attendance list"
+          : (hub.poll && hub.poll.register ? "Waiting for certificate names…" : "");
+      }
       paintNotes();
+    }
+
+    function paintPoll() {
+      paintCertCount();
       const s = slides[i];
       const el = stage.querySelectorAll(".slide")[i];
       const poll = s && (s.type === "poll" || s.type === "poll-results") ? pollFor(s.pollId) : null;
@@ -3732,8 +4117,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
           options: s.options || [],
           correct: typeof s.correct === "number" ? s.correct : null,
           teach: s.teach || "",
-          kind: s.kind || (s.layout === "news2" ? "news2" : "choice"),
-          image: s.image || ""
+          kind: s.kind || (s.layout === "news2" ? "news2" : "choice")
         };
         if (payload.kind === "news2") {
           payload.expectedTotal = s.expectedTotal;
@@ -3777,6 +4161,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       if (data.presenter) {
         hub.presenter = data.presenter;
         try { sessionStorage.setItem("copd-presenter-name", data.presenter); } catch (err) { /* ignore */ }
+        paintSessionFile();
       }
     }
 
@@ -3833,6 +4218,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         else if (pageJoinFallback()) setJoin(pageJoinFallback());
         setHubLive(!!data.live);
         fillJoin();
+        await refreshSessionStatus();
         await hostFollowSlide();
         await tickHub();
       } catch (err) {
@@ -3848,7 +4234,8 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       url.searchParams.set("view", "audience");
       url.searchParams.delete("host");
       if (hub.room) url.searchParams.set("r", hub.room);
-      audienceWin = window.open(url.toString(), "copd-audience");
+      if (COURSE.id) url.searchParams.set("course", COURSE.id);
+      audienceWin = window.open(url.toString(), COURSE.id + "-audience");
       applyView();
     }
 
@@ -3862,6 +4249,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       }
       const url = new URL(location.href);
       url.searchParams.set("view", "presenter");
+      url.searchParams.set("course", COURSE.id);
       url.searchParams.delete("r");
       history.replaceState(null, "", url);
       applyView();
@@ -3879,7 +4267,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     };
     pvBtn.onclick = () => {
       if (view === "self") {
-        window.open("handout.html", "_blank");
+        window.open(COURSE.handout, "_blank");
         return;
       }
       if (view === "presenter") openAudienceWindow();
@@ -3891,6 +4279,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     if (copyJoinBtn) copyJoinBtn.onclick = copyJoinLink;
     const feedbackBtn = document.getElementById("feedbackBtn");
     if (feedbackBtn) feedbackBtn.onclick = downloadFeedback;
+    paintSessionFile();
     const joinOverride = document.getElementById("joinOverride");
     const hostedJoinBtn = document.getElementById("hostedJoin");
     function applyPublicJoin(raw) {
@@ -3920,19 +4309,22 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     timerEl.onclick = () => { timerStarted = Date.now(); };
 
     window.addEventListener("keydown", (e) => {
-      if (view === "vote" || view === "home" || view === "lookup" || view === "feedback") return;
+      if (view === "vote" || view === "home") return;
       if (e.target && e.target.closest && e.target.closest("input, textarea, select")) return;
       if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); stepForward(); }
       if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); stepBack(); }
       if (e.key === "Home") go(0);
-      if (e.key === "End") go(slides.length - 1);
+      if (e.key === "End") {
+        e.preventDefault();
+        go(slides.length - 1);
+      }
       if ((e.key === "n" || e.key === "N") && view === "presenter") notesEl.classList.toggle("visible");
       if (e.key === "f" || e.key === "F") document.getElementById("fsBtn").click();
       if ((e.key === "s" || e.key === "S") && view !== "audience" && view !== "self") startPresenterView();
     });
 
     window.addEventListener("click", (e) => {
-      if (view === "vote" || view === "home" || view === "lookup" || view === "feedback") return;
+      if (view === "vote" || view === "home") return;
       if (e.target.closest("button, a, input, textarea, select, label, .pv-side, .controls, .notes, #voteApp, #cpdCert")) return;
       stepForward();
     });
@@ -3958,7 +4350,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     }, 1000);
 
     function certHomeUrl() {
-      const hosted = "https://hub-cpd.onrender.com/";
+      const hosted = "https://hub-cpd.co.uk/";
       try {
         if (isLanHost(location.hostname)) return hosted;
         const home = new URL("/", location.origin);
@@ -3980,7 +4372,12 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       const sheet = document.getElementById("cpdCert");
       if (!nameEl || !dateEl || !sheet) return;
       nameEl.textContent = who;
-      if (courseEl) courseEl.textContent = (course && course.title) || "COPD, Type 2 Respiratory Failure and NEWS2";
+      if (courseEl) {
+        const title = (course && course.title)
+          || (hub.poll && hub.poll.courseTitle)
+          || COURSE.title;
+        courseEl.textContent = title;
+      }
       const raw = String(when || "").trim();
       const parsed = raw ? new Date(raw) : new Date();
       const stamp = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
@@ -4025,89 +4422,130 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       qrEl.onerror = () => goPrint();
       qrEl.src = src;
     }
-    function runLookupApp() {
-      document.body.classList.add("lookup");
-      applyView();
-      const form = document.getElementById("lookupForm");
-      const statusEl = document.getElementById("lookupStatus");
-      const courseEl = document.getElementById("lookupCourse");
-      fetch("/api/courses", { cache: "no-store" }).then(async (res) => {
-        const data = await res.json().catch(() => ({}));
-        const courses = data.courses || [];
-        if (!courseEl || !courses.length) return;
-        const current = courseEl.value;
-        courseEl.innerHTML = courses.map((c) =>
-          `<option value="${c.id}"${c.id === current ? " selected" : ""}>${c.title}</option>`
-        ).join("");
-      }).catch(() => { /* keep the COPD option */ });
-      if (!form) return;
+    function showDraftGate(message, hideForm) {
+      document.body.classList.remove("home");
+      document.body.classList.add("draft-needed");
+      const gate = document.getElementById("draftGate");
+      const form = document.getElementById("draftForm");
+      const input = document.getElementById("draftInput");
+      const status = document.getElementById("draftStatus");
+      if (gate) gate.hidden = false;
+      if (form) form.hidden = Boolean(hideForm);
+      if (status) status.textContent = message || "";
+      document.title = "Hub CPD";
+      if (!form || hideForm || form.dataset.bound) {
+        if (input && !hideForm) window.setTimeout(() => input.focus(), 50);
+        return;
+      }
+      form.dataset.bound = "1";
       form.onsubmit = async (e) => {
         e.preventDefault();
-        const name = (form.name.value || "").trim();
-        const esr = (form.esr.value || "").replace(/[^A-Za-z0-9]/g, "");
-        const course = courseEl ? courseEl.value : "copd";
-        if (name.length < 2) {
-          statusEl.textContent = "Enter the name that was on the register.";
-          return;
-        }
-        if (esr.length < 4) {
-          statusEl.textContent = "Enter your ESR number.";
-          return;
-        }
-        const btn = form.querySelector("button[type='submit']");
-        btn.disabled = true;
-        statusEl.textContent = "Searching the register…";
+        const code = input ? input.value : "";
+        if (status) status.textContent = "Checking…";
+        const submitBtn = form.querySelector("button[type='submit']");
+        if (submitBtn) submitBtn.disabled = true;
         try {
-          const res = await fetch("/api/certificate/lookup", {
+          const res = await fetch("/api/draft", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ course, name, esr })
+            body: JSON.stringify({ code: code, course: courseKey })
           });
           const data = await res.json().catch(() => ({}));
-          if (res.status === 429) {
-            statusEl.textContent = "Too many tries. Wait a few minutes and try again.";
-            btn.disabled = false;
+          if (data.missing) {
+            showDraftGate("There is no session at this address.", true);
             return;
           }
-          if (res.ok && data.ok && data.name) {
-            statusEl.textContent = "Certificate found. Use Save as PDF if you want a copy.";
-            printCpdCertificate(data.name, data.date, { title: data.title, detail: data.detail });
-            btn.disabled = false;
+          if (res.ok && data.ok) {
+            location.reload();
             return;
           }
-          statusEl.textContent = "No certificate found for that course, name and ESR number.";
+          if (status) status.textContent = "That passcode is not recognised.";
+          if (input) {
+            input.value = "";
+            input.focus();
+          }
         } catch (err) {
-          statusEl.textContent = "Could not reach the register. Try again, or use the live Hub CPD site.";
+          if (status) status.textContent = "Could not reach the session. Open it from this laptop, or from hub-cpd.co.uk.";
         }
-        btn.disabled = false;
+        if (submitBtn) submitBtn.disabled = false;
       };
+      if (input) window.setTimeout(() => input.focus(), 50);
     }
 
-    if (view === "vote") {
-      runVoteApp();
-    } else if (view === "feedback") {
-      runFeedbackApp();
-    } else if (view === "home") {
-      document.body.classList.add("home");
-      applyView();
-    } else {
-      requirePresenterAccess().then((ok) => {
-        if (!ok) return;
-        applyView();
-        stage.innerHTML = `<div class="deck">${slides.map(slideMarkup).join("")}</div>`;
-        if (build > buildsOn(i)) build = buildsOn(i);
-        applySlide();
-        if (view !== "self") {
-          probeHub();
-          setInterval(tickHub, 700);
-        }
-      });
+    async function draftStatus() {
+      try {
+        const url = "/api/draft?course=" + encodeURIComponent(courseKey)
+          + (hub.room ? "&r=" + encodeURIComponent(hub.room) : "");
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        return null;
+      }
     }
+
+    function openSelectedSession() {
+      if (view === "vote") {
+        runVoteApp();
+      } else if (view === "feedback") {
+        runFeedbackApp();
+      } else if (view === "home") {
+        document.body.classList.add("home");
+        applyView();
+      } else {
+        requirePresenterAccess().then((ok) => {
+          if (!ok) return;
+          applyView();
+          stage.innerHTML = `<div class="deck">${slides.map(slideMarkup).join("")}</div>`;
+          fitDeck();
+          if (build > buildsOn(i)) build = buildsOn(i);
+          applySlide();
+          if (view === "self") ensureFeedbackOrigin();
+          if (view !== "self") {
+            probeHub();
+            setInterval(tickHub, 700);
+          }
+        });
+      }
+    }
+
+    async function startHub() {
+      if (courseNeedsPass) {
+        const status = await draftStatus();
+        if (status && status.missing) {
+          showDraftGate("There is no session at this address.", true);
+          return;
+        }
+        if (status && status.unconfigured) {
+          showDraftGate("This session is not available yet.", true);
+          return;
+        }
+        if (!(status && status.open && catalogCourse)) {
+          showDraftGate("");
+          return;
+        }
+        if (view === "home") view = "self";
+      }
+      openSelectedSession();
+    }
+    startHub();
 
     function validContactEmail(value) {
       const email = String(value || "").trim();
       if (!email) return true;
       return /^[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/.test(email);
+    }
+
+    function feedbackPayload(form) {
+      return {
+        useful: (form.useful.value || "").trim(),
+        comments: (form.comments.value || "").trim(),
+        email: (form.email.value || "").trim(),
+        suggestion: (form.suggestion.value || "").trim(),
+        name: (form.name.value || "").trim(),
+        room: hub.room || "",
+        course: COURSE.id
+      };
     }
 
     function runFeedbackApp() {
@@ -4118,16 +4556,12 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
       if (!form) return;
       form.onsubmit = async (e) => {
         e.preventDefault();
-        const useful = (form.useful.value || "").trim();
-        const comments = (form.comments.value || "").trim();
-        const email = (form.email.value || "").trim();
-        const suggestion = (form.suggestion.value || "").trim();
-        const name = (form.name.value || "").trim();
-        if (!useful) {
+        const payload = feedbackPayload(form);
+        if (!payload.useful) {
           statusEl.textContent = "Say how useful the session was.";
           return;
         }
-        if (email && !validContactEmail(email)) {
+        if (payload.email && !validContactEmail(payload.email)) {
           statusEl.textContent = "That email address does not look complete.";
           return;
         }
@@ -4138,14 +4572,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
           const res = await fetch("/api/feedback", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              useful,
-              comments,
-              email,
-              suggestion,
-              name,
-              room: hub.room || ""
-            })
+            body: JSON.stringify(payload)
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok || !data.ok) {
@@ -4164,28 +4591,13 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
     function runVoteApp() {
       document.body.classList.add("vote");
       document.getElementById("voteApp").hidden = false;
-      document.title = "COPD CPD — Vote";
+      document.title = "Hub CPD — Vote";
       const meta = document.querySelector('meta[name="viewport"]');
       if (meta) meta.setAttribute("content", "width=device-width, initial-scale=1");
       const statusEl = document.getElementById("voteStatus");
       const promptEl = document.getElementById("votePrompt");
-      const sceneEl = document.getElementById("voteScene");
       const optsEl = document.getElementById("voteOpts");
       const teachEl = document.getElementById("voteTeach");
-      function paintVoteScene(src) {
-        if (!sceneEl) return;
-        const image = String(src || "");
-        if (!image) {
-          sceneEl.hidden = true;
-          sceneEl.removeAttribute("src");
-          return;
-        }
-        if (sceneEl.getAttribute("src") !== image) {
-          sceneEl.alt = "Zoll monitor with this patient's observations";
-          sceneEl.src = image;
-        }
-        sceneEl.hidden = false;
-      }
       let voter = localStorage.getItem("copd-voter-id");
       if (!voter) {
         voter = (crypto.randomUUID && crypto.randomUUID()) || ("v" + Math.random().toString(36).slice(2));
@@ -4238,7 +4650,6 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         const stamp = [p.id, !!p.revealed, news2.scale, JSON.stringify(news2.picks), JSON.stringify(news2.scores), !!picked].join("|");
         if (stamp === lastNews2Draw) return;
         lastNews2Draw = stamp;
-        paintVoteScene("");
         promptEl.innerHTML = p.prompt || "";
         if (p.revealed) statusEl.textContent = "Scores are in. Here is the teaching point.";
         else if (picked) statusEl.textContent = "Score sent. You can change it until the room moves on.";
@@ -4290,7 +4701,6 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         lastFeedbackDraw = stamp;
         lastWaitDraw = "";
         lastNews2Draw = "";
-        paintVoteScene("");
         promptEl.textContent = "";
         teachEl.classList.remove("show");
         teachEl.textContent = "";
@@ -4319,13 +4729,12 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         const form = optsEl.querySelector(".vote-feedback");
         form.onsubmit = async (e) => {
           e.preventDefault();
-          const useful = (form.useful.value || "").trim();
-          const email = (form.email.value || "").trim();
-          if (!useful) {
+          const payload = feedbackPayload(form);
+          if (!payload.useful) {
             statusEl.textContent = "Say how useful the session was.";
             return;
           }
-          if (email && !validContactEmail(email)) {
+          if (payload.email && !validContactEmail(payload.email)) {
             statusEl.textContent = "That email address does not look complete.";
             return;
           }
@@ -4336,14 +4745,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             const res = await fetch("/api/feedback", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                useful,
-                comments: (form.comments.value || "").trim(),
-                email,
-                suggestion: (form.suggestion.value || "").trim(),
-                name: (form.name.value || "").trim(),
-                room: hub.room || ""
-              })
+              body: JSON.stringify(payload)
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok || !data.ok) {
@@ -4366,7 +4768,6 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         lastWaitDraw = stamp;
         lastCertDraw = "";
         lastNews2Draw = "";
-        paintVoteScene("");
         promptEl.textContent = "";
         teachEl.classList.remove("show");
         teachEl.textContent = "";
@@ -4379,98 +4780,14 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         }
         statusEl.textContent = "Waiting for the next question";
       }
-      function drawCert(p) {
-        const saved = localStorage.getItem("copd-cert-name") || "";
-        const savedEsr = localStorage.getItem("copd-cert-esr") || "";
-        const savedEmail = localStorage.getItem("copd-cert-email") || "";
-        const stamp = ["cert", saved, savedEsr, savedEmail, hub.ok].join("|");
-        if (stamp === lastCertDraw && optsEl.querySelector(".cert-form, .cert-done")) return;
-        lastCertDraw = stamp;
-        lastNews2Draw = "";
-        lastWaitDraw = "";
-        promptEl.innerHTML = "<ul><li>Enter your name as you wish it to appear on your certificate of attendance.</li><li>Please also provide your ESR (GRS) number for audit purposes.</li><li>Please also provide your work email for the register.</li></ul>";
-        statusEl.textContent = hub.ok === false
-          ? "Cannot reach the laptop. Join the same Wi-Fi, then open this link again."
-          : saved
-            ? "You can send it again if the spelling is wrong."
-            : "";
-        teachEl.classList.remove("show");
-        teachEl.textContent = "";
-        const thanks = saved ? `<p class="cert-done">On the list as <strong>${esc(saved)}</strong>.</p>` : "";
-        const printBtn = saved ? `<button type="button" class="cert-print-btn">Save / print my certificate</button>` : "";
-        optsEl.innerHTML = `
-          ${thanks}
-          ${printBtn}
-          <form class="cert-form">
-            <label for="certName">Name</label>
-            <input id="certName" name="name" type="text" maxlength="80" autocomplete="name" value="${esc(saved)}" required />
-            <label for="certEsr">ESR (GRS) number</label>
-            <input id="certEsr" name="esr" type="text" inputmode="numeric" maxlength="16" autocomplete="off" value="${esc(savedEsr)}" required />
-            <label for="certEmail">Work email</label>
-            <input id="certEmail" name="email" type="email" maxlength="120" autocomplete="email" inputmode="email" value="${esc(savedEmail)}" required />
-            <button type="submit">${saved ? "Update my details" : "Send my name"}</button>
-          </form>`;
-        const print = optsEl.querySelector(".cert-print-btn");
-        if (print) print.onclick = () => printCertificate(saved);
-        const form = optsEl.querySelector(".cert-form");
-        form.onsubmit = async (e) => {
-          e.preventDefault();
-          const name = (form.name.value || "").trim();
-          const esr = (form.esr.value || "").replace(/[^A-Za-z0-9]/g, "");
-          const email = (form.email.value || "").trim().toLowerCase();
-          if (name.length < 2) {
-            statusEl.textContent = "Enter the name you want on the certificate.";
-            return;
-          }
-          if (esr.length < 4) {
-            statusEl.textContent = "Enter your ESR number.";
-            return;
-          }
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            statusEl.textContent = "Enter your work email.";
-            return;
-          }
-          const btn = form.querySelector("button[type='submit']") || form.querySelector("button");
-          btn.disabled = true;
-          try {
-            const res = await fetch("/api/certificate", {
-              method: "POST",
-              headers: apiHeaders({ "Content-Type": "application/json" }),
-              body: JSON.stringify({ voter, name, esr, email })
-            });
-            const data = await res.json().catch(() => ({}));
-            if (res.ok && data.ok) {
-              localStorage.setItem("copd-cert-name", data.name || name);
-              localStorage.setItem("copd-cert-esr", data.esr || esr);
-              localStorage.setItem("copd-cert-email", data.email || email);
-              lastCertDraw = "";
-              if (data.poll) hub.poll = data.poll;
-              draw();
-              printCertificate(data.name || name);
-            } else {
-              statusEl.textContent = data.error === "missing esr"
-                ? "Enter your ESR number."
-                : data.error === "missing email"
-                  ? "Enter your work email."
-                  : "Could not send that name. Stay on this page and try again.";
-              btn.disabled = false;
-            }
-          } catch (err) {
-            statusEl.textContent = "Cannot reach the laptop. Try again.";
-            btn.disabled = false;
-          }
-        };
-      }
-      function printCertificate(name, when, course) {
-        printCpdCertificate(name, when, course);
-      }
       function draw(poll) {
         if (arguments.length) hub.poll = poll;
         const p = hub.poll;
-        if (p && p.feedback) {
+        if (p && p.feedback && !(p.id && (p.open || p.revealed))) {
           drawFeedback();
           return;
         }
+        lastFeedbackDraw = "";
         if (p && p.id && (p.open || p.revealed)) {
           lastCertDraw = "";
           lastWaitDraw = "";
@@ -4485,7 +4802,6 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             return;
           }
           promptEl.innerHTML = p.prompt || "";
-          paintVoteScene(p.image);
           if (p.revealed) statusEl.textContent = "Answer in. Here is the teaching point.";
           else if (picked != null) statusEl.textContent = "Vote in. You can change it until the room moves on.";
           else statusEl.textContent = "Tap one answer";
@@ -4512,17 +4828,6 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
           return;
         }
         lastNews2Draw = "";
-        if (p && p.register) {
-          lastCertDraw = "";
-          lastWaitDraw = "";
-          promptEl.textContent = "";
-          teachEl.classList.remove("show");
-          teachEl.textContent = "";
-          optsEl.innerHTML = "";
-          paintVoteScene("");
-          statusEl.textContent = "Scan the Trust attendance QR on the session screen. The Trust records attendance and issues the certificate.";
-          return;
-        }
         drawWait();
       }
       async function tick() {

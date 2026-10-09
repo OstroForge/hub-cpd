@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Acute Asthma CPD handout | Hub CPD</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/assets/hub-cpd-star.png" />
+  <style>
+    :root {
+      --navy: #14382c;
+      --ink: #1a2a24;
+      --muted: #5c6b64;
+      --paper: #e7f2eb;
+      --card: #fff;
+      --line: #c3d4c9;
+      --red: #b42318;
+      --teal: #1f6b58;
+      --green: #176b45;
+      --copper: #8a5608;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Calibri, Arial, sans-serif;
+      color: var(--ink);
+      background: #c9ddd2;
+      line-height: 1.35;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      background: var(--navy);
+      color: #f3f7f4;
+    }
+    .toolbar a, .toolbar button {
+      background: #e4c56a;
+      color: #14382c;
+      border: 0;
+      padding: 8px 14px;
+      font: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .sheet {
+      width: min(210mm, 100%);
+      margin: 16px auto 32px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 14mm 12mm 12mm;
+      box-shadow: 0 8px 28px rgba(12, 36, 28, 0.16);
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 4px solid var(--navy);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .kicker {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--copper);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .kicker img { height: 22px; width: auto; }
+    h1 { font-size: 22px; line-height: 1.15; color: var(--navy); }
+    h2 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy); margin: 12px 0 6px; }
+    h3 { font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+    p, li { font-size: 12.5px; }
+    .meta { font-size: 11px; color: var(--muted); max-width: 42ch; text-align: right; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+    }
+    .card.red { border-color: #e7b4ae; background: #fdecea; }
+    .card.teal { border-color: #b7d8cc; background: #e5f4ee; }
+    ul { padding-left: 1.1em; }
+    li { margin: 0.15em 0; }
+    .banner {
+      background: var(--navy);
+      color: #fff;
+      font-weight: 750;
+      padding: 7px 10px;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+    .banner.teal { background: var(--teal); }
+    .banner.green { background: var(--green); }
+    .banner.red { background: var(--red); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border: 1px solid var(--line); padding: 5px 7px; text-align: left; vertical-align: top; }
+    th { background: #d5e8de; color: var(--navy); }
+    .foot {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      font-size: 10.5px;
+      color: var(--muted);
+    }
+    .break { break-before: page; page-break-before: always; margin-top: 18px; padding-top: 8px; }
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      body { background: #fff; }
+      .toolbar { display: none; }
+      .sheet { width: auto; margin: 0; padding: 0; box-shadow: none; }
+      .break { margin-top: 0; }
+      a { color: inherit; text-decoration: none; }
+    }
+    @page { size: A4; margin: 10mm; }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <a href="/">Home</a>
+    <button type="button" onclick="window.print()">Print / save PDF</button>
+    <a href="/?course=asthma&amp;view=self">Self-guided session</a>
+  </div>
+  <article class="sheet">
+    <header>
+      <div>
+        <p class="kicker"><img src="../assets/hub-cpd-star.png" alt="">Hub CPD handout</p>
+        <h1>Acute Asthma</h1>
+        <p>JRCALC Asthma · oxygen · nebulisers · adrenaline</p>
+      </div>
+      <p class="meta">Teaching summary. Recheck the live JRCALC asthma page, local PGDs and stock before you treat. The March 2024 update revised asthma in adults and children.</p>
+    </header>
+
+    <h2>Five key points to remember</h2>
+    <div class="banner">1. Grade the attack. One life-threatening feature is enough.</div>
+    <div class="banner red">2. A silent chest is pre-terminal, not a successful nebuliser.</div>
+    <div class="banner teal">3. Oxygen target 94–98%. The COPD 6-minute, 88–92% rule is a different guideline.</div>
+    <div class="banner">4. Salbutamol 5 mg, oxygen-driven. Add ipratropium 500 micrograms when the attack is severe.</div>
+    <div class="banner green">5. Still deteriorating on continuous salbutamol: consider intramuscular adrenaline.</div>
+
+    <h2>Grade it</h2>
+    <div class="grid3">
+      <div class="card">
+        <h3>Moderate</h3>
+        <ul>
+          <li>Talks in sentences</li>
+          <li>No severe feature</li>
+          <li>Still treat, and safety-net</li>
+        </ul>
+      </div>
+      <div class="card teal">
+        <h3>Acute severe — any one</h3>
+        <ul>
+          <li>Cannot finish a sentence</li>
+          <li>Respiratory rate 25 or more</li>
+          <li>Heart rate 110 or more</li>
+          <li>Peak flow 33–50% of best</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3>Life-threatening — any one</h3>
+        <ul>
+          <li>Sats under 92%</li>
+          <li>Silent chest, cyanosis, feeble effort</li>
+          <li>Exhaustion or altered consciousness</li>
+          <li>Hypotension or arrhythmia</li>
+          <li>Peak flow under 33%</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Not the COPD rules</h2>
+    <table>
+      <thead>
+        <tr><th></th><th>Acute asthma</th><th>COPD, not critically ill</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Oxygen target</td>
+          <td>94–98%</td>
+          <td>88–92%</td>
+        </tr>
+        <tr>
+          <td>Oxygen-driven nebuliser</td>
+          <td>Yes. Keep the saturation at 94–98%. Repeat salbutamol. Continuous if life-threatening.</td>
+          <td>Limit oxygen drive to 6 minutes, then titrate.</td>
+        </tr>
+        <tr>
+          <td>They have both, and they are exhausted with a quiet chest</td>
+          <td colspan="2">Treat as life-threatening asthma. Target 94–98%.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="break">
+      <h2>Drugs</h2>
+      <div class="grid">
+        <div class="card teal">
+          <h3>Open the airway</h3>
+          <ul>
+            <li>Salbutamol 5 mg, oxygen-driven nebuliser</li>
+            <li>Repeat it. Continuous nebulised salbutamol is the step before adrenaline</li>
+            <li>Ipratropium 500 micrograms nebulised for severe or life-threatening asthma, or a poor response to salbutamol</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Do not delay</h3>
+          <ul>
+            <li>Steroid now: prednisolone if they can swallow, otherwise hydrocortisone. Use the live dose</li>
+            <li>Intramuscular adrenaline if life-threatening asthma is still deteriorating on continuous salbutamol. Confirm the live dose; the usual adult figure is 500 micrograms</li>
+            <li>Consider magnesium if life-threatening asthma is not improving on continuous salbutamol. Use the live dose</li>
+          </ul>
+        </div>
+      </div>
+      <p style="margin-top:8px">Anaphylaxis is a different first drug: intramuscular adrenaline immediately, not after a trial of salbutamol. Heart failure is a different illness: do not put a wet chest on this pathway.</p>
+
+      <h2>Check yourself</h2>
+      <table>
+        <thead>
+          <tr><th>Question</th><th>Answer</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Oxygen target in acute asthma?</td>
+            <td>94–98%. 88–92% is the COPD target when they are not critically ill.</td>
+          </tr>
+          <tr>
+            <td>The wheeze has gone and the chest is quiet.</td>
+            <td>A silent chest can be pre-terminal. Recovery is easier speech and saturations heading for 94–98%.</td>
+          </tr>
+          <tr>
+            <td>COPD and asthma, exhausted, sats 90%, quiet chest.</td>
+            <td>94–98%, and treat as life-threatening asthma.</td>
+          </tr>
+          <tr>
+            <td>Does the 6-minute neb rule apply to pure asthma?</td>
+            <td>No. That sentence is in the COPD guidance.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Pre-alert</h2>
+      <div class="banner red">Any life-threatening feature, a severe attack that does not turn around, previous near-fatal asthma, or you are giving adrenaline.</div>
+      <p class="foot">Sources: JRCALC Plus Asthma, Oxygen, and the drug monographs. Association of Ambulance Chief Executives, 1 December 2023, on the JRCALC asthma key points. BTS/SIGN acute asthma: oxygen 94–98%, salbutamol 5 mg, ipratropium 500 micrograms.</p>
+    </div>
+  </article>
+</body>
+</html>

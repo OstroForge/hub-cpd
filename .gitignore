@@ -12,14 +12,14 @@ presenters.txt
 *.log
 .DS_Store
 attend-folder.txt
+feedback-share.txt
+feedback.csv
+*Feedback*.xlsx
+**/feedback/*.xlsx
 certificates.csv
 certificates-*.csv
 certificates/**/*.csv
 *-CPD-certificate-names.csv
 *-CPD-attendance-*.csv
-feedback.csv
-feedback-share.txt
-*Feedback*.xlsx
-**/feedback/*.xlsx
 session-*.json
 Proposal for accreditation/

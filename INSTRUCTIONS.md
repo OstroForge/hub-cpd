@@ -1,8 +1,16 @@
-# COPD CPD — how to run this session
+# Hub CPD — how to run a session
 
-WMAS ambulance CPD deck on JRCALC / AACES COPD guidance, NEWS2 Scale 1 vs Scale 2, and live room voting.
+WMAS ambulance CPD decks (COPD, Heart Failure, and later packages) with live room voting.
 
-Later sessions are listed in `FUTURE-TOPICS.md`.
+Each topic has its own folder:
+
+| Topic | Folder |
+| --- | --- |
+| COPD | `copd/` — `slides.js`, `handout.html`, `assets/` |
+| Heart Failure | `hf/` — `slides.js`, `handout.html`, `assets/` |
+| Acute Asthma | `asthma/` — `slides.js`, `handout.html`, `assets/` |
+
+The hub (`index.html`, `serve.py`) stays at the top. Each topic keeps its feedback workbooks in `feedback/dev.xlsx` and `feedback/live.xlsx`. To add a later package, copy that folder pattern. The backlog of later sessions is `FUTURE-TOPICS.md`.
 
 ## Local (this laptop)
 
@@ -20,7 +28,9 @@ Then open on **this laptop**:
 | Presenter / notes | http://127.0.0.1:8765/?view=presenter |
 | Audience window (share this) | http://127.0.0.1:8765/?view=audience |
 | Self-guided (no vote, no register) | http://127.0.0.1:8765/?view=self |
-| Printable handout | http://127.0.0.1:8765/handout.html |
+| Printable COPD handout | http://127.0.0.1:8765/copd/handout.html |
+| Printable Heart Failure handout | http://127.0.0.1:8765/hf/handout.html |
+| Printable Acute Asthma handout | http://127.0.0.1:8765/asthma/handout.html |
 
 Phones must **not** use `127.0.0.1` — that address only works on the laptop. Put the phone on the **same Wi-Fi** as the laptop (not mobile data) and open the LAN address printed in the terminal, for example:
 
@@ -31,11 +41,11 @@ Use **http**, not https. The QR on the slide already uses that LAN address.
 If it only works **sometimes**:
 
 1. Turn **mobile data off** on the phone (iPhone: Settings → Mobile Data off, and Wi-Fi Assist off). The phone otherwise hops to 4G and `192.168.1.x` suddenly “can’t be reached”.
-2. Stay on the same Wi-Fi as the laptop — not guest Wi-Fi, not a different band/SSID, not a mix of local and `onrender.com`.
+2. Stay on the same Wi-Fi as the laptop — not guest Wi-Fi, not a different band/SSID, not a mix of the laptop address and `hub-cpd.co.uk`.
 3. Type the URL with `http://` at the front, or scan the QR after a hard refresh of the deck.
 4. Some work / Trust Wi-Fi blocks phone-to-laptop traffic. Use a phone hotspot (laptop and phones on that hotspot) or the hosted Render session instead.
 
-Windows Firewall: allow Python on Private networks, or inbound TCP **8765**, if Windows asked and you clicked Cancel.
+Windows Firewall asks again every time `python serve.py` starts if Python is allowed on Public networks only. This laptop’s Wi-Fi is a **Private** network, so that prompt is the phone being refused. When the box appears, tick **Private networks** and click **Allow access**. Do not click Cancel. To set it without waiting for the box: Windows Security → Firewall & network protection → Allow an app through firewall → Change settings → tick Private (and Public) for Python → OK. That is a one-time click on this PC. A code change does not replace it.
 
 Do **not** also run `python -m http.server 8765`. Two listeners on the same port is why only one phone could vote: Windows split the connections, so every other device never reached this quiz.
 
@@ -63,35 +73,84 @@ Hard-refresh presenter view and scan **this** session’s QR. Phone: same Wi-Fi,
 
 Stop the server with Ctrl+C.
 
-## Hosted session (Render)
+## Local secrets (`.env`)
 
-Use this when you are not presenting from this laptop, or when Teams needs a public vote link.
+Instructor PINs and feedback workbook links for **dev and prod** live in `.env` in this folder. That file is gitignored. This laptop uses the `DEV` feedback line. The hosted Hub uses the `LIVE` line. Restart `python serve.py` after you edit `.env`. A blank template is `.env.example`.
+
+`DEBUG=true` uses the dev workbooks. `DEBUG=false` uses the live workbooks. This laptop’s `.env` has `DEBUG=true`. On the live Render service set `DEBUG` to `false`. On the test service set `DEBUG` to `true`.
+
+The hosted site cannot read this file. In the Render dashboard, set `FEEDBACK_SHARE_COPD_LIVE` and `FEEDBACK_SHARE_HF_LIVE` on the live service, and `FEEDBACK_SHARE_COPD_DEV` and `FEEDBACK_SHARE_HF_DEV` on the test service.
+
+Instructors are one `PRESENTERS` line, in the same shape as the Render dashboard. Copy the value inside the quotes into the dashboard variable `PRESENTERS`:
+
+`PRESENTERS="PIN: Full Name; PIN: Full Name"`
+
+Feedback workbooks, a dev address and a prod address per topic:
+
+`FEEDBACK_SHARE_COPD_DEV="https://…"`
+
+`FEEDBACK_SHARE_COPD_LIVE="https://…"`
+
+Heart Failure has its own workbook. It does not write into the COPD sheet.
+
+`FEEDBACK_SHARE_HF_DEV="https://…"`
+
+`FEEDBACK_SHARE_HF_LIVE="https://…"`
+
+## Hosted session
+
+Use this when you are not presenting from this laptop, or when Teams needs a public vote link. Share **https://hub-cpd.co.uk**. The app still runs on the Render service `hub-cpd`. Cloudflare DNS for the domain points at that service.
 
 | What | URL |
 | --- | --- |
-| Home (choose self-guided, presenter, or handout) | https://hub-cpd.onrender.com/ |
-| Presenter / notes | https://hub-cpd.onrender.com/?view=presenter |
-| Audience window (share this) | https://hub-cpd.onrender.com/?view=audience |
-| Phone / Teams vote page | https://hub-cpd.onrender.com/v |
-| Self-guided (no vote, no register) | https://hub-cpd.onrender.com/?view=self |
-| Printable handout | https://hub-cpd.onrender.com/handout.html |
+| Home (choose self-guided, presenter, or handout) | https://hub-cpd.co.uk/ |
+| Presenter / notes | https://hub-cpd.co.uk/?view=presenter |
+| Audience window (share this) | https://hub-cpd.co.uk/?view=audience |
+| Phone / Teams vote page | https://hub-cpd.co.uk/v |
+| Self-guided (no vote, no register) | https://hub-cpd.co.uk/?view=self |
+| Printable COPD handout | https://hub-cpd.co.uk/copd/handout.html |
+| Previous Render address (forwards to the domain once this build is live) | https://hub-cpd.onrender.com/ |
 | Old COPD URL (forwards to Hub) | https://copd-cpd.onrender.com/ |
-| GitHub copy | https://ostroforge.github.io/copd-cpd/ |
-| GitHub handout | https://ostroforge.github.io/copd-cpd/handout.html |
+| GitHub copy (static; not the live room) | https://ostroforge.github.io/copd-cpd/ |
+| GitHub COPD handout | https://ostroforge.github.io/copd-cpd/copd/handout.html |
 | Source code | https://github.com/OstroForge/copd-cpd |
-| Render dashboard | https://dashboard.render.com/web/srv-dalud967bikc73akh3bg |
+| Render dashboard (live Hub) | https://dashboard.render.com/web/srv-danfac74ouc73bol8ig |
+| Cloudflare dashboard | https://dash.cloudflare.com/ |
 
-Hub staff **do not need a Render account**. Each facilitator has their own PIN. Local or hosted presenter view asks for it.
+The domain is registered at Cloudflare under **ostroforge@outlook.com**. Connect it once, and confirm `https://hub-cpd.co.uk/healthz` answers, before the next deploy that sets `PUBLIC_URL` to that address. Until then the working site is still `https://hub-cpd.onrender.com/`.
 
-Keep the list in `presenters.txt` or `presenter-pin.txt` on this laptop (gitignored), one line per person:
+1. Render, live service **hub-cpd**, Settings → Custom Domains. Add `hub-cpd.co.uk` and `www.hub-cpd.co.uk`. The DNS target is `hub-cpd.onrender.com`.
+2. Cloudflare, zone **hub-cpd.co.uk**, SSL/TLS → Overview → **Full**.
+3. DNS → Records. Add both as **DNS only** (grey cloud) until Render says the certificate is issued:
+   - `CNAME` `@` → `hub-cpd.onrender.com`
+   - `CNAME` `www` → `hub-cpd.onrender.com`
+4. In Render, verify the domains. When the certificates are valid, the grey-cloud records can be switched to Proxied.
+5. On the same Environment page, click **Edit**. Add a row: key `PUBLIC_URL`, value `https://hub-cpd.co.uk` (no slash on the end). Save. Render restarts the service. That value is what the room QR and the Teams join link use. It is not in the list yet — the live service only has `ATTEND_SHARE_URL` and `PRESENTERS`.
+6. On that same Environment page, add `DRAFT_CODE`. Choose a passcode and type it only there, and in this laptop’s `.env`. Do not put it in git, in Teams, or in this file. Unfinished sessions use it. The home page does not.
 
-`PIN  Full Name`
+Hub staff **do not need a Render account**. Each facilitator has their own PIN. Local or hosted presenter view asks for it. That PIN is also their name on the attendance file, so they are not asked who is delivering.
 
-On Render, set `PRESENTERS` to the same list as `PIN:Full Name;PIN:Full Name`. Do not put PINs in this public file or in the room’s Teams chat. The `r=` code on a join/QR link is the **room** for that session, not a PIN.
+On this laptop the list is the `PRESENTERS` line in `.env`. Copy that same value into Render. Do not put PINs in this public file or in the room’s Teams chat. The `r=` code on a join/QR link is the **room** for that session, not a PIN.
 
 Free Render instances sleep after a quiet spell. The first open can take about a minute.
 
-The live hostname is **hub-cpd.onrender.com**. In the Render dashboard, add a second web service named exactly `hub-cpd` from this GitHub repo (same `python serve.py`, copy `PRESENTERS` and `ATTEND_SHARE_URL` from the existing service). Keep the current `copd-cpd` service running so https://copd-cpd.onrender.com/ can forward. Do not put PINs in this public file.
+## Sessions that are not finished
+
+Use **https://hub-cpd.co.uk**. There is no second address for unfinished work. The home page only starts a session marked ready. Right now that is **COPD** only. Heart Failure (`hf`) and Acute Asthma (`asthma`) are on the site, and they are not on the home page.
+
+A session that is not ready is still on this site. In `COURSES` in `serve.py`, leave `"published": False` and give it a `home_tag`, `home_heading`, and `home_blurb`. On the live site it is not on the home page. Open it with the address, for example `https://hub-cpd.co.uk/?course=hf&view=presenter`.
+
+That address asks for the **session passcode** (`DRAFT_CODE`). A made-up slug asks for the same passcode, and does not open COPD. A wrong passcode is refused either way. The right passcode opens a real unfinished session. The right passcode on a slug that is not a session says there is no session at that address.
+
+Phones in a room that is already running do not need the passcode. They scan that session’s QR.
+
+On this laptop (`DEBUG=true`) the home page lists every session. A draft card is marked **Draft**, and its Self-guided, Presenter, and Handout links open with no passcode. The live home page does not show those cards.
+
+When a session is ready for the live home page, change that one line in `COURSES` to `"published": True`. Redeploy. The card appears on https://hub-cpd.co.uk/ and the passcode is no longer asked. No separate homepage edit.
+
+`hub-cpd-test.onrender.com` is the old preview site. New sessions do not need it.
+
+Keep the current `copd-cpd` service running so https://copd-cpd.onrender.com/ can forward.
 
 ## Accounts
 
@@ -99,32 +158,65 @@ The live hostname is **hub-cpd.onrender.com**. In the Render dashboard, add a se
 | --- | --- | --- |
 | GitHub | **OstroForge** | ostroforge@outlook.com |
 | Render | workspace **My Workspace** (same GitHub account) | ostroforge@outlook.com |
-| OneDrive | Personal | jon.ski1382@gmail.com |
+| Cloudflare | zone **hub-cpd.co.uk** | ostroforge@outlook.com |
+| OneDrive | Personal (attendance CSVs) | jon.ski1382@gmail.com |
 
 GitHub sign-in: https://github.com/login  
 Render sign-in: https://dashboard.render.com/login  
+Cloudflare sign-in: https://dash.cloudflare.com/login  
 OneDrive: https://onedrive.live.com/
+
+Certificates folder (open while signed in as jon.ski1382@gmail.com):  
+https://onedrive.live.com/my?id=%2Fpersonal%2F4a2042dbbcf48071%2FDocuments%2FCursor%20Projects%2FCPD%2FCOPD%2Fcertificates&viewid=6c1bdb91-03c5-436a-8302-197408acb301
 
 ## On the day
 
 1. Wake the live site (or start `python serve.py`).
-2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.onrender.com/?view=presenter) — type **your** Hub PIN when asked.
+2. On your laptop, open **presenter** view (local `http://127.0.0.1:8765/?view=presenter` or https://hub-cpd.co.uk/?view=presenter) — type **your** Hub PIN when asked.
 3. Share the **Audience** window to the projector and/or Teams (Share window, not the presenter screen).
 4. Room: scan **this session’s** QR (it includes a room code). Teams: copy the join link from the presenter sidebar into chat — do not reuse another facilitator’s QR.
 5. Space, a mouse click on the slide, a wireless clicker (Page Down / next), or **Next** on a question goes to the results slide.
-6. The last slide of a hosted session shows the CPD certificate QR (`assets/copd-certificate-qr.png`). Leave it up for the room to scan. The Trust records attendance and issues the certificate. That slide is not in the self-guided deck.
-7. The slide before that collects feedback and ideas for another 30-minute CPD. Phones scan its QR. Each response is added to the OneDrive workbook `feedback/COPD_Feedback_sheet.xlsx`. The sharing link is not kept in this project: on this laptop it is read from `feedback-share.txt`, and on Render it is the environment variable `FEEDBACK_SHARE_URL`. Close the workbook in Excel before a live session, or the site cannot add rows. Download **feedback** from the presenter sidebar.
+6. Both hosted decks then show **Help shape the next session**. The feedback QR is in the top right, with the address under it. Phones already on the vote page get the form. Anyone else can scan that QR. The same QR is on the self-guided deck. Download the sheet from **Download feedback** in the presenter sidebar. The last slide is **Record Attendance for CPD Certificate**. Leave that QR up for the room to scan. It is not in the self-guided deck. Certificate attendance is the Trust QR only: there is no name, ESR, or email collection for certificates, and no certificate lookup page.
 
-Two people can deliver the same CPD at the same time. Each opens presenter view on the **same live site** (usually Render). The site gives each facilitator a different room code, and quiz answers from their own phones only. Phones must scan the QR on **that** screen.
+Two people can deliver the same CPD at the same time. Each opens presenter view on the **same live site** (usually Render). The site gives each facilitator a different room code, a different attendance file, and quiz answers from their own phones only. Phones must scan the QR on **that** screen.
 
 If you present from this laptop instead, phones vote on this `serve.py` process — a second laptop running its own `serve.py` is a second session. Do not mix a laptop presenter with the hosted Render QR unless everyone is actually presenting on Render.
+
+Automatic copies (same names, no extra click):
+
+- `certificates.csv` in this project folder (synced with OneDrive)
+- `COPD-CPD-certificate-names.csv` in this folder, and also in **Documents** and **OneDrive** if those folders exist
+- The serve.py terminal prints each name as it arrives
+
+On Render the files are lost when the service sleeps, so also set a `CERT_WEBHOOK` environment variable if you want each name POSTed as JSON to an inbox you control.
+
+**OneDrive attendance folder:** account **jon.ski1382@gmail.com**. Layout is course, then env:
+
+```
+certificates/
+  copd/dev
+  copd/live
+  heart failure/dev
+  heart failure/live
+```
+
+The OneDrive **share link** must be the parent `certificates` folder — not `certificates/dev` and not `certificates/COPD/dev`. The site then creates `copd/dev`, `copd/live`, `heart failure/dev` and `heart failure/live` inside that folder.
+
+| Course | Path |
+| --- | --- |
+| COPD | `certificates/copd/dev` or `certificates/copd/live` |
+| Heart Failure | `certificates/heart failure/dev` or `certificates/heart failure/live` |
+
+Both hosted decks collect session feedback (how useful it was, comments, a suggestion for the next half hour, and an optional name and email). COPD writes to the COPD workbook. Heart Failure writes to the Heart Failure workbook. Certificate attendance is the Trust QR on the last slide. Neither course collects names, ESR numbers, or emails for a certificate. There is no page to look up or reprint a certificate.
+
+To add a later package, give it a `folder` name in `COURSES` in `serve.py`, plus `home_tag`, `home_heading`, and `home_blurb`. Leave `"published": False` until it should appear on the live home page. The `dev` and `live` folders are created the first time that course writes an attendance file.
 
 ## Handout and self-guided
 
 For staff who missed the room, or for a Teams share with no phones:
 
-1. **Handout** — two A4 pages. Open `handout.html` and use Print / save PDF.
-2. **Self-guided deck** — add `?view=self` to the deck URL. Same slides, no QR, no live vote, no certificate register. Check questions reveal on click or Space. **Printable handout** is on the bottom bar.
+1. **Handout** — two A4 pages. Open `copd/handout.html`, `hf/handout.html` or `asthma/handout.html` and use Print / save PDF.
+2. **Self-guided deck** — add `?view=self` to the deck URL. Same slides, no live vote, no certificate QR. The feedback QR stays, with the address under it. Check questions reveal on click or Space. **Printable handout** is on the bottom bar.
 
 A PowerPoint export is a poorer copy of this deck (NEWS2 chart and kit photos sit in HTML). Use the self-guided URL if you need a version with voting removed.
 
@@ -136,4 +228,4 @@ Commit your changes, then:
 git push origin HEAD
 ```
 
-Render rebuilds from `main`. Hard-refresh the live URL after the deploy finishes.
+Render rebuilds from `main`. Hard-refresh https://hub-cpd.co.uk/ after the deploy finishes. Do not deploy the domain redirect until https://hub-cpd.co.uk/healthz already answers.

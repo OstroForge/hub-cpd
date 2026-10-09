@@ -2,11 +2,11 @@
 
 Each session is one JRCALC guideline and about 30 minutes. COPD and Heart Failure are already built.
 
-A new topic stays on its own branch until it is ready for the live Hub. An edit to a live topic, or a change to the shared layout, is a separate branch from `main`.
+A new topic can be deployed on hub-cpd before it is ready. Leave it unpublished and off the home page, and open it with the session passcode. An edit to a live topic, or a change to the shared layout, is a separate branch from `main`.
 
 ## Next
 
-1. **Acute asthma.** Life-threatening features, oxygen to 94–98%, oxygen-driven nebulisers, and intramuscular adrenaline when the patient is exhausted or silent. Include a patient who also has COPD, where the oxygen target and the adrenaline decision differ from the COPD session.
+1. **Acute asthma.** The first deck is in `asthma/`. It still needs the title photograph, a check of the live drug doses, and its own feedback workbook. Life-threatening features, oxygen to 94–98%, oxygen-driven nebulisers, and intramuscular adrenaline when the attack is still deteriorating. Includes a patient who also has COPD.
 2. **Sepsis.** Who to pre-alert, who gets fluid, and how NEWS2 is used here. This follows the NEWS2 material in the COPD session.
 
 ## Later
