@@ -1331,7 +1331,7 @@
     }
     .hub-courses {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(280px, 340px));
       gap: 16px;
       margin-top: 28px;
     }
@@ -1346,6 +1346,16 @@
     .hub-course.hf {
       border-color: #b7c4db;
       background: #eef1f7;
+    }
+    .home-draft-note {
+      margin: 18px 0 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .draft-mark {
+      margin-left: 8px;
+      letter-spacing: 0.08em;
     }
     .hub-tag {
       font-size: 12px;
@@ -1467,6 +1477,30 @@
       padding: 12px;
       font: inherit;
       cursor: pointer;
+    }
+    #draftGate {
+      display: none;
+      min-height: 100%;
+      padding: 28px 18px 40px;
+      align-items: center;
+      justify-content: center;
+    }
+    body.draft-needed { overflow: auto; }
+    body.draft-needed #draftGate { display: flex; }
+    body.draft-needed #home,
+    body.draft-needed .stage,
+    body.draft-needed .controls,
+    body.draft-needed .pv-side,
+    body.draft-needed #pinGate,
+    body.draft-needed #voteApp,
+    body.draft-needed #feedback { display: none !important; }
+    #draftGate .pin-panel input { letter-spacing: 0; }
+    #draftGate .draft-home {
+      display: block;
+      margin-top: 14px;
+      text-align: center;
+      color: var(--navy);
+      font-weight: 700;
     }
 
     .pv-side { display: contents; }
@@ -2735,38 +2769,7 @@
     <div class="home-panel">
       <h1 class="home-logo-title"><img class="home-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers."></h1>
       <p class="home-lead">30-minute JRCALC sessions for the room, Teams, or self-guided study. Always use the live guideline on the day.</p>
-      <div class="hub-courses">
-        <article class="hub-course">
-          <p class="hub-tag">Respiratory</p>
-          <h2>COPD, Type 2 Respiratory Failure and NEWS2</h2>
-          <p>Controlled oxygen versus NEWS2 Scale 2, and why they are not the same decision.</p>
-          <div class="hub-links">
-            <a href="?course=copd&amp;view=self">Self-guided</a>
-            <a href="?course=copd&amp;view=presenter">Presenter</a>
-            <a href="copd/handout.html">Handout</a>
-          </div>
-        </article>
-        <article class="hub-course hf">
-          <p class="hub-tag">Cardiac</p>
-          <h2>Heart Failure</h2>
-          <p>Pulmonary oedema, positioning, GTN, fluids and furosemide.</p>
-          <div class="hub-links">
-            <a href="?course=hf&amp;view=self">Self-guided</a>
-            <a href="?course=hf&amp;view=presenter">Presenter</a>
-            <a href="hf/handout.html">Handout</a>
-          </div>
-        </article>
-        <article class="hub-course asthma">
-          <p class="hub-tag">Respiratory</p>
-          <h2>Acute Asthma</h2>
-          <p>Life-threatening features, oxygen to 94–98%, and when to give intramuscular adrenaline.</p>
-          <div class="hub-links">
-            <a href="?course=asthma&amp;view=self">Self-guided</a>
-            <a href="?course=asthma&amp;view=presenter">Presenter</a>
-            <a href="asthma/handout.html">Handout</a>
-          </div>
-        </article>
-      </div>
+      <div class="hub-courses" id="hubCourses"></div>
     </div>
   </main>
   <main id="feedback">
@@ -2840,6 +2843,18 @@
       <button type="button" class="pin-self" id="pinSelf">Self-guided instead</button>
     </form>
   </div>
+  <div id="draftGate" hidden>
+    <form class="pin-panel" id="draftForm">
+      <p class="home-kicker">Hub CPD</p>
+      <h2>Session passcode</h2>
+      <p>This address is not one of the sessions on the home page. Enter the passcode to open it.</p>
+      <p class="pin-status" id="draftStatus"></p>
+      <label for="draftInput">Passcode</label>
+      <input id="draftInput" name="draft" type="password" autocomplete="off" maxlength="80" />
+      <button type="submit">Open session</button>
+      <a class="draft-home" href="./">Home</a>
+    </form>
+  </div>
   <div id="voteApp" hidden>
     <p class="vote-kicker">Hub CPD</p>
     <p id="voteStatus">Connecting to the room…</p>
@@ -2878,7 +2893,17 @@
   <script src="copd/slides.js?v=aace1"></script>
   <script src="hf/slides.js?v=steps1"></script>
   <script src="asthma/slides.js?v=steps1"></script>
+  <script id="hubPublished" type="application/json">{"copd":true,"hf":false,"asthma":false}</script>
   <script>
+    function hubPublished(id, fallback) {
+      const node = document.getElementById("hubPublished");
+      if (!node) return fallback;
+      try {
+        const map = JSON.parse(node.textContent || "{}");
+        if (Object.prototype.hasOwnProperty.call(map, id)) return map[id] === true;
+      } catch (err) { /* use the fallback */ }
+      return fallback;
+    }
     const NEWS2_CITE = "Reproduced from: Royal College of Physicians. <em>National Early Warning Score (NEWS) 2: Standardising the assessment of acute-illness severity in the NHS.</em> Updated report of a working party. London: RCP, 2017.";
     const params = new URLSearchParams(location.search);
     const COURSE_CATALOG = {
@@ -2891,7 +2916,8 @@
         store: "copd-cpd-state",
         selfStore: "copd-cpd-self-state",
         channel: "copd-cpd-deck",
-        attendKey: "copd-cpd-register"
+        attendKey: "copd-cpd-register",
+        published: hubPublished("copd", true)
       },
       hf: {
         id: "hf",
@@ -2902,7 +2928,8 @@
         store: "hf-cpd-state",
         selfStore: "hf-cpd-self-state",
         channel: "hf-cpd-deck",
-        attendKey: "hf-cpd-register"
+        attendKey: "hf-cpd-register",
+        published: hubPublished("hf", false)
       },
       asthma: {
         id: "asthma",
@@ -2913,10 +2940,16 @@
         store: "asthma-cpd-state",
         selfStore: "asthma-cpd-self-state",
         channel: "asthma-cpd-deck",
-        attendKey: "asthma-cpd-register"
+        attendKey: "asthma-cpd-register",
+        published: hubPublished("asthma", false)
       }
     };
-    const COURSE = COURSE_CATALOG[String(params.get("course") || "").trim().toLowerCase()] || COURSE_CATALOG.copd;
+    const courseKey = String(params.get("course") || "").trim().toLowerCase();
+    const catalogCourse = Object.prototype.hasOwnProperty.call(COURSE_CATALOG, courseKey)
+      ? COURSE_CATALOG[courseKey]
+      : null;
+    const COURSE = catalogCourse || COURSE_CATALOG.copd;
+    const courseNeedsPass = Boolean(courseKey) && (!catalogCourse || catalogCourse.published === false);
     if (COURSE.id === "hf") document.body.classList.add("theme-hf");
     if (COURSE.id === "asthma") document.body.classList.add("theme-asthma");
     const NEWS2_FORM = {
@@ -4389,28 +4422,113 @@
       qrEl.onerror = () => goPrint();
       qrEl.src = src;
     }
-    if (view === "vote") {
-      runVoteApp();
-    } else if (view === "feedback") {
-      runFeedbackApp();
-    } else if (view === "home") {
-      document.body.classList.add("home");
-      applyView();
-    } else {
-      requirePresenterAccess().then((ok) => {
-        if (!ok) return;
-        applyView();
-        stage.innerHTML = `<div class="deck">${slides.map(slideMarkup).join("")}</div>`;
-        fitDeck();
-        if (build > buildsOn(i)) build = buildsOn(i);
-        applySlide();
-        if (view === "self") ensureFeedbackOrigin();
-        if (view !== "self") {
-          probeHub();
-          setInterval(tickHub, 700);
+    function showDraftGate(message, hideForm) {
+      document.body.classList.remove("home");
+      document.body.classList.add("draft-needed");
+      const gate = document.getElementById("draftGate");
+      const form = document.getElementById("draftForm");
+      const input = document.getElementById("draftInput");
+      const status = document.getElementById("draftStatus");
+      if (gate) gate.hidden = false;
+      if (form) form.hidden = Boolean(hideForm);
+      if (status) status.textContent = message || "";
+      document.title = "Hub CPD";
+      if (!form || hideForm || form.dataset.bound) {
+        if (input && !hideForm) window.setTimeout(() => input.focus(), 50);
+        return;
+      }
+      form.dataset.bound = "1";
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const code = input ? input.value : "";
+        if (status) status.textContent = "Checking…";
+        const submitBtn = form.querySelector("button[type='submit']");
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+          const res = await fetch("/api/draft", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: code, course: courseKey })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (data.missing) {
+            showDraftGate("There is no session at this address.", true);
+            return;
+          }
+          if (res.ok && data.ok) {
+            location.reload();
+            return;
+          }
+          if (status) status.textContent = "That passcode is not recognised.";
+          if (input) {
+            input.value = "";
+            input.focus();
+          }
+        } catch (err) {
+          if (status) status.textContent = "Could not reach the session. Open it from this laptop, or from hub-cpd.co.uk.";
         }
-      });
+        if (submitBtn) submitBtn.disabled = false;
+      };
+      if (input) window.setTimeout(() => input.focus(), 50);
     }
+
+    async function draftStatus() {
+      try {
+        const url = "/api/draft?course=" + encodeURIComponent(courseKey)
+          + (hub.room ? "&r=" + encodeURIComponent(hub.room) : "");
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function openSelectedSession() {
+      if (view === "vote") {
+        runVoteApp();
+      } else if (view === "feedback") {
+        runFeedbackApp();
+      } else if (view === "home") {
+        document.body.classList.add("home");
+        applyView();
+      } else {
+        requirePresenterAccess().then((ok) => {
+          if (!ok) return;
+          applyView();
+          stage.innerHTML = `<div class="deck">${slides.map(slideMarkup).join("")}</div>`;
+          fitDeck();
+          if (build > buildsOn(i)) build = buildsOn(i);
+          applySlide();
+          if (view === "self") ensureFeedbackOrigin();
+          if (view !== "self") {
+            probeHub();
+            setInterval(tickHub, 700);
+          }
+        });
+      }
+    }
+
+    async function startHub() {
+      if (courseNeedsPass) {
+        const status = await draftStatus();
+        if (status && status.missing) {
+          showDraftGate("There is no session at this address.", true);
+          return;
+        }
+        if (status && status.unconfigured) {
+          showDraftGate("This session is not available yet.", true);
+          return;
+        }
+        if (!(status && status.open && catalogCourse)) {
+          showDraftGate("");
+          return;
+        }
+        if (view === "home") view = "self";
+      }
+      openSelectedSession();
+    }
+    startHub();
 
     function validContactEmail(value) {
       const email = String(value || "").trim();

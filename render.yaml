@@ -20,6 +20,8 @@ services:
         sync: false
       - key: HOST_TOKEN
         generateValue: true
+      - key: DRAFT_CODE
+        sync: false
   - type: web
     name: hub-cpd-test
     runtime: python

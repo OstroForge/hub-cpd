@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import base64
 import csv
+import hashlib
+import hmac
 import io
 import json
 import os
@@ -180,6 +182,11 @@ COURSES = {
         "detail": "JRCALC Chronic Obstructive Pulmonary Disease · 30 minutes",
         "prefix": "COPD-CPD-attendance-",
         "folder": "copd",
+        "published": True,
+        "home_tag": "Respiratory",
+        "home_heading": "COPD, Type 2 Respiratory Failure and NEWS2",
+        "home_blurb": "Controlled oxygen versus NEWS2 Scale 2, and why they are not the same decision.",
+        "home_class": "",
     },
     "hf": {
         "id": "hf",
@@ -187,6 +194,11 @@ COURSES = {
         "detail": "JRCALC Heart Failure · 30 minutes",
         "prefix": "HF-CPD-attendance-",
         "folder": "heart failure",
+        "published": False,
+        "home_tag": "Cardiac",
+        "home_heading": "Heart Failure",
+        "home_blurb": "Pulmonary oedema, positioning, GTN, fluids and furosemide.",
+        "home_class": "hf",
     },
     "asthma": {
         "id": "asthma",
@@ -194,8 +206,14 @@ COURSES = {
         "detail": "JRCALC Asthma · 30 minutes",
         "prefix": "ASTHMA-CPD-attendance-",
         "folder": "asthma",
+        "published": False,
+        "home_tag": "Respiratory",
+        "home_heading": "Acute Asthma",
+        "home_blurb": "Life-threatening features, oxygen to 94–98%, and when to give intramuscular adrenaline.",
+        "home_class": "asthma",
     },
 }
+_DRAFT_HITS: dict[str, list[float]] = {}
 
 
 def course_record(course_id: str) -> dict:
@@ -462,6 +480,250 @@ def new_room_id() -> str:
         if rid not in ROOMS:
             return rid
     return secrets.token_urlsafe(6).upper()[:8]
+
+
+def course_published(course_id: str) -> bool:
+    rec = COURSES.get(course_id)
+    if not rec:
+        return False
+    return bool(rec.get("published", True))
+
+
+def draft_code() -> str:
+    return (os.environ.get("DRAFT_CODE") or "").strip()
+
+
+def draft_debug_open() -> bool:
+    """This laptop (DEBUG=true) opens every session. The live site does not."""
+    return debug_flag(os.environ.get("DEBUG")) is True
+
+
+def draft_codes_match(got: str, expected: str) -> bool:
+    if not expected or not got:
+        return False
+    return hmac.compare_digest(
+        hashlib.sha256(got.encode("utf-8")).digest(),
+        hashlib.sha256(expected.encode("utf-8")).digest(),
+    )
+
+
+def request_cookies(handler: SimpleHTTPRequestHandler) -> dict[str, str]:
+    found: dict[str, str] = {}
+    raw = handler.headers.get("Cookie") or ""
+    for part in raw.split(";"):
+        if "=" not in part:
+            continue
+        key, value = part.split("=", 1)
+        found[key.strip()] = value.strip()
+    return found
+
+
+def sign_draft(scope: str) -> str:
+    scope = scope.strip()
+    mac = hmac.new(HOST_TOKEN.encode("utf-8"), scope.encode("utf-8"), hashlib.sha256).hexdigest()
+    return scope + "." + mac
+
+
+def draft_cookie_header(scope: str) -> str:
+    return "hub_draft={}; HttpOnly; SameSite=Lax; Path=/; Max-Age=43200".format(sign_draft(scope))
+
+
+def draft_scope_from_cookie(handler: SimpleHTTPRequestHandler) -> str:
+    raw = request_cookies(handler).get("hub_draft", "")
+    if "." not in raw:
+        return ""
+    scope, mac = raw.rsplit(".", 1)
+    expected = hmac.new(HOST_TOKEN.encode("utf-8"), scope.encode("utf-8"), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(mac, expected):
+        return ""
+    if scope == "all" or scope in COURSES:
+        return scope
+    return ""
+
+
+def draft_room_allows(handler: SimpleHTTPRequestHandler, course_id: str) -> bool:
+    rid = request_room_id(handler)
+    if not rid or rid not in ROOMS:
+        return False
+    return (getattr(ROOMS[rid], "course_id", "") or "") == course_id
+
+
+def draft_access(handler: SimpleHTTPRequestHandler, course_id: str) -> bool:
+    if course_id not in COURSES:
+        return False
+    if course_published(course_id) or draft_debug_open():
+        return True
+    scope = draft_scope_from_cookie(handler)
+    if scope == "all" or scope == course_id:
+        return True
+    return draft_room_allows(handler, course_id)
+
+
+def draft_attempt_allowed(ip: str) -> bool:
+    now = time.monotonic()
+    hits = [stamp for stamp in _DRAFT_HITS.get(ip, []) if now - stamp < 600]
+    if len(hits) >= 8:
+        _DRAFT_HITS[ip] = hits
+        return False
+    hits.append(now)
+    _DRAFT_HITS[ip] = hits
+    return True
+
+
+def unpublished_course_from_path(path: str) -> str:
+    parts = [part for part in (path or "").split("/") if part]
+    if not parts:
+        return ""
+    course_id = parts[0].casefold()
+    if course_id in COURSES and not course_published(course_id):
+        return course_id
+    return ""
+
+
+def home_card(course: dict, draft: bool) -> str:
+    extra = re.sub(r"[^a-z0-9 -]", "", str(course.get("home_class") or ""))
+    classes = "hub-course" + ((" " + extra) if extra else "")
+    tag = escape(str(course.get("home_tag") or ""))
+    if draft:
+        tag += ' <span class="draft-mark">Draft</span>'
+    heading = escape(str(course.get("home_heading") or course["title"]))
+    blurb = escape(str(course.get("home_blurb") or ""))
+    cid = re.sub(r"[^a-z0-9-]", "", str(course["id"]))
+    return (
+        '<article class="{classes}">\n'
+        '          <p class="hub-tag">{tag}</p>\n'
+        "          <h2>{heading}</h2>\n"
+        "          <p>{blurb}</p>\n"
+        '          <div class="hub-links">\n'
+        '            <a href="?course={cid}&amp;view=self">Self-guided</a>\n'
+        '            <a href="?course={cid}&amp;view=presenter">Presenter</a>\n'
+        '            <a href="{cid}/handout.html">Handout</a>\n'
+        "          </div>\n"
+        "        </article>"
+    ).format(classes=classes, tag=tag, heading=heading, blurb=blurb, cid=cid)
+
+
+def home_cards_html(include_drafts: bool) -> str:
+    cards = []
+    for course in COURSES.values():
+        published = course_published(course["id"])
+        if not published and not include_drafts:
+            continue
+        cards.append(home_card(course, draft=not published))
+    return "\n".join(cards)
+
+
+def fill_home_cards(text: str, include_drafts: bool) -> str:
+    cards = home_cards_html(include_drafts)
+    block = '<div class="hub-courses" id="hubCourses">\n' + cards + "\n      </div>"
+    if include_drafts and any(not course_published(cid) for cid in COURSES):
+        block = (
+            '<p class="home-draft-note">Draft sessions on this laptop. '
+            "The live home page lists finished sessions only.</p>\n      "
+            + block
+        )
+    return text.replace('<div class="hub-courses" id="hubCourses"></div>', block, 1)
+
+
+def published_map_json() -> str:
+    payload = {cid: course_published(cid) for cid in COURSES}
+    return json.dumps(payload, separators=(",", ":"))
+
+
+def fill_published_map(text: str) -> str:
+    return re.sub(
+        r'(<script id="hubPublished" type="application/json">)(.*?)(</script>)',
+        lambda match: match.group(1) + published_map_json() + match.group(3),
+        text,
+        count=1,
+        flags=re.DOTALL,
+    )
+
+
+def strip_course_from_index(text: str, course_id: str) -> str:
+    cid = re.escape(course_id)
+    text = re.sub(
+        r'\s*<script src="' + cid + r'/slides\.js[^"]*"></script>',
+        "",
+        text,
+        count=1,
+    )
+    needle = "?course=" + course_id + "&amp;"
+    hit = text.find(needle)
+    if hit < 0:
+        return text
+    open_at = text.rfind("<article", 0, hit)
+    close_at = text.find("</article>", hit)
+    if open_at < 0 or close_at < 0 or text.find("<article", open_at + 1, hit) != -1:
+        return text
+    end = close_at + len("</article>")
+    while open_at > 0 and text[open_at - 1] in "\r\n":
+        open_at -= 1
+    return text[:open_at] + text[end:]
+
+
+def index_html_for(handler: SimpleHTTPRequestHandler) -> str:
+    text = (ROOT / "index.html").read_text(encoding="utf-8")
+    text = fill_home_cards(text, draft_debug_open())
+    text = fill_published_map(text)
+    for course_id in COURSES:
+        if course_published(course_id) or draft_access(handler, course_id):
+            continue
+        text = strip_course_from_index(text, course_id)
+    return text
+
+
+def draft_status_payload(handler: SimpleHTTPRequestHandler, course_id: str) -> dict:
+    course_id = (course_id or "").strip().casefold()
+    if not course_id:
+        return {"locked": True}
+    if course_id not in COURSES:
+        if draft_scope_from_cookie(handler) == "all" or draft_debug_open():
+            return {"locked": False, "missing": True}
+        if not draft_code():
+            return {"locked": True, "unconfigured": True}
+        return {"locked": True}
+    if course_published(course_id):
+        return {"locked": False, "open": True, "published": True}
+    if draft_access(handler, course_id):
+        return {"locked": False, "open": True}
+    if not draft_code() and not draft_debug_open():
+        return {"locked": True, "unconfigured": True}
+    return {"locked": True}
+
+
+def send_index(handler: SimpleHTTPRequestHandler, body: str, cookie_scope: str = "") -> None:
+    data = body.encode("utf-8")
+    handler.send_response(200)
+    handler.send_header("Content-Type", "text/html; charset=utf-8")
+    handler.send_header("Cache-Control", "no-store")
+    if cookie_scope:
+        handler.send_header("Set-Cookie", draft_cookie_header(cookie_scope))
+    handler.send_header("Content-Length", str(len(data)))
+    handler.end_headers()
+    handler.wfile.write(data)
+
+
+def serve_index_if_needed(handler: SimpleHTTPRequestHandler) -> bool:
+    path = urlparse(handler.path).path
+    if path not in ("/", "/index.html"):
+        return False
+    original = (ROOT / "index.html").read_text(encoding="utf-8")
+    body = index_html_for(handler)
+    course_id = request_course_id(handler)
+    existing = draft_scope_from_cookie(handler)
+    cookie_scope = ""
+    if (
+        course_id
+        and not course_published(course_id)
+        and draft_room_allows(handler, course_id)
+        and existing not in ("all", course_id)
+    ):
+        cookie_scope = course_id
+    if body == original and not cookie_scope:
+        return False
+    send_index(handler, body, cookie_scope)
+    return True
 
 
 def request_course_id(handler: SimpleHTTPRequestHandler) -> str:
@@ -1617,6 +1879,7 @@ def public_courses() -> list[dict]:
     return [
         {"id": c["id"], "title": c["title"], "detail": c["detail"]}
         for c in COURSES.values()
+        if course_published(c["id"])
     ]
 
 
@@ -2053,6 +2316,12 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         if redirect_legacy_host(self):
             return
+        if serve_index_if_needed(self):
+            return
+        locked_course = unpublished_course_from_path(urlparse(self.path).path)
+        if locked_course and not draft_access(self, locked_course):
+            self.send_error(404, "Not found")
+            return
         parsed = urlparse(self.path)
         path = parsed.path
         if path in ("/v", "/vote", "/v/"):
@@ -2108,6 +2377,10 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if path == "/api/courses":
             send_json(self, {"ok": True, "courses": public_courses()})
+            return
+        if path == "/api/draft":
+            asked = (parse_qs(parsed.query).get("course") or [""])[0].strip().casefold()
+            send_json(self, draft_status_payload(self, asked))
             return
         if path == "/healthz":
             send_json(self, {"ok": True})
@@ -2229,6 +2502,26 @@ class Handler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         data = read_json(self)
+        if path == "/api/draft":
+            if not draft_attempt_allowed(self.client_address[0]):
+                send_json(self, {"ok": False, "error": "passcode"}, 429)
+                return
+            course = str(data.get("course") or "").strip().casefold()
+            if not draft_codes_match(str(data.get("code") or ""), draft_code()):
+                send_json(self, {"ok": False, "error": "passcode"}, 401)
+                return
+            payload = {"ok": True}
+            if course not in COURSES:
+                payload["missing"] = True
+            body = json.dumps(payload).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Set-Cookie", draft_cookie_header("all"))
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path == "/api/feedback":
             if not feedback_allowed(self.client_address[0]):
                 send_json(self, {"ok": False, "error": "try later"}, 429)
@@ -2241,7 +2534,11 @@ class Handler(SimpleHTTPRequestHandler):
             if email and not _EMAIL_RE.fullmatch(email):
                 send_json(self, {"ok": False, "error": "bad email"}, 400)
                 return
-            course = str(data.get("course") or "").strip().casefold()
+            asked = str(data.get("course") or "").strip().casefold()
+            if asked in COURSES and not course_published(asked) and not draft_access(self, asked):
+                send_json(self, {"ok": False, "error": "not found"}, 404)
+                return
+            course = asked
             if course not in COURSES:
                 course = request_course_id(self) or "copd"
             row = {
@@ -2314,6 +2611,9 @@ class Handler(SimpleHTTPRequestHandler):
             course = str(data.get("course") or "copd").strip().casefold()
             if course not in COURSES:
                 course = "copd"
+            if not course_published(course) and not draft_access(self, course):
+                send_json(self, {"ok": False, "error": "not found"}, 404)
+                return
             print("Attendance file from {} ({}) [{}]".format(self.client_address[0], presenter, course), flush=True)
             with LOCK:
                 room = self.room_for(create=True)

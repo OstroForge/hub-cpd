@@ -109,8 +109,6 @@ Use this when you are not presenting from this laptop, or when Teams needs a pub
 | Phone / Teams vote page | https://hub-cpd.co.uk/v |
 | Self-guided (no vote, no register) | https://hub-cpd.co.uk/?view=self |
 | Printable COPD handout | https://hub-cpd.co.uk/copd/handout.html |
-| Printable Heart Failure handout | https://hub-cpd.co.uk/hf/handout.html |
-| Printable Acute Asthma handout | https://hub-cpd.co.uk/asthma/handout.html |
 | Previous Render address (forwards to the domain once this build is live) | https://hub-cpd.onrender.com/ |
 | Old COPD URL (forwards to Hub) | https://copd-cpd.onrender.com/ |
 | GitHub copy (static; not the live room) | https://ostroforge.github.io/copd-cpd/ |
@@ -127,7 +125,8 @@ The domain is registered at Cloudflare under **ostroforge@outlook.com**. Connect
    - `CNAME` `@` → `hub-cpd.onrender.com`
    - `CNAME` `www` → `hub-cpd.onrender.com`
 4. In Render, verify the domains. When the certificates are valid, the grey-cloud records can be switched to Proxied.
-5. On the same Environment page, click **Edit**. Add a row: key `PUBLIC_URL`, value `https://hub-cpd.co.uk` (no slash on the end). Save. Render restarts the service. That value is what the room QR and the Teams join link use. It is not in the list yet — the live service only has `ATTEND_SHARE_URL` and `PRESENTERS`. Leave the test service on `https://hub-cpd-test.onrender.com`.
+5. On the same Environment page, click **Edit**. Add a row: key `PUBLIC_URL`, value `https://hub-cpd.co.uk` (no slash on the end). Save. Render restarts the service. That value is what the room QR and the Teams join link use. It is not in the list yet — the live service only has `ATTEND_SHARE_URL` and `PRESENTERS`.
+6. On that same Environment page, add `DRAFT_CODE`. Choose a passcode and type it only there, and in this laptop’s `.env`. Do not put it in git, in Teams, or in this file. Unfinished sessions use it. The home page does not.
 
 Hub staff **do not need a Render account**. Each facilitator has their own PIN. Local or hosted presenter view asks for it. That PIN is also their name on the attendance file, so they are not asked who is delivering.
 
@@ -135,42 +134,21 @@ On this laptop the list is the `PRESENTERS` line in `.env`. Copy that same value
 
 Free Render instances sleep after a quiet spell. The first open can take about a minute.
 
-## Test site (this branch, not live)
+## Sessions that are not finished
 
-Use this to try Heart Failure and the new folder layout **without merging to `main`**. Live `https://hub-cpd.co.uk/` stays on `main`.
+Use **https://hub-cpd.co.uk**. There is no second address for unfinished work. The home page only starts a session marked ready. Right now that is **COPD** only. Heart Failure (`hf`) and Acute Asthma (`asthma`) are on the site, and they are not on the home page.
 
-Create it once in the Render dashboard (signed in as ostroforge@outlook.com):
+A session that is not ready is still on this site. In `COURSES` in `serve.py`, leave `"published": False` and give it a `home_tag`, `home_heading`, and `home_blurb`. On the live site it is not on the home page. Open it with the address, for example `https://hub-cpd.co.uk/?course=hf&view=presenter`.
 
-1. [New Web Service](https://dashboard.render.com/select-repo?type=web)
-2. Repository: **OstroForge/copd-cpd**
-3. Name: **hub-cpd-test**
-4. Branch: **heart-failure-cpd** (not `main`)
-5. Region: Frankfurt
-6. Runtime: Python 3
-7. Build command: `pip install -r requirements.txt`
-8. Start command: `python serve.py`
-9. Health check path: `/healthz`
-10. Instance type: Free
+That address asks for the **session passcode** (`DRAFT_CODE`). A made-up slug asks for the same passcode, and does not open COPD. A wrong passcode is refused either way. The right passcode opens a real unfinished session. The right passcode on a slug that is not a session says there is no session at that address.
 
-Environment variables (Environment tab). Copy **PRESENTERS** from the live `hub-cpd` service — do not paste PINs into chat or this file. Then add:
+Phones in a room that is already running do not need the passcode. They scan that session’s QR.
 
-| Key | Value |
-| --- | --- |
-| `PYTHON_VERSION` | `3.12.0` |
-| `PUBLIC_URL` | `https://hub-cpd-test.onrender.com` |
-| `DEBUG` | `true` |
-| `FEEDBACK_SHARE_COPD_DEV` | the dev COPD feedback workbook from `.env` |
-| `FEEDBACK_SHARE_HF_DEV` | the dev Heart Failure feedback workbook from `.env` |
+On this laptop (`DEBUG=true`) the home page lists every session. A draft card is marked **Draft**, and its Self-guided, Presenter, and Handout links open with no passcode. The live home page does not show those cards.
 
-Create Web Service. First build takes a few minutes. After that:
+When a session is ready for the live home page, change that one line in `COURSES` to `"published": True`. Redeploy. The card appears on https://hub-cpd.co.uk/ and the passcode is no longer asked. No separate homepage edit.
 
-| What | URL |
-| --- | --- |
-| Test home | https://hub-cpd-test.onrender.com/ |
-| Test presenter | https://hub-cpd-test.onrender.com/?course=hf&view=presenter |
-| Test COPD | https://hub-cpd-test.onrender.com/?course=copd&view=self |
-
-Later commits on `heart-failure-cpd` update this test site only. Merging to `main` is what updates the live Hub.
+`hub-cpd-test.onrender.com` is the old preview site. New sessions do not need it.
 
 Keep the current `copd-cpd` service running so https://copd-cpd.onrender.com/ can forward.
 
@@ -231,7 +209,7 @@ The OneDrive **share link** must be the parent `certificates` folder — not `ce
 
 Both hosted decks collect session feedback (how useful it was, comments, a suggestion for the next half hour, and an optional name and email). COPD writes to the COPD workbook. Heart Failure writes to the Heart Failure workbook. Certificate attendance is the Trust QR on the last slide. Neither course collects names, ESR numbers, or emails for a certificate. There is no page to look up or reprint a certificate.
 
-To add a later package, give it a `folder` name in `COURSES` in `serve.py`. The `dev` and `live` folders are created the first time that course writes an attendance file.
+To add a later package, give it a `folder` name in `COURSES` in `serve.py`, plus `home_tag`, `home_heading`, and `home_blurb`. Leave `"published": False` until it should appear on the live home page. The `dev` and `live` folders are created the first time that course writes an attendance file.
 
 ## Handout and self-guided
 

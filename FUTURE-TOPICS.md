@@ -2,7 +2,7 @@
 
 Each session is one JRCALC guideline and about 30 minutes. COPD and Heart Failure are already built.
 
-A new topic stays on its own branch until it is ready for the live Hub. An edit to a live topic, or a change to the shared layout, is a separate branch from `main`.
+A new topic can be deployed on hub-cpd before it is ready. Leave it unpublished and off the home page, and open it with the session passcode. An edit to a live topic, or a change to the shared layout, is a separate branch from `main`.
 
 ## Next
 
