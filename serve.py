@@ -182,7 +182,7 @@ COURSES = {
         "detail": "JRCALC Chronic Obstructive Pulmonary Disease · 30 minutes",
         "prefix": "COPD-CPD-attendance-",
         "folder": "copd",
-        "published": True,
+        "published": False,
         "home_tag": "Respiratory",
         "home_heading": "COPD, Type 2 Respiratory Failure and NEWS2",
         "home_blurb": "Controlled oxygen versus NEWS2 Scale 2, and why they are not the same decision.",
