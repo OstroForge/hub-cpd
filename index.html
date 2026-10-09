@@ -1295,8 +1295,24 @@
     .home-lead {
       font-size: 18px;
       color: var(--muted);
-      max-width: 46ch;
+      max-width: 62ch;
       line-height: 1.4;
+    }
+    .home-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .home-points li {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 12px;
     }
     .home-choices {
       display: grid;
@@ -1331,9 +1347,9 @@
     }
     .hub-courses {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 340px));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 16px;
-      margin-top: 28px;
+      margin-top: 22px;
     }
     .hub-course {
       background: var(--card);
@@ -1396,13 +1412,107 @@
     .hub-course.asthma .hub-tag { color: #1f6b58; }
     .hub-course.asthma h2 { color: #14382c; }
     .hub-course.asthma .hub-links a { background: #14382c; }
+    .hub-course.soon {
+      border-style: dashed;
+      background: transparent;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .hub-course.soon .hub-tag,
+    .hub-course.soon h2 { color: #8a7352; }
+    .hub-course.soon p { margin: 0; }
     .hub-links a:hover,
     .hub-links a:focus-visible { filter: brightness(1.12); }
+    .site-footer {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 28px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+    .site-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 6px 18px;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .site-meta a {
+      color: var(--navy);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .site-meta a:hover,
+    .site-meta a:focus-visible { text-decoration: underline; }
+    .site-disclaimer {
+      margin: 10px 0 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    #about {
+      display: none;
+      min-height: 100%;
+      padding: 28px 18px 40px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    body.about { overflow: auto; background: var(--stage); }
+    body.about #about { display: flex; }
+    body.about .stage,
+    body.about .controls,
+    body.about .pv-side,
+    body.about #home,
+    body.about #feedback,
+    body.about #voteApp,
+    body.about #pinGate { display: none !important; }
+    .about-lead,
+    .about-copy {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .about-lead { font-size: 18px; }
+    .about-copy { font-size: 16px; margin-top: 10px; }
+    .about-section { margin-top: 22px; }
+    .about-section h2 {
+      font-size: 18px;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .about-list {
+      margin: 0;
+      padding-left: 1.15em;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.45;
+    }
+    .about-list li { margin-top: 8px; }
+    .about-list strong { color: var(--navy); }
+    .about-copy a,
+    .about-home {
+      color: var(--navy);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .about-home { display: inline-block; margin-top: 18px; }
+    .about-copy a:hover,
+    .about-copy a:focus-visible,
+    .about-home:hover,
+    .about-home:focus-visible { text-decoration: underline; }
     @media (max-width: 720px) {
       .home-panel { padding: 24px 20px 20px; }
       .home-choices { grid-template-columns: 1fr; }
       .home-choices a { min-height: 0; }
       .hub-courses { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) and (min-width: 721px) {
+      .hub-courses { grid-template-columns: 1fr 1fr; }
     }
     .controls a.home-link {
       background: #1c4236;
@@ -2768,8 +2878,56 @@
   <main id="home">
     <div class="home-panel">
       <h1 class="home-logo-title"><img class="home-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers."></h1>
-      <p class="home-lead">30-minute JRCALC sessions for the room, Teams, or self-guided study. Always use the live guideline on the day.</p>
+      <p class="home-lead">30-minute CPD sessions for the in person presentation, online sessions, or self-guided study. Always use the live guideline on the day.</p>
+      <ul class="home-points">
+        <li>About 30 minutes</li>
+        <li>Live vote in the room or on Teams</li>
+        <li>Self-guided if you missed it</li>
+      </ul>
       <div class="hub-courses" id="hubCourses"></div>
+      <footer class="site-footer">
+        <ul class="site-meta">
+          <li>Last updated <time class="hub-updated" datetime="2026-10-09T15:09:00+01:00">9 October 2026, 15:09</time></li>
+          <li><a href="mailto:info@hub-cpd.co.uk">info@hub-cpd.co.uk</a></li>
+          <li>© <span class="hub-year">2026</span> Hub CPD</li>
+          <li><a href="./?view=about">About</a></li>
+        </ul>
+        <p class="site-disclaimer">These sessions are a teaching aid. Always follow the live JRCALC, AACE, and your Trust guidance. Mistakes can be made. Hub CPD accepts no responsibility for any clinical decision based on this site.</p>
+      </footer>
+    </div>
+  </main>
+  <main id="about">
+    <div class="home-panel">
+      <p class="home-kicker">Hub CPD</p>
+      <h1>About</h1>
+      <p class="about-lead">Hub CPD is a set of 30-minute clinical refreshers for ambulance staff. Each session takes one topic and the decisions you make with it.</p>
+      <section class="about-section">
+        <h2>Three ways to use a session</h2>
+        <ul class="about-list">
+          <li><strong>In the room.</strong> The presenter runs the slides. People in the room vote from their phones.</li>
+          <li><strong>On Teams.</strong> Share the audience window. Remote staff use the same vote.</li>
+          <li><strong>Self-guided.</strong> Work through the session if you missed it. Finished sessions have a short handout.</li>
+        </ul>
+      </section>
+      <section class="about-section">
+        <h2>What to follow on the day</h2>
+        <p class="about-copy">These pages are a teaching aid. They are written around JRCALC, and they note AACE and Trust guidance where that changes the job. Always use the live guideline. If a dose, a threshold, or a local notice has changed, the live source wins.</p>
+        <p class="about-copy">A session is listed on the home page once it is finished.</p>
+      </section>
+      <section class="about-section">
+        <h2>Contact</h2>
+        <p class="about-copy">Corrections, and ideas for the next 30 minutes: <a href="mailto:info@hub-cpd.co.uk">info@hub-cpd.co.uk</a></p>
+        <a class="about-home" href="./">Back to sessions</a>
+      </section>
+      <footer class="site-footer">
+        <ul class="site-meta">
+          <li>Last updated <time class="hub-updated" datetime="2026-10-09T15:09:00+01:00">9 October 2026, 15:09</time></li>
+          <li><a href="mailto:info@hub-cpd.co.uk">info@hub-cpd.co.uk</a></li>
+          <li>© <span class="hub-year">2026</span> Hub CPD</li>
+          <li><a href="./?view=about">About</a></li>
+        </ul>
+        <p class="site-disclaimer">These sessions are a teaching aid. Always follow the live JRCALC, AACE, and your Trust guidance. Mistakes can be made. Hub CPD accepts no responsibility for any clinical decision based on this site.</p>
+      </footer>
     </div>
   </main>
   <main id="feedback">
@@ -3074,7 +3232,7 @@
     const STORE = selfMode ? COURSE.selfStore : COURSE.store;
     const CHANNEL = COURSE.channel;
     const requested = params.get("view");
-    let view = requested === "presenter" || requested === "audience" || requested === "vote" || requested === "self" || requested === "feedback"
+    let view = requested === "presenter" || requested === "audience" || requested === "vote" || requested === "self" || requested === "feedback" || requested === "about"
       ? requested
       : "home";
     try {
@@ -3276,6 +3434,7 @@
       document.body.classList.toggle("audience", view === "audience");
       document.body.classList.toggle("self", view === "self");
       document.body.classList.toggle("feedback", view === "feedback");
+      document.body.classList.toggle("about", view === "about");
       if (view === "presenter") {
         document.title = COURSE.short + " — Presenter";
         pvBtn.textContent = "Audience window";
@@ -3294,6 +3453,8 @@
         setHubLive(false);
       } else if (view === "home") {
         document.title = "Hub CPD";
+      } else if (view === "about") {
+        document.title = "About — Hub CPD";
       } else if (view === "feedback") {
         document.title = COURSE.short + " — Feedback";
       } else {
@@ -4309,7 +4470,7 @@
     timerEl.onclick = () => { timerStarted = Date.now(); };
 
     window.addEventListener("keydown", (e) => {
-      if (view === "vote" || view === "home") return;
+      if (view === "vote" || view === "home" || view === "about" || view === "feedback") return;
       if (e.target && e.target.closest && e.target.closest("input, textarea, select")) return;
       if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) { e.preventDefault(); stepForward(); }
       if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) { e.preventDefault(); stepBack(); }
@@ -4324,7 +4485,7 @@
     });
 
     window.addEventListener("click", (e) => {
-      if (view === "vote" || view === "home") return;
+      if (view === "vote" || view === "home" || view === "about" || view === "feedback") return;
       if (e.target.closest("button, a, input, textarea, select, label, .pv-side, .controls, .notes, #voteApp, #cpdCert")) return;
       stepForward();
     });
@@ -4484,6 +4645,25 @@
       }
     }
 
+    function fillComingSoon() {
+      const grid = document.getElementById("hubCourses");
+      if (!grid || !document.body.classList.contains("home")) return;
+      grid.querySelectorAll(".hub-course.soon").forEach((el) => el.remove());
+      const cols = getComputedStyle(grid).gridTemplateColumns.split(" ").filter((part) => part && part !== "none").length;
+      if (cols < 2) return;
+      const count = grid.querySelectorAll(".hub-course").length;
+      const gap = (cols - (count % cols)) % cols;
+      for (let n = 0; n < gap; n++) {
+        const article = document.createElement("article");
+        article.className = "hub-course soon";
+        article.innerHTML = '<p class="hub-tag">Next</p><h2>CPD Topic Coming Soon</h2><p>Another 30-minute session is being written.</p>';
+        grid.appendChild(article);
+      }
+    }
+    window.addEventListener("resize", () => {
+      if (document.body.classList.contains("home")) fillComingSoon();
+    });
+
     function openSelectedSession() {
       if (view === "vote") {
         runVoteApp();
@@ -4491,6 +4671,10 @@
         runFeedbackApp();
       } else if (view === "home") {
         document.body.classList.add("home");
+        applyView();
+        requestAnimationFrame(fillComingSoon);
+      } else if (view === "about") {
+        document.body.classList.add("about");
         applyView();
       } else {
         requirePresenterAccess().then((ok) => {

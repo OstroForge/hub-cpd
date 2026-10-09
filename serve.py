@@ -34,7 +34,7 @@ import urllib.error
 import urllib.request
 import zipfile
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from xml.sax.saxutils import escape
 from functools import partial
 from http.cookiejar import CookieJar
@@ -613,6 +613,58 @@ def home_cards_html(include_drafts: bool) -> str:
     return "\n".join(cards)
 
 
+def _uk_civil_time(moment: datetime) -> datetime:
+    """GMT, or BST from the last Sunday in March until the last Sunday in October."""
+    utc = moment.astimezone(timezone.utc)
+
+    def last_sunday(year: int, month: int) -> datetime:
+        if month == 12:
+            probe = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        else:
+            probe = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+        last = probe - timedelta(days=1)
+        back = (last.weekday() - 6) % 7
+        return (last - timedelta(days=back)).replace(hour=1, minute=0, second=0, microsecond=0)
+
+    start = last_sunday(utc.year, 3)
+    end = last_sunday(utc.year, 10)
+    offset = timedelta(hours=1) if start <= utc < end else timedelta(0)
+    return (utc + offset).replace(tzinfo=timezone(offset))
+
+
+def content_updated_at() -> datetime:
+    """Newest teaching file, in UK time. This is the footer 'last updated' stamp."""
+    newest = 0.0
+    paths = [ROOT / "index.html", ROOT / "serve.py"]
+    for course_id in COURSES:
+        paths.append(ROOT / course_id / "slides.js")
+        paths.append(ROOT / course_id / "handout.html")
+    for path in paths:
+        try:
+            newest = max(newest, path.stat().st_mtime)
+        except OSError:
+            continue
+    if newest <= 0:
+        newest = time.time()
+    return _uk_civil_time(datetime.fromtimestamp(newest, timezone.utc))
+
+
+def fill_site_footer(text: str) -> str:
+    when = content_updated_at()
+    label = "{} {}, {}".format(when.day, when.strftime("%B %Y"), when.strftime("%H:%M"))
+    iso = when.isoformat(timespec="minutes")
+    text = re.sub(
+        r'<time class="hub-updated" datetime="[^"]*">[^<]*</time>',
+        '<time class="hub-updated" datetime="{}">{}</time>'.format(iso, label),
+        text,
+    )
+    return re.sub(
+        r'<span class="hub-year">\d*</span>',
+        '<span class="hub-year">{}</span>'.format(when.year),
+        text,
+    )
+
+
 def fill_home_cards(text: str, include_drafts: bool) -> str:
     cards = home_cards_html(include_drafts)
     block = '<div class="hub-courses" id="hubCourses">\n' + cards + "\n      </div>"
@@ -664,6 +716,7 @@ def strip_course_from_index(text: str, course_id: str) -> str:
 
 def index_html_for(handler: SimpleHTTPRequestHandler) -> str:
     text = (ROOT / "index.html").read_text(encoding="utf-8")
+    text = fill_site_footer(text)
     text = fill_home_cards(text, draft_debug_open())
     text = fill_published_map(text)
     for course_id in COURSES:

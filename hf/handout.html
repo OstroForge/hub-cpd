@@ -79,7 +79,16 @@
     h2 { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy); margin: 12px 0 6px; }
     h3 { font-size: 14px; color: var(--navy); margin-bottom: 4px; }
     p, li { font-size: 12.5px; }
-    .meta { font-size: 11px; color: var(--muted); max-width: 42ch; text-align: right; }
+    .brand-logo {
+      height: 54px;
+      width: auto;
+      flex: 0 0 auto;
+      align-self: center;
+    }
+    header > div { flex: 1; min-width: 0; }
+    .meta { margin-top: 8px; font-size: 11px; color: var(--muted); }
+    .sheet-link { margin-top: 6px; font-size: 12px; font-weight: 700; }
+    .sheet-link a { color: var(--navy); }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     .card {
@@ -138,11 +147,10 @@
   <article class="sheet">
     <header>
       <div>
-        <p class="kicker"><img src="../assets/hub-cpd-star.png" alt="">Hub CPD handout</p>
         <h1>Heart Failure in Pre-hospital Care</h1>
         <p>JRCALC Heart Failure · GTN · Furosemide · Oxygen</p>
       </div>
-      <p class="meta">Summary of current (as at 22/09/2026) JRCALC and related evidence. Recheck the live guideline, local PGDs and stock before you treat.</p>
+      <img class="brand-logo" src="../assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers.">
     </header>
 
     <h2>Five key points to remember</h2>
@@ -287,6 +295,8 @@
         NICE CG187 Acute heart failure. Ponikowski et al. ESC 2016. Wakai et al. Cochrane 2013.
         Self-guided slides: add <code>?course=hf&amp;view=self</code> to the deck URL. This is not a substitute for the live JRCALC entry or Trust policy.
       </p>
+      <p class="meta">Summary of current (as at 22/09/2026) JRCALC and related evidence. Recheck the live guideline, local PGDs and stock before you treat.</p>
+      <p class="sheet-link"><a href="https://hub-cpd.co.uk/">hub-cpd.co.uk</a></p>
     </section>
   </article>
 </body>
