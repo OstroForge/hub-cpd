@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <title>Slide preview</title>
+  <link rel="stylesheet" href="/preview.css" />
+</head>
+<body>
+  <div class="stage"><div class="deck" id="deck"></div></div>
+  <script>
+    function fit() {
+      const scale = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+      document.documentElement.style.setProperty("--slide-scale", String(scale || 1));
+    }
+    window.addEventListener("resize", fit);
+    window.addEventListener("message", (event) => {
+      if (event.origin !== location.origin || !event.data) return;
+      if (event.data.html != null) {
+        document.body.className = event.data.theme || "";
+        document.getElementById("deck").innerHTML = event.data.html || "";
+        window.__buildStep = null;
+        window.__answer = false;
+        if (window.__buildTimer) clearInterval(window.__buildTimer);
+        markBuilds();
+      }
+      if (event.data.builds) applyBuilds(event.data.builds);
+      fit();
+    });
+    function applyBuilds(mode) {
+      const builds = Array.from(document.querySelectorAll("#deck .build"));
+      const hasPoll = !!document.querySelector("#deck .poll-slide");
+      if (mode === "reset") {
+        window.__buildStep = null;
+        window.__answer = true;
+        if (window.__buildTimer) clearInterval(window.__buildTimer);
+      } else if (mode === "next") {
+        const stepping = builds.length && (window.__buildStep == null || window.__buildStep < builds.length);
+        if (stepping) {
+          window.__buildStep = window.__buildStep == null ? 1 : window.__buildStep + 1;
+          window.__answer = false;
+        } else if (hasPoll) {
+          window.__answer = true;
+        }
+      } else if (mode === "play") {
+        window.__buildStep = builds.length ? 0 : null;
+        window.__answer = false;
+        if (window.__buildTimer) clearInterval(window.__buildTimer);
+        window.__buildTimer = setInterval(() => {
+          const count = document.querySelectorAll("#deck .build").length;
+          if ((window.__buildStep || 0) < count) {
+            window.__buildStep = (window.__buildStep || 0) + 1;
+            markBuilds();
+            return;
+          }
+          if (!window.__answer && document.querySelector("#deck .poll-slide")) {
+            window.__answer = true;
+            markBuilds();
+            return;
+          }
+          clearInterval(window.__buildTimer);
+        }, 900);
+      }
+      markBuilds();
+    }
+    function markBuilds() {
+      const step = window.__buildStep;
+      document.querySelectorAll("#deck .build").forEach((el, index) => {
+        el.classList.toggle("show", step == null || index < step);
+      });
+      const slide = document.querySelector("#deck .slide");
+      if (slide) slide.classList.toggle("revealed", window.__answer === true);
+    }
+    fit();
+    parent.postMessage({ ready: true }, location.origin);
+  </script>
+</body>
+</html>

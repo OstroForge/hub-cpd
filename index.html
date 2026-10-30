@@ -3087,6 +3087,9 @@
     </div>
   </div>
 
+  <script src="copd/deck.js"></script>
+  <script src="hf/deck.js"></script>
+  <script src="asthma/deck.js"></script>
   <script src="copd/slides.js?v=cert2"></script>
   <script src="hf/slides.js?v=steps1"></script>
   <script src="asthma/slides.js?v=steps1"></script>
@@ -3181,12 +3184,18 @@
       return `<figure class="n2-official${form ? " n2-form" : ""}"><div class="n2-form-scroll"><div class="n2-form-wrap"><img src="copd/assets/news2-chart-1.png" alt="NEWS2 Chart 1: The NEWS scoring system">${hits}</div></div><figcaption class="n2-cite">${NEWS2_CITE}</figcaption></figure>`;
     }
     const selfMode = params.get("view") === "self";
-    const slideSource = (COURSE.id === "hf" && typeof heartFailureSlides === "function")
-      ? heartFailureSlides()
-      : (COURSE.id === "asthma" && typeof asthmaSlides === "function")
-      ? asthmaSlides()
-      : copdSlides();
+    function deckSlides() {
+      if (COURSE.id === "hf" && typeof heartFailureDeckSlides === "function") return heartFailureDeckSlides();
+      if (COURSE.id === "asthma" && typeof asthmaDeckSlides === "function") return asthmaDeckSlides();
+      if ((COURSE.id === "copd" || !params.get("course")) && typeof copdDeckSlides === "function") return copdDeckSlides();
+      if (COURSE.id === "hf" && typeof heartFailureSlides === "function") return heartFailureSlides();
+      if (COURSE.id === "asthma" && typeof asthmaSlides === "function") return asthmaSlides();
+      return copdSlides();
+    }
+    const slideSource = deckSlides();
     const slides = slideSource.flatMap((s) => {
+      if (!selfMode && s.live === false) return [];
+      if (selfMode && s.self === false) return [];
       if (selfMode && (s.collectNames || s.hostedOnly || s.questions)) return [];
       if (s.type !== "poll") return [s];
       if (selfMode) {
