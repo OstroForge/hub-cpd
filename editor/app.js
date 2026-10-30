@@ -206,6 +206,22 @@
     }).join("");
   }
 
+  function currentThemeClass(overrideId) {
+    const course = state.deck && state.deck.course;
+    const chosen = overrideId || (state.deck && state.deck.theme);
+    return HubDeck.themeClass(HubDeck.themeIdFor(course, chosen));
+  }
+
+  function themePicker() {
+    const id = HubDeck.themeIdFor(state.deck.course, state.deck.theme);
+    const current = HubDeck.THEMES.filter((item) => item.id === id)[0];
+    const items = HubDeck.THEMES.map((item) => `<button type="button" data-theme="${escapeText(item.id)}">${escapeText(item.label)}</button>`).join("");
+    return `<div class="picker" data-picker="theme">
+      <button type="button" class="picker-open" title="Hover a theme to try it on this slide">${escapeText(current.label)}</button>
+      <div class="picker-menu" hidden>${items}</div>
+    </div>`;
+  }
+
   function picker(which, value) {
     const choices = HubDeck.choices || [];
     const current = choices.filter((item) => item.id === value)[0] || choices[0];
@@ -253,7 +269,15 @@
     const topic = ((state.status && state.status.topics) || []).find((item) => item.id === course);
     let extra = "";
     if (slide.template === "title") {
-      extra = field("subtitle", "Subtitle", "textarea") + field("meta", "Source line", "textarea");
+      const tagged = String(slide.image || "").indexOf("upload:title-slide.") === 0;
+      const taggedName = tagged ? String(slide.image).slice(7) : "";
+      extra = field("subtitle", "Subtitle", "textarea") + field("meta", "Source line", "textarea")
+        + `<label>Suggested title picture</label><input id="titleImageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+          <p class="hint">${tagged
+            ? "Tagged in this session’s assets folder as " + escapeText(taggedName) + ". Copy into this project puts that same file in the topic’s assets folder."
+            : "No title picture tagged yet."}</p>
+          <p class="hint">The preview shows this picture behind the title. The title slide on the site keeps its current picture. The tagged file is how you spot the suggestion when the draft comes in.</p>
+          ${tagged ? `<img alt="Suggested title picture" src="${escapeText(mediaUrl(slide.image))}" style="width:100%;border-radius:6px;margin-top:8px"><button type="button" data-action="clearTitleImage">Remove this tag</button>` : ""}`;
     } else if (slide.template === "columns") {
       extra = field("leftTitle", "Left heading", "text") + field("leftBody", "Left bullets, one per line", "textarea")
         + field("rightTitle", "Right heading", "text") + field("rightBody", "Right bullets, one per line", "textarea")
@@ -335,6 +359,9 @@
     inspect.innerHTML = `
       <div class="inspect-head">
         <p class="template-name">Folder: ${escapeText(state.folder ? state.folder.name : "")} · ${state.index + 1} of ${state.deck.slides.length}</p>
+        <label>Colour theme</label>
+        ${themePicker()}
+        <p class="hint">This colours the whole session. Hover a name to try it on this slide. Clay, Tide and Plum use the ambulance title picture for now.</p>
         <label>Layout</label>
         ${picker("layout", slide.template)}
         <p class="hint">Hover a layout to see an example. Choosing one keeps the title and the notes.</p>
@@ -373,7 +400,7 @@
     if (!frame || !frame.contentWindow || !previewReady || !slide) return;
     frame.contentWindow.postMessage({
       html: HubDeck.previewHtml(slide, ctx()),
-      theme: HubDeck.themeFor(state.deck.course)
+      theme: currentThemeClass()
     }, location.origin);
   }
 
@@ -414,16 +441,24 @@
     paintChrome();
   }
 
-  async function uploadImage(file) {
-    const res = await fetch("/api/asset", {
-      method: "POST",
-      headers: {
-        "X-Filename": file.name,
-        "X-Drive-Id": state.folder.driveId,
-        "X-Item-Id": state.folder.itemId
-      },
-      body: file
+  function mediaUrl(image) {
+    if (!image || String(image).indexOf("upload:") !== 0 || !state.folder) return "";
+    const query = new URLSearchParams({
+      driveId: state.folder.driveId,
+      itemId: state.folder.itemId,
+      name: String(image).slice(7)
     });
+    return "/media?" + query.toString();
+  }
+
+  async function uploadImage(file, role) {
+    const headers = {
+      "X-Filename": file.name,
+      "X-Drive-Id": state.folder.driveId,
+      "X-Item-Id": state.folder.itemId
+    };
+    if (role) headers["X-Role"] = role;
+    const res = await fetch("/api/asset", { method: "POST", headers: headers, body: file });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Could not add that picture");
     current().image = data.image;
@@ -431,6 +466,7 @@
     renderInspector();
     refreshPreview();
     paintChrome();
+    if (role === "title") await saveDeck();
   }
 
   function loadScript(src) {
@@ -500,6 +536,7 @@
       body: JSON.stringify({
         course: course,
         slides: slides,
+        theme: state.deck.theme || "",
         uploads: HubDeck.uploadsIn(state.deck),
         driveId: state.folder.driveId,
         itemId: state.folder.itemId
@@ -555,6 +592,10 @@
       uploadImage(target.files[0]).catch((err) => alert(err.message));
       return;
     }
+    if (target.id === "titleImageFile" && target.files && target.files[0]) {
+      uploadImage(target.files[0], "title").catch((err) => alert(err.message));
+      return;
+    }
     if (target.getAttribute("data-field")) rememberField(target);
   });
 
@@ -587,7 +628,7 @@
       index: 0,
       total: 1
     });
-    if (hoverReady && frame.contentWindow) frame.contentWindow.postMessage({ html: hoverHtml, theme: HubDeck.themeFor(state.deck && state.deck.course) }, location.origin);
+    if (hoverReady && frame.contentWindow) frame.contentWindow.postMessage({ html: hoverHtml, theme: currentThemeClass() }, location.origin);
   }
 
   function placeMenu(menu, opener) {
@@ -603,13 +644,45 @@
     menu.style.maxHeight = "360px";
   }
 
+  function paintTheme(className) {
+    const frame = document.getElementById("preview");
+    if (!frame || !frame.contentWindow || !previewReady) return;
+    frame.contentWindow.postMessage({ theme: className || "" }, location.origin);
+  }
+
   screen.addEventListener("mouseover", (event) => {
+    const themeItem = event.target.closest("[data-theme]");
+    if (themeItem) {
+      paintTheme(HubDeck.themeClass(themeItem.getAttribute("data-theme")));
+      return;
+    }
     const item = event.target.closest("[data-pick]");
     if (!item) return;
     showExample(item.getAttribute("data-pick"), item);
   });
 
+  screen.addEventListener("mouseout", (event) => {
+    const menu = event.target.closest('[data-picker="theme"] .picker-menu');
+    if (!menu || menu.hidden) return;
+    const next = event.relatedTarget;
+    if (next && menu.contains(next)) return;
+    paintTheme(currentThemeClass());
+  });
+
   screen.addEventListener("click", (event) => {
+    const themeItem = event.target.closest("[data-theme]");
+    if (themeItem) {
+      const id = themeItem.getAttribute("data-theme");
+      closeMenus();
+      if (state.deck && state.deck.theme !== id) {
+        state.deck.theme = id;
+        state.dirty = true;
+        renderInspector();
+        paintChrome();
+      }
+      paintTheme(currentThemeClass());
+      return;
+    }
     const item = event.target.closest("[data-pick]");
     const opener = event.target.closest(".picker-open");
     if (item) {
@@ -802,6 +875,20 @@
       await importCourse(button.dataset.course);
       return;
     }
+    if (action === "clearTitleImage") {
+      const slide = current();
+      if (!slide) return;
+      await api("/api/title-image", {
+        method: "POST",
+        body: JSON.stringify({ driveId: state.folder.driveId, itemId: state.folder.itemId })
+      });
+      if (String(slide.image || "").indexOf("upload:title-slide.") === 0) slide.image = "";
+      state.dirty = true;
+      renderInspector();
+      refreshPreview();
+      await saveDeck();
+      return;
+    }
     if (action === "restore") {
       if (!confirm("Use the original slides in this project again? The draft in the folder stays as it is.")) return;
       await api("/api/project-restore", {
@@ -818,7 +905,7 @@
     const hover = document.getElementById("templateHover");
     if (hover && event.source === hover.contentWindow) {
       hoverReady = true;
-      if (hoverHtml) event.source.postMessage({ html: hoverHtml, theme: HubDeck.themeFor(state.deck && state.deck.course) }, location.origin);
+      if (hoverHtml) event.source.postMessage({ html: hoverHtml, theme: currentThemeClass() }, location.origin);
       return;
     }
     const frame = document.getElementById("preview");

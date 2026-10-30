@@ -265,10 +265,18 @@
     return image;
   }
 
-  function shell(kind, inner, ctx) {
-    return `<section class="slide ${kind} active">${inner}
+  function shell(kind, inner, ctx, style) {
+    const attr = style ? ` style="${style}"` : "";
+    return `<section class="slide ${kind} active"${attr}>${inner}
       <div class="footer-bar"><span class="footer-brand">Hub CPD</span><span>${ctx.index + 1} / ${ctx.total}</span></div>
     </section>`;
+  }
+
+  function titlePreviewStyle(slide, ctx) {
+    if (String(slide.image || "").indexOf("upload:title-slide.") !== 0) return "";
+    const src = imageSrc(slide.image, ctx, false);
+    if (!src) return "";
+    return "background-image:linear-gradient(90deg, rgba(8, 16, 14, 0.92) 0%, rgba(8, 16, 14, 0.55) 42%, rgba(8, 16, 14, 0.2) 100%), linear-gradient(rgba(8, 16, 14, 0.28), rgba(8, 16, 14, 0.28)), url('" + esc(src) + "');background-size:100% 100%, 100% 100%, cover;background-position:left center, left center, right center;background-repeat:no-repeat";
   }
 
   function paras(value) {
@@ -367,7 +375,7 @@
   function previewHtml(slide, ctx) {
     if (!slide) return "";
     const inner = bodyHtml(slide, ctx, false);
-    if (slide.template === "title") return shell("title-slide", inner, ctx);
+    if (slide.template === "title") return shell("title-slide", inner, ctx, titlePreviewStyle(slide, ctx));
     const kind = slide.template === "poll" ? "poll-slide" : (slide.player && slide.player.hostedOnly ? "trust-slide" : "");
     const heading = slide.template === "title" ? "" : `<div class="kicker">${esc(slide.kicker)}</div><h2>${esc(slide.title)}</h2>`;
     return shell(kind, heading + inner, ctx);
@@ -850,10 +858,29 @@
     HubLayouts.choices.forEach((item) => { LABELS[item.id] = item.label; });
   }
 
-  function themeFor(course) {
-    if (course === "hf") return "theme-hf";
-    if (course === "asthma") return "theme-asthma";
-    return "";
+  const THEMES = [
+    { id: "copd", label: "Sand" },
+    { id: "hf", label: "Slate" },
+    { id: "asthma", label: "Sage" },
+    { id: "clay", label: "Clay" },
+    { id: "tide", label: "Tide" },
+    { id: "plum", label: "Plum" }
+  ];
+
+  function themeIdFor(course, chosen) {
+    if (THEMES.some((item) => item.id === chosen)) return chosen;
+    if (course === "hf") return "hf";
+    if (course === "asthma") return "asthma";
+    return "copd";
+  }
+
+  function themeClass(id) {
+    if (!id || id === "copd") return "";
+    return "theme-" + id;
+  }
+
+  function themeFor(course, chosen) {
+    return themeClass(themeIdFor(course, chosen));
   }
 
   window.HubDeck = {
@@ -871,6 +898,9 @@
     textParts: textParts,
     writePart: writePart,
     uploadsIn: uploadsIn,
+    THEMES: THEMES,
+    themeIdFor: themeIdFor,
+    themeClass: themeClass,
     themeFor: themeFor,
     lines: lines
   };

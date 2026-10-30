@@ -15,8 +15,8 @@
     window.addEventListener("resize", fit);
     window.addEventListener("message", (event) => {
       if (event.origin !== location.origin || !event.data) return;
+      if (event.data.theme != null) document.body.className = event.data.theme || "";
       if (event.data.html != null) {
-        document.body.className = event.data.theme || "";
         document.getElementById("deck").innerHTML = event.data.html || "";
         window.__buildStep = null;
         window.__answer = false;

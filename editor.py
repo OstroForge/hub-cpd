@@ -258,14 +258,23 @@ def draft_is_live(course: str) -> bool:
         return False
 
 
-def deck_js(course: str, slides: list) -> str:
+THEMES = ("copd", "hf", "asthma", "clay", "tide", "plum")
+
+
+def deck_js(course: str, slides: list, theme: str = "") -> str:
     fn = COURSE_FILES[course][0]
+    theme = str(theme or "")
+    if theme not in THEMES and theme != "":
+        raise ValueError("Unknown colour theme")
     payload = json.dumps(slides, ensure_ascii=False, indent=2)
     payload = payload.replace("\u2028", "\\u2028").replace("\u2029", "\\u2029").replace("</", "<\\/")
-    return "function %s() {\n  return %s;\n}\n" % (fn, payload)
+    script = "function %s() {\n  return %s;\n}\n" % (fn, payload)
+    if theme:
+        script += "function %s() {\n  return %s;\n}\n" % (fn.replace("Slides", "Theme"), json.dumps(theme))
+    return script
 
 
-def write_project_deck(course: str, slides: list) -> None:
+def write_project_deck(course: str, slides: list, theme: str = "") -> None:
     if course not in COURSE_FILES:
         raise ValueError("This session cannot be copied into the project")
     if not isinstance(slides, list) or not slides:
@@ -275,7 +284,7 @@ def write_project_deck(course: str, slides: list) -> None:
     dest = COURSE_FILES[course][1]
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(".js.tmp")
-    tmp.write_text(deck_js(course, slides), encoding="utf-8")
+    tmp.write_text(deck_js(course, slides, theme), encoding="utf-8")
     tmp.replace(dest)
 
 
@@ -601,6 +610,26 @@ def write_disk_deck(drive_id: str, item_id: str, deck: dict, email: str) -> dict
     deck["updatedBy"] = email or "this computer"
     (folder / "deck.json").write_text(json.dumps(deck, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return deck
+
+
+TITLE_SUFFIXES = {".png", ".jpg", ".webp", ".gif"}
+
+
+def title_slide_name(original: str) -> str:
+    ext = Path(str(original or "")).suffix.lower()
+    if ext == ".jpeg":
+        ext = ".jpg"
+    if ext not in TITLE_SUFFIXES:
+        raise ValueError("Use a PNG, JPG, WEBP or GIF for the title picture")
+    return "title-slide" + ext
+
+
+def forget_other_title_slides(folder: Path, keep: str) -> None:
+    if not folder.is_dir():
+        return
+    for path in folder.iterdir():
+        if path.is_file() and path.name.startswith("title-slide.") and path.name != keep:
+            path.unlink()
 
 
 def disk_asset(drive_id: str, item_id: str, filename: str) -> Path:
@@ -960,6 +989,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/asset":
             self.save_asset()
             return
+        if path == "/api/title-image":
+            self.clear_title_image()
+            return
         if path == "/api/project":
             data = self.read_json()
             course = str(data.get("course") or "")
@@ -972,7 +1004,7 @@ class Handler(BaseHTTPRequestHandler):
             self.require_project_write(drive_id)
             validate_ids(drive_id, item_id)
             copy_uploads(course, drive_id, item_id, uploads)
-            write_project_deck(course, slides)
+            write_project_deck(course, slides, str(data.get("theme") or ""))
             self.send_json({"ok": True, "live": True})
             return
         if path == "/api/project-restore":
@@ -1078,18 +1110,55 @@ class Handler(BaseHTTPRequestHandler):
     def save_asset(self) -> None:
         drive_id = self.headers.get("X-Drive-Id") or ""
         item_id = self.headers.get("X-Item-Id") or ""
-        filename = safe_name(self.headers.get("X-Filename") or "")
+        original = self.headers.get("X-Filename") or ""
+        role = (self.headers.get("X-Role") or "").strip().lower()
+        filename = title_slide_name(original) if role == "title" else safe_name(original)
         raw = self.read_body(8 * 1024 * 1024)
         if not raw:
             raise ValueError("That image was empty")
         validate_ids(drive_id, item_id)
         if drive_id in {"local", "path"}:
-            disk_asset(drive_id, item_id, filename).write_bytes(raw)
+            dest = disk_asset(drive_id, item_id, filename)
+            dest.write_bytes(raw)
+            if role == "title":
+                forget_other_title_slides(dest.parent, filename)
         else:
             self.require_user()
             self.ensure_assets(drive_id, item_id)
             graph_call("PUT", drive_file_url(drive_id, item_id, "assets/" + filename), raw, mime_for(Path(filename)))
+            if role == "title":
+                self.forget_graph_title_slides(drive_id, item_id, filename)
         self.send_json({"image": "upload:" + filename})
+
+    def clear_title_image(self) -> None:
+        data = self.read_json()
+        drive_id = str(data.get("driveId") or "")
+        item_id = str(data.get("itemId") or "")
+        validate_ids(drive_id, item_id)
+        if drive_id in {"local", "path"}:
+            forget_other_title_slides(disk_path(drive_id, item_id) / "assets", "")
+        else:
+            self.require_user()
+            self.forget_graph_title_slides(drive_id, item_id, "")
+        self.send_json({"ok": True})
+
+    def forget_graph_title_slides(self, drive_id: str, item_id: str, keep: str) -> None:
+        assets_id = ""
+        for item in list_children(drive_id, item_id):
+            if str(item.get("name") or "").lower() == "assets" and "folder" in item:
+                assets_id = str(item.get("id") or "")
+                break
+        if not assets_id:
+            return
+        for item in list_children(drive_id, assets_id):
+            name = str(item.get("name") or "")
+            item_key = str(item.get("id") or "")
+            if "folder" in item or not item_key or not name.startswith("title-slide.") or name == keep:
+                continue
+            graph_call(
+                "DELETE",
+                GRAPH + "/drives/%s/items/%s" % (urllib.parse.quote(drive_id), urllib.parse.quote(item_key)),
+            )
 
     def send_media(self, drive_id: str, item_id: str, name: str) -> None:
         filename = safe_name(name)
@@ -1162,12 +1231,32 @@ def check() -> None:
     assert static_file("/editor.py") is None
     js = deck_js("copd", [{"html": "<div></div>", "notes": "a</script>b"}])
     assert js.startswith("function copdDeckSlides()")
+    assert "DeckTheme" not in js
     assert "<\\/" in js
-    assert ".slide" in preview_css()
+    themed = deck_js("hf", [{"html": "<div></div>"}], "clay")
+    assert "function heartFailureDeckTheme()" in themed
+    assert '"clay"' in themed
+    try:
+        deck_js("copd", [{"html": "<div></div>"}], "nope")
+    except ValueError:
+        pass
+    else:
+        raise SystemExit("theme check failed")
+    css = preview_css()
+    assert ".slide" in css
+    assert "theme-clay" in css and "theme-tide" in css and "theme-plum" in css
     topics = topic_catalog()
     assert any(item["id"] == "copd" and item["published"] for item in topics)
     assert any(item["id"] == "hf" and not item["published"] for item in topics)
     assert guess_course("Heart Failure") == "hf"
+    assert title_slide_name("Ward photo.JPEG") == "title-slide.jpg"
+    assert title_slide_name("night.png") == "title-slide.png"
+    try:
+        title_slide_name("notes.txt")
+    except ValueError:
+        pass
+    else:
+        raise SystemExit("title picture type check failed")
     assert guess_course("sepsis") == ""
     try:
         canonical_topic_folder("Sepsis")

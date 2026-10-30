@@ -105,6 +105,7 @@
         linear-gradient(90deg, rgba(10, 16, 36, 0.92) 0%, rgba(18, 28, 58, 0.58) 40%, rgba(27, 39, 68, 0.32) 100%),
         linear-gradient(rgba(27, 39, 68, 0.34), rgba(12, 18, 40, 0.34)),
         url("hf/assets/title-ambulance-hf.png") right center / cover no-repeat;
+      background-size: 100% 100%, 100% 100%, cover;
     }
     body.theme-hf .slide.title-slide h1,
     body.theme-hf .slide.cert-slide h2 { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.75); }
@@ -154,7 +155,7 @@
         url("asthma/assets/title-ambulance-asthma.png?v=9");
       background-repeat: no-repeat;
       background-position: left center, left center, 46% center;
-      background-size: auto, auto, 70% auto;
+      background-size: 100% 100%, 100% 100%, 70% auto;
     }
     body.theme-asthma .title-slide .title-logo {
       top: 16px;
@@ -219,12 +220,152 @@
       background: transparent;
     }
 
+    body.theme-clay {
+      --navy: #4a2c24;
+      --navy-2: #6a4034;
+      --ink: #2a211c;
+      --muted: #6d5b53;
+      --paper: #f3e4d6;
+      --card: #f8eee4;
+      --line: #e0cbb8;
+      --amber: #b85c38;
+      --amber-bg: #fde8df;
+      --teal: #5f6b3a;
+      --teal-bg: #eef2e4;
+      --stage: #1a100e;
+    }
+    body.theme-tide {
+      --navy: #0e3a4a;
+      --navy-2: #156078;
+      --ink: #163038;
+      --muted: #4e6870;
+      --paper: #d7e8ec;
+      --card: #eaf4f6;
+      --line: #b7d0d6;
+      --amber: #c4892a;
+      --amber-bg: #f8efd8;
+      --teal: #0f6e78;
+      --teal-bg: #e3f4f5;
+      --stage: #07161c;
+    }
+    body.theme-plum {
+      --navy: #3a2448;
+      --navy-2: #543266;
+      --ink: #2a2030;
+      --muted: #6a5c72;
+      --paper: #ece4f0;
+      --card: #f7f2f8;
+      --line: #d4c6de;
+      --amber: #c46b3a;
+      --amber-bg: #f8ebe3;
+      --teal: #3d6b62;
+      --teal-bg: #e7f3ef;
+      --stage: #140e18;
+    }
+    body.theme-clay .slide.title-slide,
+    body.theme-clay .slide.cert-slide {
+      background:
+        linear-gradient(90deg, rgba(36, 16, 12, 0.92) 0%, rgba(74, 36, 26, 0.58) 42%, rgba(90, 44, 32, 0.28) 100%),
+        linear-gradient(rgba(74, 40, 30, 0.36), rgba(36, 18, 14, 0.36)),
+        url("copd/assets/title-ambulance.png") right center / cover no-repeat;
+      background-size: 100% 100%, 100% 100%, cover;
+    }
+    body.theme-tide .slide.title-slide,
+    body.theme-tide .slide.cert-slide {
+      background:
+        linear-gradient(90deg, rgba(6, 24, 32, 0.92) 0%, rgba(10, 46, 58, 0.58) 42%, rgba(14, 58, 74, 0.28) 100%),
+        linear-gradient(rgba(14, 58, 74, 0.36), rgba(6, 28, 36, 0.36)),
+        url("copd/assets/title-ambulance.png") right center / cover no-repeat;
+      background-size: 100% 100%, 100% 100%, cover;
+    }
+    body.theme-plum .slide.title-slide,
+    body.theme-plum .slide.cert-slide {
+      background:
+        linear-gradient(90deg, rgba(26, 12, 34, 0.92) 0%, rgba(46, 22, 58, 0.58) 42%, rgba(58, 36, 72, 0.28) 100%),
+        linear-gradient(rgba(58, 36, 72, 0.36), rgba(28, 14, 36, 0.36)),
+        url("copd/assets/title-ambulance.png") right center / cover no-repeat;
+      background-size: 100% 100%, 100% 100%, cover;
+    }
+    body.theme-clay .slide.title-slide h1,
+    body.theme-tide .slide.title-slide h1,
+    body.theme-plum .slide.title-slide h1,
+    body.theme-clay .slide.cert-slide h2,
+    body.theme-tide .slide.cert-slide h2,
+    body.theme-plum .slide.cert-slide h2 { color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.75); }
+    body.theme-clay .slide.title-slide .subtitle,
+    body.theme-tide .slide.title-slide .subtitle,
+    body.theme-plum .slide.title-slide .subtitle { color: #f4efe8; }
+    body.theme-clay .slide.title-slide .meta,
+    body.theme-tide .slide.title-slide .meta,
+    body.theme-plum .slide.title-slide .meta { color: #ddd2c8; }
+    body.theme-clay .controls { background: #241410; color: #f3e4d6; }
+    body.theme-clay .controls button,
+    body.theme-clay .controls a.home-link { background: #5c3a30; color: #f8eee4; }
+    body.theme-clay .controls button:hover,
+    body.theme-clay .controls a.home-link:hover { background: #744838; }
+    body.theme-clay .progress { background: #5c3a30; }
+    body.theme-clay .notes { background: #2a1612; color: #f6ebe3; border-top-color: var(--amber); }
+    body.theme-clay .notes strong { color: #e7a07a; }
+    body.theme-clay .pv-live { background: #2a1612; color: #f6ebe3; border-color: #744838; }
+    body.theme-clay .title-slide .footer-bar,
+    body.theme-clay .cert-slide .footer-bar { color: #e0cbb8; }
+    body.theme-clay .vote-btn { background: #6a4034; }
+    body.theme-clay #voteTeach { background: #4a2c24; }
+    body.theme-clay .cpd-cert-mark { background: #4a2c24; }
+    body.theme-clay .cpd-cert-page h1,
+    body.theme-clay .cpd-cert-page .who,
+    body.theme-clay .cpd-cert-page .course { color: #4a2c24; }
+    body.theme-clay .cpd-cert-page .who { border-bottom-color: #b85c38; }
+    body.theme-clay .photo-frame,
+    body.theme-clay .photo-frame img { background: #1a100e; }
+    body.theme-tide .controls { background: #071820; color: #d7e8ec; }
+    body.theme-tide .controls button,
+    body.theme-tide .controls a.home-link { background: #15586c; color: #eaf4f6; }
+    body.theme-tide .controls button:hover,
+    body.theme-tide .controls a.home-link:hover { background: #1c6e86; }
+    body.theme-tide .progress { background: #15586c; }
+    body.theme-tide .notes { background: #0c2430; color: #e7f3f6; border-top-color: var(--amber); }
+    body.theme-tide .notes strong { color: #e4c56a; }
+    body.theme-tide .pv-live { background: #0c2430; color: #e7f3f6; border-color: #1c6e86; }
+    body.theme-tide .title-slide .footer-bar,
+    body.theme-tide .cert-slide .footer-bar { color: #b7d0d6; }
+    body.theme-tide .vote-btn { background: #156078; }
+    body.theme-tide #voteTeach { background: #0e3a4a; }
+    body.theme-tide .cpd-cert-mark { background: #0e3a4a; }
+    body.theme-tide .cpd-cert-page h1,
+    body.theme-tide .cpd-cert-page .who,
+    body.theme-tide .cpd-cert-page .course { color: #0e3a4a; }
+    body.theme-tide .cpd-cert-page .who { border-bottom-color: #c4892a; }
+    body.theme-tide .photo-frame,
+    body.theme-tide .photo-frame img { background: #07161c; }
+    body.theme-plum .controls { background: #120c16; color: #ece4f0; }
+    body.theme-plum .controls button,
+    body.theme-plum .controls a.home-link { background: #4a305c; color: #f7f2f8; }
+    body.theme-plum .controls button:hover,
+    body.theme-plum .controls a.home-link:hover { background: #5e3e74; }
+    body.theme-plum .progress { background: #4a305c; }
+    body.theme-plum .notes { background: #1c1224; color: #f4eef6; border-top-color: var(--amber); }
+    body.theme-plum .notes strong { color: #e7a888; }
+    body.theme-plum .pv-live { background: #1c1224; color: #f4eef6; border-color: #5e3e74; }
+    body.theme-plum .title-slide .footer-bar,
+    body.theme-plum .cert-slide .footer-bar { color: #d4c6de; }
+    body.theme-plum .vote-btn { background: #543266; }
+    body.theme-plum #voteTeach { background: #3a2448; }
+    body.theme-plum .cpd-cert-mark { background: #3a2448; }
+    body.theme-plum .cpd-cert-page h1,
+    body.theme-plum .cpd-cert-page .who,
+    body.theme-plum .cpd-cert-page .course { color: #3a2448; }
+    body.theme-plum .cpd-cert-page .who { border-bottom-color: #c46b3a; }
+    body.theme-plum .photo-frame,
+    body.theme-plum .photo-frame img { background: #140e18; }
+
     .slide.title-slide,
     .slide.cert-slide {
       background:
         linear-gradient(90deg, rgba(8, 28, 22, 0.92) 0%, rgba(10, 40, 32, 0.58) 40%, rgba(18, 56, 44, 0.32) 100%),
         linear-gradient(rgba(18, 56, 44, 0.34), rgba(12, 42, 32, 0.34)),
         url("copd/assets/title-ambulance.png") right center / cover no-repeat;
+      background-size: 100% 100%, 100% 100%, cover;
     }
     .slide.title-slide {
       color: #f7f4ee;
@@ -880,6 +1021,12 @@
       display: flex;
       flex-direction: column;
     }
+    .step-row .job-num.job-pill { font-size: 28px; }
+    .step-row .job-step li {
+      font-size: 28px;
+      line-height: 1.3;
+      margin: 10px 0;
+    }
     .step-row > .job-step.build:not(.show) {
       display: flex;
       visibility: hidden;
@@ -1525,6 +1672,34 @@
     .controls a.home-link:hover { background: #2a5c4a; }
     body:not(.self) a.home-link { display: none; }
 
+    #screenPick {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(8, 21, 16, 0.55);
+    }
+    #screenPick.open { display: flex; }
+    #screenPickList { display: grid; gap: 8px; margin-top: 14px; }
+    #screenPickList button,
+    #screenPickCancel {
+      font: inherit;
+      font-size: 18px;
+      text-align: left;
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--navy);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+    }
+    #screenPickList button:hover,
+    #screenPickList button:focus { background: #f4efe4; }
+    #screenPickCancel { margin-top: 10px; background: transparent; }
     #pinGate {
       display: none;
       min-height: 100%;
@@ -3028,6 +3203,14 @@
     <button type="button" id="copyJoinBtn">Copy join link</button>
     <button type="button" id="fsBtn">Fullscreen (F)</button>
   </div>
+  <div id="screenPick" hidden>
+    <div class="pin-panel" role="dialog" aria-labelledby="screenPickTitle">
+      <h2 id="screenPickTitle">Audience window</h2>
+      <p>Which screen should show the slides for the room?</p>
+      <div id="screenPickList"></div>
+      <button type="button" id="screenPickCancel">Cancel</button>
+    </div>
+  </div>
   <div id="pinGate" hidden>
     <form class="pin-panel" id="pinForm">
       <p class="home-kicker">Presenter</p>
@@ -3150,8 +3333,22 @@
       : null;
     const COURSE = catalogCourse || COURSE_CATALOG.copd;
     const courseNeedsPass = Boolean(courseKey) && (!catalogCourse || catalogCourse.published === false);
-    if (COURSE.id === "hf") document.body.classList.add("theme-hf");
-    if (COURSE.id === "asthma") document.body.classList.add("theme-asthma");
+    function deckThemeId() {
+      const allowed = { copd: 1, hf: 1, asthma: 1, clay: 1, tide: 1, plum: 1 };
+      let id = "";
+      if (COURSE.id === "hf" && typeof heartFailureDeckTheme === "function") id = heartFailureDeckTheme();
+      else if (COURSE.id === "asthma" && typeof asthmaDeckTheme === "function") id = asthmaDeckTheme();
+      else if ((COURSE.id === "copd" || !params.get("course")) && typeof copdDeckTheme === "function") id = copdDeckTheme();
+      id = String(id || "");
+      if (!allowed[id]) {
+        if (COURSE.id === "hf") id = "hf";
+        else if (COURSE.id === "asthma") id = "asthma";
+        else id = "copd";
+      }
+      return id === "copd" ? "" : id;
+    }
+    const deckTheme = deckThemeId();
+    if (deckTheme) document.body.classList.add("theme-" + deckTheme);
     const NEWS2_FORM = {
       cols: [20.04, 31.24, 42.43, 53.62, 64.81, 76.01, 87.20, 98.61],
       rows: [
@@ -4437,15 +4634,105 @@
 
     window.go = go;
 
-    async function openAudienceWindow() {
-      if (!hub.room) await refreshJoin();
+    function audienceUrl() {
       const url = new URL(location.href);
       url.searchParams.set("view", "audience");
       url.searchParams.delete("host");
       if (hub.room) url.searchParams.set("r", hub.room);
       if (COURSE.id) url.searchParams.set("course", COURSE.id);
-      audienceWin = window.open(url.toString(), COURSE.id + "-audience");
+      return url;
+    }
+
+    function screenChoiceLabel(screen, current) {
+      const where = screen === current
+        ? "This screen"
+        : (screen.isInternal ? "Built-in screen" : "Other screen");
+      const name = screen.label ? String(screen.label) : "";
+      const size = Math.round(screen.width) + " × " + Math.round(screen.height);
+      return [where, name, size].filter(Boolean).join(" · ");
+    }
+
+    function askAudienceScreen(screens, current) {
+      const pick = document.getElementById("screenPick");
+      const list = document.getElementById("screenPickList");
+      const cancel = document.getElementById("screenPickCancel");
+      list.replaceChildren();
+      return new Promise((resolve) => {
+        const finish = (screen) => {
+          pick.classList.remove("open");
+          pick.hidden = true;
+          list.replaceChildren();
+          document.removeEventListener("keydown", onKey);
+          resolve(screen);
+        };
+        const onKey = (event) => {
+          if (event.key === "Escape") finish(null);
+        };
+        screens.forEach((screen) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = screenChoiceLabel(screen, current);
+          button.addEventListener("click", () => finish(screen));
+          list.appendChild(button);
+        });
+        cancel.onclick = () => finish(null);
+        document.addEventListener("keydown", onKey);
+        pick.hidden = false;
+        pick.classList.add("open");
+        const first = list.querySelector("button");
+        if (first) first.focus();
+      });
+    }
+
+    function placeAudienceWindow(screen) {
+      const name = COURSE.id + "-audience";
+      let features = "";
+      let left = 0;
+      let top = 0;
+      let width = 0;
+      let height = 0;
+      if (screen) {
+        left = Math.round(screen.availLeft);
+        top = Math.round(screen.availTop);
+        width = Math.max(200, Math.round(screen.availWidth));
+        height = Math.max(200, Math.round(screen.availHeight));
+        features = "left=" + left + ",top=" + top + ",width=" + width + ",height=" + height;
+      }
+      audienceWin = window.open(audienceUrl().toString(), name, features);
+      if (!audienceWin) {
+        const hint = document.getElementById("pvHint");
+        if (hint) hint.textContent = "The browser blocked the audience window. Click Audience window again and allow the window.";
+        return;
+      }
+      if (screen) {
+        try {
+          audienceWin.moveTo(left, top);
+          audienceWin.resizeTo(width, height);
+        } catch (err) { /* the open position still applies when the browser allows it */ }
+      }
+      try { audienceWin.focus(); } catch (err) { /* ignore */ }
       applyView();
+    }
+
+    async function openAudienceWindow() {
+      if (!hub.room) await refreshJoin();
+      const extended = window.screen && window.screen.isExtended === true;
+      if (extended && typeof window.getScreenDetails === "function") {
+        let details = null;
+        try {
+          details = await window.getScreenDetails();
+        } catch (err) {
+          details = null;
+        }
+        const screens = details ? Array.from(details.screens || []) : [];
+        if (screens.length > 1) {
+          const chosen = await askAudienceScreen(screens, details.currentScreen || null);
+          if (!chosen) return;
+          placeAudienceWindow(chosen);
+          return;
+        }
+      }
+      placeAudienceWindow(null);
     }
 
     async function startPresenterView() {
