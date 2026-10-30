@@ -862,13 +862,16 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         kicker: "",
         title: "Record Attendance for CPD Certificate",
         html: `
-          <div class="body trust-attend">
+          <div class="body trust-attend has-guide">
             <div class="trust-qr">
               <img src="copd/assets/copd-certificate-qr.png" alt="CPD certificate QR code" onerror="var p=this.parentElement;this.remove();var m=p&&p.querySelector('.trust-qr-missing');if(m)m.hidden=false" />
               <p class="trust-qr-missing" hidden>Save the QR image as copd/assets/copd-certificate-qr.png, then refresh.</p>
             </div>
+            <figure class="trust-guide">
+              <img src="copd/assets/copd-certificate-instructions.png?v=2" alt="Certificate form. The name and employee ID are examples. Choose tutor QA CPD and training location Other.">
+            </figure>
           </div>`,
-        notes: "This slide is only in a hosted session, after a Hub PIN. It is not in the self-guided deck. Leave it up so the room can scan. Save the Trust QR as copd/assets/copd-certificate-qr.png and hard-refresh."
+        notes: "Hosted session only, after a Hub PIN. Not in the self-guided deck. Leave it up so the room can scan. Point at the guide: any name and employee ID, tutor QA CPD, training location Other."
       }
   ];
 }
