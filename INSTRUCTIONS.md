@@ -229,13 +229,15 @@ It creates:
 - the course entry in `serve.py`, so the editor and the laptop home page can list it
 - title, learning objectives, take-home points, references, any questions, feedback, and a certificate slide with a holding QR
 - a blank handout page
-- `feedback/dev.xlsx` and `feedback/live.xlsx` with the column headings
+- `feedback/dev.xlsx` and `feedback/live.xlsx`, blank templates with the column headings. These are not OneDrive workbooks
+- a `TODO.md` in the topic folder: share links for both feedback workbooks, QA CPD sign-off, and the certificate QR
+- the same variable names in `.env.example`, with a line above each one saying to create it on Render
 - the editor draft in `editor-drafts`, so the topic opens in the editor
 - a line in `FUTURE-TOPICS.md`
 
 Restart `python serve.py` and the editor after it finishes. The new topic is on the laptop home page as a draft. It is not on https://hub-cpd.co.uk/ until you set `"published": True` and push.
 
-Two things are still done by hand. Paste the OneDrive addresses for the two feedback workbooks into `.env` (`FEEDBACK_SHARE_<ID>_DEV` and `FEEDBACK_SHARE_<ID>_LIVE`) and into the live Render service when the topic is ready. Replace the holding certificate QR before the session is used.
+Open the new topic’s `TODO.md` before the first live session. Share both feedback workbooks in OneDrive, paste the dev link into `FEEDBACK_SHARE_<ID>_DEV` and the live link into `FEEDBACK_SHARE_<ID>_LIVE`, on Render and in `.env`. A session on hub-cpd.co.uk does not read this laptop’s `.env`. The same list covers QA CPD sign-off and replacing the holding certificate QR.
 
 The teaching slides, the real references, and a title photograph are added in the editor after this starter exists.
 

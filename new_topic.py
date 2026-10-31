@@ -29,6 +29,44 @@ def ask(label: str, default: str = "") -> str:
     return value or default
 
 
+def feedback_var(course: str, suffix: str) -> str:
+    key = re.sub(r"[^A-Za-z0-9]", "", course).upper() or "TOPIC"
+    return f"FEEDBACK_SHARE_{key}_{suffix}"
+
+
+def env_example_block(course: str) -> str:
+    dev_name = feedback_var(course, "DEV")
+    live_name = feedback_var(course, "LIVE")
+    return (
+        f"# Create {dev_name} on the test Render service.\n"
+        f"# Create {live_name} on the live Render service.\n"
+        f"{dev_name}=\n"
+        f"{live_name}=\n"
+    )
+
+
+def topic_todo(heading: str, course: str) -> str:
+    dev_name = feedback_var(course, "DEV")
+    live_name = feedback_var(course, "LIVE")
+    qr = f"{course}/assets/{course}-certificate-qr.png"
+    return (
+        f"# {heading}\n"
+        "\n"
+        "Before the first live session:\n"
+        "\n"
+        "- [ ] In OneDrive, create a share link for the dev feedback workbook\n"
+        "- [ ] In OneDrive, create a share link for the live feedback workbook\n"
+        f"- [ ] Paste the dev share link into `{dev_name}` in this laptop's `.env` and on the test Render service\n"
+        f"- [ ] Paste the live share link into `{live_name}` in this laptop's `.env` and on the live Render service (hub-cpd)\n"
+        "- [ ] Get QA CPD sign-off\n"
+        f"- [ ] Replace the holding certificate QR with the Trust QR from that sign-off. Save it as `{qr}`. On the form, the tutor is QA CPD and the training location is Other.\n"
+        "\n"
+        "The live site does not read this laptop's `.env`. "
+        "The share links are the only way it can open the workbooks. "
+        "Blank `feedback/dev.xlsx` and `feedback/live.xlsx` files are templates only, and the live site does not write into them.\n"
+    )
+
+
 def suggest_id(heading: str) -> str:
     word = re.sub(r"[^a-z0-9]", "", heading.lower().split()[0] if heading.split() else "")
     return word[:20]
@@ -370,14 +408,9 @@ def register_course(topic: dict) -> None:
 
     example = ROOT / ".env.example"
     example_text = example.read_text(encoding="utf-8") if example.is_file() else ""
-    key = re.sub(r"[^A-Za-z0-9]", "", course).upper()
-    extra = ""
-    for suffix in ("DEV", "LIVE"):
-        name = f"FEEDBACK_SHARE_{key}_{suffix}="
-        if name not in example_text:
-            extra += name + "\n"
-    if extra:
-        example.write_text(example_text.rstrip() + "\n" + extra, encoding="utf-8")
+    dev_name = feedback_var(course, "DEV")
+    if dev_name + "=" not in example_text and dev_name + '="' not in example_text:
+        example.write_text(example_text.rstrip() + "\n" + env_example_block(course), encoding="utf-8")
 
     future = ROOT / "FUTURE-TOPICS.md"
     future_text = future.read_text(encoding="utf-8")
@@ -424,6 +457,7 @@ def create_topic(topic: dict) -> None:
     book = feedback_workbook()
     (code / "feedback" / "dev.xlsx").write_bytes(book)
     (code / "feedback" / "live.xlsx").write_bytes(book)
+    (code / "TODO.md").write_text(topic_todo(topic["heading"], course), encoding="utf-8")
     draft = ROOT / "editor-drafts" / topic["folder"]
     draft.mkdir(parents=True, exist_ok=True)
     (draft / "deck.json").write_text(
@@ -469,6 +503,14 @@ def self_test() -> None:
     assert rows[0] == HEADERS
     added = serve.xlsx_append(book, ["now", "room", "yes", "note", "a@b.c", "idea", "Pat"])
     assert serve.workbook_rows(added)[1][0] == "now"
+    assert feedback_var("copd", "DEV") == "FEEDBACK_SHARE_COPD_DEV"
+    assert feedback_var("copd", "LIVE") == "FEEDBACK_SHARE_COPD_LIVE"
+    todo = topic_todo("COPD", "copd")
+    assert "FEEDBACK_SHARE_COPD_LIVE" in todo and "hub-cpd" in todo
+    assert "share link for the dev feedback workbook" in todo
+    assert "QA CPD sign-off" in todo
+    example = env_example_block("copd")
+    assert "FEEDBACK_SHARE_COPD_DEV=\n" in example and "live Render service" in example
     assert "## In progress" in (ROOT / "FUTURE-TOPICS.md").read_text(encoding="utf-8")
     page = (ROOT / "index.html").read_text(encoding="utf-8")
     assert 'const courseKey = String(params.get("course")' in page
@@ -483,11 +525,10 @@ def main() -> None:
         return
     topic = questions()
     create_topic(topic)
-    key = re.sub(r"[^A-Za-z0-9]", "", topic["id"]).upper()
     print()
     print(f"Created {topic['heading']} ({topic['id']}). It is not on the public home page.")
     print("Restart python serve.py and the editor, then open the topic there.")
-    print(f"Paste the OneDrive workbook links into .env as FEEDBACK_SHARE_{key}_DEV and FEEDBACK_SHARE_{key}_LIVE.")
+    print(f"The Render variable names are in .env.example and in {topic['id']}/TODO.md.")
     print("Replace the holding certificate QR before the session is used.")
 
 
