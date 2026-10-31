@@ -4,6 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hub CPD | Ambulance clinical refreshers</title>
+  <script>
+    (function () {
+      try {
+        if (new URLSearchParams(location.search).get("view") !== "audience") return;
+        var root = document.documentElement;
+        if (!root.requestFullscreen || document.fullscreenElement) return;
+        var attempt = root.requestFullscreen();
+        if (attempt && attempt.catch) attempt.catch(function () {});
+      } catch (err) { /* the audience page tries again once the deck is ready */ }
+    })();
+  </script>
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" href="/assets/hub-cpd-star.png" />
   <style>
@@ -3823,7 +3834,7 @@
         pvBtn.textContent = "Audience window";
         notesEl.classList.add("visible");
         pvHint.textContent = audienceWin && !audienceWin.closed
-          ? "Share the Audience window with the room projector and in Teams (Share window). Keep this presenter screen on your laptop. Paste the join link in the Teams chat so remote staff can vote."
+          ? "Share the Audience window with the room projector and in Teams (Share window). It fills that screen. Keep this presenter screen on your laptop. Paste the join link in the Teams chat so remote staff can vote."
           : "Popup blocked? Open a second copy and add ?view=audience to the address. Share that window in the room and in Teams.";
       } else if (view === "audience") {
         document.title = COURSE.short + " — Audience";
@@ -4895,6 +4906,38 @@
       });
     }
 
+    let audienceNeedsFill = false;
+    let swallowAudienceClick = false;
+
+    function enterAudienceFullscreen() {
+      if (view !== "audience" || document.fullscreenElement) {
+        audienceNeedsFill = false;
+        return;
+      }
+      const root = document.documentElement;
+      if (!root.requestFullscreen) {
+        audienceNeedsFill = true;
+        return;
+      }
+      const attempt = root.requestFullscreen();
+      if (attempt && attempt.then) {
+        attempt.then(() => { audienceNeedsFill = false; }).catch(() => { audienceNeedsFill = true; });
+      }
+    }
+    window.enterAudienceFullscreen = enterAudienceFullscreen;
+
+    function nudgeAudienceFullscreen(win) {
+      const kick = () => {
+        try {
+          if (typeof win.enterAudienceFullscreen === "function") win.enterAudienceFullscreen();
+        } catch (err) { /* the audience page fills the screen on the next click */ }
+      };
+      try {
+        if (win.document && win.document.readyState === "complete") kick();
+        else win.addEventListener("load", kick, { once: true });
+      } catch (err) { /* ignore */ }
+    }
+
     function placeAudienceWindow(screen) {
       const name = COURSE.id + "-audience";
       let features = "";
@@ -4903,10 +4946,10 @@
       let width = 0;
       let height = 0;
       if (screen) {
-        left = Math.round(screen.availLeft);
-        top = Math.round(screen.availTop);
-        width = Math.max(200, Math.round(screen.availWidth));
-        height = Math.max(200, Math.round(screen.availHeight));
+        left = Math.round(Number.isFinite(screen.left) ? screen.left : screen.availLeft);
+        top = Math.round(Number.isFinite(screen.top) ? screen.top : screen.availTop);
+        width = Math.max(200, Math.round(screen.width || screen.availWidth));
+        height = Math.max(200, Math.round(screen.height || screen.availHeight));
         features = "left=" + left + ",top=" + top + ",width=" + width + ",height=" + height;
       }
       audienceWin = window.open(audienceUrl().toString(), name, features);
@@ -4922,6 +4965,7 @@
         } catch (err) { /* the open position still applies when the browser allows it */ }
       }
       try { audienceWin.focus(); } catch (err) { /* ignore */ }
+      nudgeAudienceFullscreen(audienceWin);
       applyView();
     }
 
@@ -5015,6 +5059,16 @@
     };
     timerEl.onclick = () => { timerStarted = Date.now(); };
 
+    document.addEventListener("pointerdown", (e) => {
+      if (!audienceNeedsFill || view !== "audience") return;
+      if (e.target.closest && e.target.closest("button, a, input, textarea, select, label")) return;
+      const attempt = document.documentElement.requestFullscreen();
+      if (attempt && attempt.then) {
+        attempt.then(() => { audienceNeedsFill = false; }).catch(() => { audienceNeedsFill = true; });
+      }
+      swallowAudienceClick = true;
+    }, true);
+
     window.addEventListener("keydown", (e) => {
       if (view === "vote" || view === "home" || view === "about" || view === "feedback") return;
       if (e.target && e.target.closest && e.target.closest("input, textarea, select")) return;
@@ -5031,6 +5085,12 @@
     });
 
     window.addEventListener("click", (e) => {
+      if (swallowAudienceClick) {
+        swallowAudienceClick = false;
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       if (view === "vote" || view === "home" || view === "about" || view === "feedback") return;
       if (e.target.closest("button, a, input, textarea, select, label, .pv-side, .controls, .notes, #voteApp, #cpdCert")) return;
       stepForward();
@@ -5231,6 +5291,7 @@
           if (build > buildsOn(i)) build = buildsOn(i);
           applySlide();
           if (view === "self") ensureFeedbackOrigin();
+          if (view === "audience") enterAudienceFullscreen();
           if (view !== "self") {
             probeHub();
             setInterval(tickHub, 700);
