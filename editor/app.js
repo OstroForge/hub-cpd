@@ -121,10 +121,65 @@
     paintChrome();
   }
 
+  function showSharedFolders() {
+    if (state.status && state.status.foreign) {
+      tagline.textContent = "This page belongs to the account that started it.";
+      screen.innerHTML = `
+        <div class="folders">
+          <h1>Open Hub CPD Editor on your account</h1>
+          <p>This page was started by another account on this computer. It is not your session list, and it cannot open a session for you.</p>
+          <p>Close this page. On your account, open <strong>Hub CPD Editor</strong> from the Start menu. A topic opens there only when that session folder was shared with you.</p>
+        </div>`;
+      paintChrome();
+      return;
+    }
+    tagline.textContent = "You can edit a session only when its folder was shared with you.";
+    const topics = (state.status && state.status.topics) || [];
+    const known = new Set(topics.map((topic) => topic.id));
+    const topicButtons = topics.map((topic) => {
+      const mark = topic.published ? "" : " · Not on the public site yet";
+      const folder = state.folders.find((item) => item.course === topic.id);
+      if (folder) {
+        return `<button type="button" data-action="open-folder" data-drive="${escapeText(folder.driveId)}" data-id="${escapeText(folder.itemId)}">${escapeText(topic.heading)}${mark}</button>`;
+      }
+      return `<button type="button" data-action="locked-topic" data-label="${escapeText(topic.heading)}">${escapeText(topic.heading)}${mark}</button>`;
+    }).join("");
+    const extra = state.folders.filter((folder) => !folder.course || !known.has(folder.course)).map((folder) => {
+      return `<button type="button" data-action="open-folder" data-drive="${escapeText(folder.driveId)}" data-id="${escapeText(folder.itemId)}">${escapeText(folder.name)}</button>`;
+    }).join("");
+    const drive = state.status && state.status.onedrive;
+    screen.innerHTML = `
+      <div class="folders">
+        <h1>Topics</h1>
+        <p>Every topic is listed. A topic opens only when that session folder was shared with you.</p>
+        ${state.error ? `<div class="error">${escapeText(state.error)}</div>` : ""}
+        ${drive ? "" : `<div class="error">The OneDrive app is not signed in on this computer. Sign in to OneDrive, then open the editor again.</div>`}
+        <section class="card-block">
+          <h2>Topics on the site</h2>
+          <div class="folder-list">${topicButtons || extra || `<p class="hint">No topics are set up yet.</p>`}</div>
+        </section>
+        ${extra && topicButtons ? `<section class="card-block"><h2>Other shared folders</h2><div class="folder-list">${extra}</div></section>` : ""}
+        <p class="hint">If a session you were given is missing, open the share email and choose <strong>Add shortcut to My files</strong>. Wait until OneDrive has finished, then open the editor again.</p>
+      </div>`;
+    paintChrome();
+  }
+
   async function showFolders() {
     state.folder = null;
     state.deck = null;
     state.dirty = false;
+    if (state.status && state.status.shared) {
+      try {
+        const data = await api("/api/folders?source=pc");
+        state.folders = data.folders || [];
+        state.error = "";
+      } catch (err) {
+        state.folders = [];
+        state.error = err.message;
+      }
+      showSharedFolders();
+      return;
+    }
     tagline.textContent = "Sessions are saved in editor-drafts inside this project. Share one session folder when someone else should edit it.";
     try {
       const data = await api("/api/folders?source=" + encodeURIComponent(state.source));
@@ -156,7 +211,7 @@
           <summary>How to let someone else edit one session</summary>
           <ol>
             <li>Open <a href="https://onedrive.live.com" target="_blank" rel="noopener">onedrive.live.com</a> and sign in as jon.ski1382@gmail.com.</li>
-            <li>Open <strong>Cursor Projects</strong>, then <strong>CPD</strong>, <strong>COPD</strong>, <strong>editor-drafts</strong>, then the one session folder.</li>
+            <li>Open <strong>Cursor Projects</strong>, then <strong>CPD</strong>, <strong>Hub-CPD</strong>, <strong>editor-drafts</strong>, then the one session folder.</li>
             <li>Click <strong>Share</strong>, type their email, leave it as <strong>Can edit</strong>, and send.</li>
             <li>They open the email and choose <strong>Add shortcut to My files</strong>. Their saves come back into that same folder.</li>
           </ol>
@@ -167,7 +222,9 @@
   }
 
   function showEditor() {
-    tagline.textContent = "Saved in editor-drafts. Copy into this project, then push, when you want hub-cpd.co.uk to change.";
+    tagline.textContent = state.status && state.status.shared
+      ? "Save writes into the session folder that was shared with you."
+      : "Saved in editor-drafts. Copy into this project, then push, when you want hub-cpd.co.uk to change.";
     previewReady = false;
     screen.innerHTML = `
       <div class="editor">
@@ -239,13 +296,24 @@
     return `<label>${escapeText(label)}</label><select data-field="${escapeText(name)}">${opts}</select>`;
   }
 
+  function sizeField(key) {
+    const slide = current();
+    const value = slide && slide.boxSize && slide.boxSize[key] ? String(slide.boxSize[key]) : "fit";
+    const options = [["fit", "Best fit"], ["18", "Small"], ["24", "Medium"], ["32", "Large"], ["40", "Extra large"]];
+    const opts = options.map(([id, label]) => `<option value="${id}" ${value === id ? "selected" : ""}>${label}</option>`).join("");
+    return `<label>Text size</label><select data-box-size="${escapeText(key)}" title="Best fit fills the box, and stays moderate when there is only a little text.">${opts}</select>`
+      + `<label class="checks"><input type="checkbox" data-box-reveal="${escapeText(key)}" ${slide && slide.boxReveal && slide.boxReveal[key] ? "checked" : ""}> Bring this box in on a click</label>`;
+  }
+
   function schemaFields(template) {
     const list = window.HubLayouts ? HubLayouts.fields(template) : null;
     if (!list) return "";
     return list.map((item) => {
+      if (item.kind === "hint") return `<p class="hint">${item.label}</p>`;
       if (item.kind === "select") return toneField(item.name, item.label, item.options);
       if (item.kind === "check") return field(item.name, item.label, "check");
-      return field(item.name, item.label, item.kind === "textarea" ? "textarea" : "text");
+      const control = field(item.name, item.label, item.kind === "textarea" ? "textarea" : "text");
+      return control + (item.box ? sizeField(item.box) : "");
     }).join("");
   }
 
@@ -274,23 +342,28 @@
       extra = field("subtitle", "Subtitle", "textarea") + field("meta", "Source line", "textarea")
         + `<label>Suggested title picture</label><input id="titleImageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
           <p class="hint">${tagged
-            ? "Tagged in this session’s assets folder as " + escapeText(taggedName) + ". Copy into this project puts that same file in the topic’s assets folder."
+            ? "Tagged in this session’s assets folder as " + escapeText(taggedName) + (state.status && state.status.shared ? "." : ". Copy into this project puts that same file in the topic’s assets folder.")
             : "No title picture tagged yet."}</p>
-          <p class="hint">The preview shows this picture behind the title. The title slide on the site keeps its current picture. The tagged file is how you spot the suggestion when the draft comes in.</p>
+          <p class="hint">${state.status && state.status.shared
+            ? "The preview shows this picture behind the title. The file stays in this session folder."
+            : "The preview shows this picture behind the title. The title slide on the site keeps its current picture. The tagged file is how you spot the suggestion when the draft comes in."}</p>
           ${tagged ? `<img alt="Suggested title picture" src="${escapeText(mediaUrl(slide.image))}" style="width:100%;border-radius:6px;margin-top:8px"><button type="button" data-action="clearTitleImage">Remove this tag</button>` : ""}`;
     } else if (slide.template === "columns") {
-      extra = field("leftTitle", "Left heading", "text") + field("leftBody", "Left bullets, one per line", "textarea")
-        + field("rightTitle", "Right heading", "text") + field("rightBody", "Right bullets, one per line", "textarea")
+      extra = field("leftTitle", "Left heading", "text") + field("leftBody", "Left bullets, one per line", "textarea") + sizeField("left")
+        + field("leftTable", "Left side is a two-column table", "check")
+        + field("rightTitle", "Right heading", "text") + field("rightBody", "Right bullets, one per line", "textarea") + sizeField("right")
+        + field("rightTable", "Right side is a two-column table", "check")
+        + `<p class="hint">For a table, one row per line. Type the left cell, then the solid bar | , then the right cell. The solid bar is Shift and the key just to the right of the left Shift key, before Z. That key is printed with \\ and |. The ¦ next to ¬ is a different key.</p>`
         + toneField("leftTone", "Left column style", [["normal", "Normal"], ["warn", "Warning"], ["fact", "Fact"], ["myth", "Myth"]])
         + field("leftProse", "Left side is a paragraph", "check")
         + field("leftNote", "Note under the left column", "textarea")
         + toneField("rightTone", "Right column style", [["normal", "Normal"], ["warn", "Warning"], ["fact", "Fact"], ["myth", "Myth"]])
         + field("rightProse", "Right side is a paragraph", "check")
         + field("rightNote", "Note under the right column", "textarea")
-        + field("callout", "Line under the columns", "textarea")
+        + field("callout", "Line under the columns", "textarea") + sizeField("callout")
         + field("calloutReveal", "Bring that line in on a click", "check")
-        + field("note", "Small print under the columns", "textarea")
-        + field("banner", "Closing banner", "text")
+        + field("note", "Small print under the columns", "textarea") + sizeField("note")
+        + field("banner", "Closing banner", "text") + sizeField("banner")
         + `<label>Banner colour</label><select data-field="bannerTone">
             <option value="" ${!slide.bannerTone ? "selected" : ""}>Plain</option>
             <option value="teal" ${slide.bannerTone === "teal" ? "selected" : ""}>Teal</option>
@@ -301,21 +374,22 @@
         + field("bannerReveal", "Bring the banner in on a click", "check")
         + `<p class="hint">A small 2 stays written as &lt;sub&gt;2&lt;/sub&gt;. Leave the banner blank if this slide has none.</p>`;
     } else if (slide.template === "photo") {
-      extra = field("body", "Bullets, one per line", "textarea")
+      extra = field("body", "Bullets, one per line", "textarea") + sizeField("body")
         + `<label>Picture</label><input id="imageFile" type="file" accept="image/*"><p class="hint">${escapeText(slide.image || "No picture yet")}</p>`
         + field("image", "Or an existing picture path", "text")
         + field("imageAlt", "Picture description", "text")
         + field("caption", "Caption", "text")
         + `<label>Picture position</label><select data-field="imageSide"><option value="right" ${slide.imageSide !== "left" ? "selected" : ""}>Right</option><option value="left" ${slide.imageSide === "left" ? "selected" : ""}>Left</option></select>`
+        + `<p class="hint">Drag the picture in the preview to move it. Drag the dark square on its corner to make it larger or smaller. Double-click the picture to put it back.</p>`
         + field("cardTitle", "Card under the picture", "text")
-        + field("cardBody", "Card text", "textarea")
+        + field("cardBody", "Card text", "textarea") + sizeField("card")
         + toneField("cardTone", "Card style", [["normal", "Normal"], ["warn", "Warning"], ["fact", "Fact"]]);
     } else if (slide.template === "quote") {
-      extra = field("quote", "Quote", "textarea")
-        + field("leftTitle", "Left heading", "text") + field("leftBody", "Left text, one bullet per line", "textarea")
+      extra = field("quote", "Quote", "textarea") + sizeField("quote")
+        + field("leftTitle", "Left heading", "text") + field("leftBody", "Left text, one bullet per line", "textarea") + sizeField("left")
         + field("leftProse", "Left side is a paragraph", "check")
         + toneField("leftTone", "Left column style", [["normal", "Normal"], ["warn", "Warning"], ["fact", "Fact"], ["myth", "Myth"]])
-        + field("rightTitle", "Right heading", "text") + field("rightBody", "Right text, one bullet per line", "textarea")
+        + field("rightTitle", "Right heading", "text") + field("rightBody", "Right text, one bullet per line", "textarea") + sizeField("right")
         + field("rightProse", "Right side is a paragraph", "check")
         + toneField("rightTone", "Right column style", [["normal", "Normal"], ["warn", "Warning"], ["fact", "Fact"], ["myth", "Myth"]]);
     } else if (slide.template === "steps") {
@@ -325,24 +399,25 @@
         <option value="decide" ${value === "decide" ? "selected" : ""}>Red</option>
         <option value="amber" ${value === "amber" ? "selected" : ""}>Amber</option>
       </select>`;
-      extra = field("oneTitle", "First heading", "text") + field("oneBody", "First bullets, one per line", "textarea") + tone("oneTone", slide.oneTone)
-        + field("twoTitle", "Second heading", "text") + field("twoBody", "Second bullets, one per line", "textarea") + tone("twoTone", slide.twoTone)
-        + field("threeTitle", "Third heading", "text") + field("threeBody", "Third bullets, one per line", "textarea") + tone("threeTone", slide.threeTone)
+      extra = field("oneTitle", "First heading", "text") + field("oneBody", "First bullets, one per line", "textarea") + sizeField("one") + tone("oneTone", slide.oneTone)
+        + field("twoTitle", "Second heading", "text") + field("twoBody", "Second bullets, one per line", "textarea") + sizeField("two") + tone("twoTone", slide.twoTone)
+        + field("threeTitle", "Third heading", "text") + field("threeBody", "Third bullets, one per line", "textarea") + sizeField("three") + tone("threeTone", slide.threeTone)
         + field("reveal", "Bring in the second and third columns on click", "check");
     } else if (slide.template === "banners") {
-      extra = field("lines", "Lines, one per line", "textarea")
+      extra = field("lines", "Lines, one per line", "textarea") + sizeField("lines")
         + `<p class="hint">A line can start with a colour and a bar: plain, teal, green, navy or red. For example red | Never leave them hypoxic.</p>`
         + field("reveal", "Reveal one line at a time", "check")
         + field("questions", "This is the questions slide, live room only", "check");
     } else if (slide.template === "poll") {
       const options = HubDeck.lines(slide.optionsText);
       const correct = options.map((option, index) => `<option value="${index}" ${Number(slide.correct) === index ? "selected" : ""}>${escapeText(option)}</option>`).join("");
-      extra = field("prompt", "Question (simple HTML such as sub tags is allowed)", "textarea")
-        + field("optionsText", "Options, one per line", "textarea")
+      extra = field("prompt", "Question (simple HTML such as sub tags is allowed)", "textarea") + sizeField("prompt")
+        + field("optionsText", "Options, one per line", "textarea") + sizeField("options")
         + `<label>Correct option</label><select data-field="correct">${correct}</select>`
-        + field("teach", "Teaching point", "textarea")
+        + field("teach", "Teaching point", "textarea") + sizeField("teach")
         + field("resultsTitle", "Results slide title", "text")
-        + field("image", "Picture path, if this poll has one", "text");
+        + field("image", "Picture path, if this poll has one", "text")
+        + `<p class="hint">The preview shows a stand-in for the live QR code, with the response count. Drag it to move it. Drag the dark square to change its size. Double-click to put it back.</p>`;
     } else if (window.HubLayouts && HubLayouts.fields(slide.template)) {
       extra = schemaFields(slide.template);
     } else if (slide.template === "special") {
@@ -367,7 +442,9 @@
         <p class="hint">Hover a layout to see an example. Choosing one keeps the title and the notes.</p>
       </div>
       <div class="inspect-body">
-      ${topic
+      ${state.status && state.status.shared
+        ? ""
+        : topic
         ? `<p class="hint">Topic: ${escapeText(topic.heading)}${topic.published ? "" : " · Not on the public site yet"}</p>`
         : `<p class="hint">This folder is not a topic on the site.</p>`}
       <div class="checks">
@@ -509,9 +586,10 @@
 
   async function importCourse(course, skipConfirm) {
     if (!skipConfirm && state.deck.slides.length && !confirm("Replace the slides in this draft with the current project deck?")) return;
-    const path = course === "hf" ? "/hf/slides.js" : course === "asthma" ? "/asthma/slides.js" : "/copd/slides.js";
+    const path = "/" + (course === "hf" ? "hf" : course) + "/slides.js";
     await loadScript(path);
-    const fn = course === "hf" ? window.heartFailureSlides : course === "asthma" ? window.asthmaSlides : window.copdSlides;
+    const fnName = course === "hf" ? "heartFailureSlides" : course + "Slides";
+    const fn = window[fnName];
     if (typeof fn !== "function") throw new Error("The current deck did not load");
     state.deck.slides = fn().map(HubDeck.fromPlayer);
     state.deck.course = course;
@@ -561,6 +639,61 @@
     showEditor();
   }
 
+  async function pullNewerDraft() {
+    if (!state.folder || !state.deck || state.dirty || document.hidden) return;
+    if (!document.getElementById("filmList")) return;
+    const folder = state.folder;
+    const seen = state.deck.updated || "";
+    const data = await api("/api/deck?driveId=" + encodeURIComponent(folder.driveId) + "&itemId=" + encodeURIComponent(folder.itemId));
+    const next = data.deck;
+    if (!next || !next.updated || next.updated === seen) return;
+    if (state.folder !== folder || state.dirty) return;
+    const index = state.index;
+    state.deck = next;
+    state.deck.slides = (state.deck.slides || []).map((slide) => HubDeck.adopt(slide));
+    if (!state.deck.course) state.deck.course = folder.course || "";
+    state.deck.kind = "hub-cpd-deck";
+    state.index = Math.min(index, Math.max(0, state.deck.slides.length - 1));
+    state.dirty = false;
+    renderFilm();
+    renderInspector();
+    refreshPreview();
+    paintChrome();
+  }
+
+  setInterval(() => {
+    pullNewerDraft().catch(() => {});
+  }, 8000);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) pullNewerDraft().catch(() => {});
+  });
+
+  function rememberSize(target) {
+    const key = target.getAttribute("data-box-size");
+    const slide = current();
+    if (!key || !slide) return;
+    slide.boxSize = slide.boxSize || {};
+    if (target.value === "fit") delete slide.boxSize[key];
+    else slide.boxSize[key] = target.value;
+    if (!Object.keys(slide.boxSize).length) delete slide.boxSize;
+    state.dirty = true;
+    refreshPreview();
+    paintChrome();
+  }
+
+  function rememberReveal(target) {
+    const key = target.getAttribute("data-box-reveal");
+    const slide = current();
+    if (!key || !slide) return;
+    slide.boxReveal = slide.boxReveal || {};
+    if (target.checked) slide.boxReveal[key] = true;
+    else delete slide.boxReveal[key];
+    if (!Object.keys(slide.boxReveal).length) delete slide.boxReveal;
+    state.dirty = true;
+    refreshPreview();
+    paintChrome();
+  }
+
   screen.addEventListener("input", (event) => {
     const target = event.target;
     if (!target) return;
@@ -575,6 +708,8 @@
       paintChrome();
       return;
     }
+    if (target.getAttribute("data-box-size")) rememberSize(target);
+    if (target.getAttribute("data-box-reveal")) rememberReveal(target);
     if (target.getAttribute("data-field")) rememberField(target);
   });
   screen.addEventListener("change", (event) => {
@@ -596,6 +731,8 @@
       uploadImage(target.files[0], "title").catch((err) => alert(err.message));
       return;
     }
+    if (target.getAttribute("data-box-size")) rememberSize(target);
+    if (target.getAttribute("data-box-reveal")) rememberReveal(target);
     if (target.getAttribute("data-field")) rememberField(target);
   });
 
@@ -804,6 +941,12 @@
       await openFolder(button.dataset.drive, button.dataset.id);
       return;
     }
+    if (action === "locked-topic") {
+      const label = button.dataset.label || "That session";
+      state.error = "You have not been given access to " + label + ". It stays closed until that session folder is shared with you.";
+      showSharedFolders();
+      return;
+    }
     if (action === "open-live") {
       await openLive(button.dataset.course);
       return;
@@ -900,8 +1043,28 @@
     }
   }
 
+  function rememberNudge(spot) {
+    const slide = current();
+    const key = spot && spot.key;
+    if (!slide || !key) return;
+    const x = Math.max(-60, Math.min(60, Math.round(Number(spot.x) || 0)));
+    const y = Math.max(-60, Math.min(60, Math.round(Number(spot.y) || 0)));
+    const scale = Math.max(0.45, Math.min(2.2, Math.round((Number(spot.scale) || 1) * 100) / 100));
+    slide.place = slide.place || {};
+    if (!x && !y && scale === 1) delete slide.place[key];
+    else slide.place[key] = { x: x, y: y, scale: scale };
+    if (!Object.keys(slide.place).length) delete slide.place;
+    state.dirty = true;
+    paintChrome();
+  }
+
   window.addEventListener("message", (event) => {
-    if (event.origin !== location.origin || !event.data || !event.data.ready) return;
+    if (event.origin !== location.origin || !event.data) return;
+    if (event.data.nudge) {
+      rememberNudge(event.data.nudge);
+      return;
+    }
+    if (!event.data.ready) return;
     const hover = document.getElementById("templateHover");
     if (hover && event.source === hover.contentWindow) {
       hoverReady = true;

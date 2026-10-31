@@ -547,6 +547,25 @@
       min-height: 0;
     }
     .card h3 { font-size: 26px; color: var(--navy); margin-bottom: 10px; }
+    .box-copy { display: flow-root; min-width: 0; }
+    .o2-row > .box-copy { display: contents; }
+    .poll-opts > .box-copy,
+    .card > .box-copy,
+    .job-step > .box-copy,
+    .step > .box-copy {
+      min-width: 0;
+    }
+    .poll-opts > .box-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+    .banner > .box-copy { width: 100%; }
+    .table-fit { width: 100%; min-height: 0; }
+    .table-fit table { width: 100%; }
     .card p, .card li { font-size: 24px; }
     .myth { background: var(--red-bg); border-color: #f0b8b2; }
     .fact { background: var(--green-bg); border-color: #b7e0c8; }
@@ -681,11 +700,25 @@
       left: 48px; right: 48px; bottom: 14px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       gap: 16px;
       font-size: 12px;
       color: var(--muted);
       letter-spacing: 0;
     }
+    .poll-foot-url {
+      display: none;
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 650;
+      line-height: 1.2;
+      color: var(--navy);
+      word-break: break-all;
+    }
+    body.live .poll-foot-url:not(:empty) { display: block; }
+    .footer-bar .slide-num { flex: none; }
     .footer-brand {
       display: flex;
       align-items: center;
@@ -880,15 +913,58 @@
       line-height: 1.25;
       margin: 0.12em 0;
     }
+    .body.two.neb-hero.neb-wide {
+      grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+      gap: 12px;
+    }
+    .body.two.neb-hero.neb-wide .photo-frame.cutout {
+      justify-content: flex-start;
+    }
+    .body.two.neb-hero.neb-wide .photo-frame.cutout img {
+      margin-left: 0;
+      margin-right: auto;
+    }
+    .body.two.neb-hero.neb-wide > div:last-child {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+    .body.two.neb-hero.neb-wide .card {
+      flex: 1;
+      margin-top: 0;
+      padding: 18px 22px;
+    }
+    .body.two.neb-hero.neb-wide .card h3 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    .body.two.neb-hero.neb-wide .card li {
+      font-size: 24px;
+      line-height: 1.3;
+      margin: 0.2em 0;
+    }
     .cn-extract {
       display: block;
-      width: 100%;
+      width: auto;
+      max-width: 100%;
       height: auto;
       max-height: 280px;
       object-fit: contain;
       object-position: left top;
       background: #fff;
       border: 1px solid var(--line);
+    }
+    .body.two:has(> div > .cn-extract) {
+      grid-template-columns: max-content minmax(0, 1fr);
+    }
+    .body.two:has(> div > .cn-extract) > div:first-child {
+      width: max-content;
+      max-width: 100%;
+    }
+    .body.two:has(> div > .cn-extract) .photo-caption {
+      width: 0;
+      min-width: 100%;
     }
     .photo-caption {
       font-size: 16px;
@@ -1243,6 +1319,36 @@
     .callout.build.hold-space.show,
     .banner.build.hold-space.show {
       visibility: visible;
+    }
+    .box-text.build.hold-space:not(.show) {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      animation: none;
+    }
+    .card.box-text.build.hold-space:not(.show),
+    .card.box-text.build.hold-space.show,
+    .banner.box-text.build.hold-space:not(.show),
+    .banner.box-text.build.hold-space.show,
+    .job-step.box-text.build.hold-space:not(.show) {
+      display: flex;
+    }
+    .o2-row.box-text.build.hold-space:not(.show),
+    .o2-row.box-text.build.hold-space.show {
+      display: grid;
+    }
+    .step.box-text.build.hold-space:not(.show),
+    .callout.box-text.build.hold-space:not(.show),
+    .small.box-text.build.hold-space:not(.show),
+    .poll-prompt.box-text.build.hold-space:not(.show),
+    .poll-opts.box-text.build.hold-space:not(.show),
+    .poll-teach.box-text.build.hold-space:not(.show),
+    .shock-scene-line.box-text.build.hold-space:not(.show),
+    .lead-line.box-text.build.hold-space:not(.show),
+    .ask-line.box-text.build.hold-space:not(.show),
+    .scale-scene.box-text.build.hold-space:not(.show),
+    .table-fit.box-text.build.hold-space:not(.show) {
+      display: block;
     }
     @keyframes rise {
       from { opacity: 0; transform: translateY(12px); }
@@ -1903,7 +2009,7 @@
     .poll-slide .kicker,
     .poll-slide h2,
     .poll-slide .poll-top {
-      padding-right: 180px;
+      padding-right: 330px;
     }
     .poll-slide .poll-top {
       display: block;
@@ -2039,11 +2145,19 @@
     }
     .poll-join {
       display: none;
-      width: 210px;
+      width: 300px;
       text-align: center;
       background: var(--card);
       border: 1px solid var(--line);
-      padding: 8px 8px 10px;
+      padding: 10px;
+      transform-origin: top right;
+    }
+    .poll-join.poll-hold {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: grab;
+      touch-action: none;
     }
     body.live .poll-join,
     .poll-join.cert-join {
@@ -2056,9 +2170,10 @@
       max-width: 220px;
       margin: 0 auto;
     }
-    .poll-join img {
-      width: 186px;
-      height: 186px;
+    .poll-join img,
+    .poll-join .qr-hold {
+      width: 276px;
+      height: 276px;
       max-width: 100%;
       display: block;
       margin: 0 auto;
@@ -2349,8 +2464,13 @@
       max-width: 100%;
       gap: 10px;
     }
-    .poll-news2 .poll-join { width: 112px; padding: 6px 6px 8px; }
-    .poll-news2 .poll-join img { width: 96px; height: 96px; }
+    .poll-news2 .kicker,
+    .poll-news2 h2,
+    .poll-news2 .poll-top { padding-right: 188px; }
+    .poll-news2 .poll-join { width: 164px; padding: 6px; }
+    .poll-news2 .poll-join img,
+    .poll-news2 .poll-join .qr-hold { width: 148px; height: 148px; }
+    .poll-news2 .poll-phones { margin-top: 2px; font-size: 15px; }
     .poll-news2 .n2-hx {
       display: flex;
       flex-wrap: wrap;
@@ -3273,10 +3393,12 @@
   <script src="copd/deck.js"></script>
   <script src="hf/deck.js"></script>
   <script src="asthma/deck.js"></script>
+  <script src="stroke/deck.js"></script>
   <script src="copd/slides.js?v=cert2"></script>
   <script src="hf/slides.js?v=steps1"></script>
   <script src="asthma/slides.js?v=steps1"></script>
-  <script id="hubPublished" type="application/json">{"copd":true,"hf":false,"asthma":false}</script>
+  <script src="stroke/slides.js?v=start1"></script>
+  <script id="hubPublished" type="application/json">{"copd":true,"hf":false,"asthma":false,"stroke":false}</script>
   <script>
     function hubPublished(id, fallback) {
       const node = document.getElementById("hubPublished");
@@ -3325,6 +3447,18 @@
         channel: "asthma-cpd-deck",
         attendKey: "asthma-cpd-register",
         published: hubPublished("asthma", false)
+      },
+      stroke: {
+        id: "stroke",
+        title: "Stroke / TIA",
+        short: "Stroke / TIA CPD",
+        footer: "Hub CPD · JRCALC Stroke / TIA",
+        handout: "stroke/handout.html",
+        store: "stroke-cpd-state",
+        selfStore: "stroke-cpd-self-state",
+        channel: "stroke-cpd-deck",
+        attendKey: "stroke-cpd-register",
+        published: hubPublished("stroke", false)
       }
     };
     const courseKey = String(params.get("course") || "").trim().toLowerCase();
@@ -3382,11 +3516,15 @@
     }
     const selfMode = params.get("view") === "self";
     function deckSlides() {
-      if (COURSE.id === "hf" && typeof heartFailureDeckSlides === "function") return heartFailureDeckSlides();
-      if (COURSE.id === "asthma" && typeof asthmaDeckSlides === "function") return asthmaDeckSlides();
-      if ((COURSE.id === "copd" || !params.get("course")) && typeof copdDeckSlides === "function") return copdDeckSlides();
-      if (COURSE.id === "hf" && typeof heartFailureSlides === "function") return heartFailureSlides();
-      if (COURSE.id === "asthma" && typeof asthmaSlides === "function") return asthmaSlides();
+      const special = {
+        hf: ["heartFailureDeckSlides", "heartFailureSlides"],
+        copd: ["copdDeckSlides", "copdSlides"]
+      };
+      const pair = special[COURSE.id] || [COURSE.id + "DeckSlides", COURSE.id + "Slides"];
+      if (typeof window[pair[0]] === "function") return window[pair[0]]();
+      if (typeof window[pair[1]] === "function") return window[pair[1]]();
+      if (!params.get("course") && typeof copdDeckSlides === "function") return copdDeckSlides();
+      if (!params.get("course") && typeof copdSlides === "function") return copdSlides();
       return copdSlides();
     }
     const slideSource = deckSlides();
@@ -3708,6 +3846,16 @@
       }
     }
 
+    function qrPlaceStyle(s) {
+      const spot = s && s.qrPlace;
+      if (!spot) return "";
+      const x = Math.round(Number(spot.x) || 0);
+      const y = Math.round(Number(spot.y) || 0);
+      const scale = Math.round((Number(spot.scale) || 1) * 100) / 100;
+      if (!x && !y && scale === 1) return "";
+      return ` style="transform:translate(${x}%,${y}%) scale(${scale})"`;
+    }
+
     function slideMarkup(s, idx) {
       if (s.type === "title") {
         return `<section class="slide title-slide" data-i="${idx}">
@@ -3742,9 +3890,8 @@
                 <p class="poll-prompt">${s.prompt}</p>
                 ${sceneBox}
               </div>
-              <aside class="poll-join">
-                <img alt="Join the quiz" width="132" height="132" />
-                <p class="poll-url"></p>
+              <aside class="poll-join"${qrPlaceStyle(s)}>
+                <img alt="Join the quiz" width="276" height="276" />
                 <p class="poll-phones"><span class="poll-total">0</span> responses</p>
               </aside>
             </div>
@@ -3767,7 +3914,7 @@
             ${selfMode && s.teach ? `<div class="poll-teach">${s.teach}</div>` : ""}
             <p class="poll-host"></p>
           </div>
-          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
+          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span class="poll-foot-url"></span><span class="slide-num">${idx + 1} / ${slides.length}</span></div>
         </section>`;
       }
       if (s.type === "poll-results") {
@@ -3927,6 +4074,68 @@
       zoomIn(firsts);
     }
 
+    function paintBoxText(box, size) {
+      const px = size + "px";
+      const head = Math.round(size * 1.08) + "px";
+      const copy = box.querySelector(":scope > .box-copy");
+      const target = copy || box;
+      target.style.fontSize = px;
+      target.querySelectorAll("h3, .job-pill").forEach((el) => { el.style.fontSize = head; });
+      target.querySelectorAll("p, li, em").forEach((el) => { el.style.fontSize = px; });
+    }
+
+    function boxContentHeight(box) {
+      const copy = box.querySelector(":scope > .box-copy");
+      if (copy && getComputedStyle(copy).display !== "contents") return copy.scrollHeight;
+      const node = copy || box;
+      return Array.from(node.children).reduce((sum, child) => sum + child.offsetHeight, 0);
+    }
+
+    function clearBoxText(box) {
+      const copy = box.querySelector(":scope > .box-copy");
+      const target = copy || box;
+      target.style.fontSize = "";
+      target.querySelectorAll("h3, .job-pill, p, li, em").forEach((el) => { el.style.fontSize = ""; });
+    }
+
+    function fitSlideBoxes(root) {
+      if (!root || !root.querySelectorAll) return;
+      const boxes = Array.from(root.querySelectorAll(".box-text"));
+      boxes.forEach((box) => {
+        const chosen = box.getAttribute("data-box") || "fit";
+        if (chosen !== "fit") paintBoxText(box, Number(chosen) || 24);
+      });
+      const fits = boxes.filter((box) => (box.getAttribute("data-box") || "fit") === "fit" && box.getClientRects().length);
+      fits.forEach(clearBoxText);
+      const limits = fits.map((box) => {
+        const cs = getComputedStyle(box);
+        return box.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+      });
+      fits.forEach((box, index) => {
+        const available = limits[index];
+        if (available < 24) return;
+        const copy = box.querySelector(":scope > .box-copy") || box;
+        const sizes = [box, copy].concat(Array.from(copy.querySelectorAll("h3, .job-pill, p, li")));
+        const start = Math.round(Math.max.apply(null, sizes.map((el) => parseFloat(getComputedStyle(el).fontSize) || 0)) || 24);
+        const cap = Math.min(32, Math.max(start, Math.round(available * 0.22)));
+        let best = start;
+        if (boxContentHeight(box) > available + 1) {
+          for (let size = start; size >= 16; size -= 1) {
+            paintBoxText(box, size);
+            best = size;
+            if (boxContentHeight(box) <= available + 1) break;
+          }
+        } else {
+          for (let size = start; size <= cap; size += 1) {
+            paintBoxText(box, size);
+            if (boxContentHeight(box) <= available + 1) best = size;
+            else break;
+          }
+        }
+        paintBoxText(box, best);
+      });
+    }
+
     function applySlide() {
       const els = [...stage.querySelectorAll(".slide")];
       els.forEach((el, idx) => {
@@ -3956,6 +4165,7 @@
       hostFollowSlide();
       fillJoin();
       paintPoll();
+      if (current) fitSlideBoxes(current);
     }
 
     function pollRevealed() {
@@ -4253,15 +4463,16 @@
         }
         if (url) url.textContent = feedback.replace(/([/?&=])/g, "$1\u200b");
       });
+      stage.querySelectorAll(".poll-foot-url").forEach((el) => {
+        el.textContent = hub.join || "";
+      });
       if (!hub.join) return;
       stage.querySelectorAll(".poll-join:not(.feedback-join)").forEach((box) => {
         const img = box.querySelector("img");
-        const url = box.querySelector(".poll-url");
         if (img && img.dataset.src !== hub.join) {
           img.dataset.src = hub.join;
           img.src = "/qr.svg?u=" + encodeURIComponent(hub.join);
         }
-        if (url) url.textContent = hub.join;
       });
     }
 

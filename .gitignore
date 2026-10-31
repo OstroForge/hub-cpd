@@ -7,6 +7,11 @@ editor_config.json
 editor-drafts/
 .venv/
 venv/
+editor_setup/build/
+editor_setup/dist/
+editor_setup/output/
+editor_setup/stage/
+editor_setup/*.spec
 ACCOUNTS.md
 host-token.txt
 presenter-pin.txt

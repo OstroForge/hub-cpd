@@ -2,6 +2,8 @@
 
 WMAS ambulance CPD decks (COPD, Heart Failure, and later packages) with live room voting.
 
+The project folder on this computer is `Cursor Projects\CPD\Hub-CPD`.
+
 Each topic has its own folder:
 
 | Topic | Folder |
@@ -9,8 +11,9 @@ Each topic has its own folder:
 | COPD | `copd/` — `slides.js`, `handout.html`, `assets/` |
 | Heart Failure | `hf/` — `slides.js`, `handout.html`, `assets/` |
 | Acute Asthma | `asthma/` — `slides.js`, `handout.html`, `assets/` |
+| Stroke / TIA | `stroke/` — `slides.js`, `handout.html`, `assets/` |
 
-The hub (`index.html`, `serve.py`) stays at the top. Each topic keeps its feedback workbooks in `feedback/dev.xlsx` and `feedback/live.xlsx`. To add a later package, copy that folder pattern. The backlog of later sessions is `FUTURE-TOPICS.md`.
+The hub (`index.html`, `serve.py`) stays at the top. Each topic keeps its feedback workbooks in `feedback/dev.xlsx` and `feedback/live.xlsx`. To add a later package, run `python new_topic.py` from this folder. The backlog of later sessions is `FUTURE-TOPICS.md`.
 
 ## Local (this laptop)
 
@@ -167,7 +170,7 @@ Cloudflare sign-in: https://dash.cloudflare.com/login
 OneDrive: https://onedrive.live.com/
 
 Certificates folder (open while signed in as jon.ski1382@gmail.com):  
-https://onedrive.live.com/my?id=%2Fpersonal%2F4a2042dbbcf48071%2FDocuments%2FCursor%20Projects%2FCPD%2FCOPD%2Fcertificates&viewid=6c1bdb91-03c5-436a-8302-197408acb301
+https://onedrive.live.com/my?id=%2Fpersonal%2F4a2042dbbcf48071%2FDocuments%2FCursor%20Projects%2FCPD%2FHub-CPD%2Fcertificates&viewid=6c1bdb91-03c5-436a-8302-197408acb301
 
 ## On the day
 
@@ -209,7 +212,32 @@ The OneDrive **share link** must be the parent `certificates` folder — not `ce
 
 Both hosted decks collect session feedback (how useful it was, comments, a suggestion for the next half hour, and an optional name and email). COPD writes to the COPD workbook. Heart Failure writes to the Heart Failure workbook. Certificate attendance is the Trust QR on the last slide. Neither course collects names, ESR numbers, or emails for a certificate. There is no page to look up or reprint a certificate.
 
-To add a later package, give it a `folder` name in `COURSES` in `serve.py`, plus `home_tag`, `home_heading`, and `home_blurb`. Leave `"published": False` until it should appear on the live home page. The `dev` and `live` folders are created the first time that course writes an attendance file.
+To add a later package, run `python new_topic.py` from this folder. It asks for the topic name and writes the starter files. Leave `"published": False` until it should appear on the live home page. The `dev` and `live` attendance folders are created the first time that course writes an attendance file.
+
+## Start a new topic
+
+From this project folder:
+
+```
+python new_topic.py
+```
+
+It asks for the name, a short id, the editor folder, a home-page tag, one line about the session, and three take-home placeholders. It leaves the topic unpublished.
+
+It creates:
+
+- the course entry in `serve.py`, so the editor and the laptop home page can list it
+- title, learning objectives, take-home points, references, any questions, feedback, and a certificate slide with a holding QR
+- a blank handout page
+- `feedback/dev.xlsx` and `feedback/live.xlsx` with the column headings
+- the editor draft in `editor-drafts`, so the topic opens in the editor
+- a line in `FUTURE-TOPICS.md`
+
+Restart `python serve.py` and the editor after it finishes. The new topic is on the laptop home page as a draft. It is not on https://hub-cpd.co.uk/ until you set `"published": True` and push.
+
+Two things are still done by hand. Paste the OneDrive addresses for the two feedback workbooks into `.env` (`FEEDBACK_SHARE_<ID>_DEV` and `FEEDBACK_SHARE_<ID>_LIVE`) and into the live Render service when the topic is ready. Replace the holding certificate QR before the session is used.
+
+The teaching slides, the real references, and a title photograph are added in the editor after this starter exists.
 
 ## Handout and self-guided
 

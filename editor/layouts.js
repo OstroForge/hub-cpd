@@ -36,6 +36,8 @@
       slide.rightTone = slide.rightTone || (slide.template === "quote" ? "warn" : "normal");
       slide.leftProse = !!slide.leftProse;
       slide.rightProse = !!slide.rightProse;
+      slide.leftTable = !!slide.leftTable;
+      slide.rightTable = !!slide.rightTable;
       slide.leftNote = slide.leftNote || "";
       slide.rightNote = slide.rightNote || "";
       slide.callout = slide.callout || "";
@@ -251,11 +253,12 @@
   }
 
   function fields(template) {
-    const text = (name, label) => ({ name: name, label: label, kind: "text" });
-    const area = (name, label) => ({ name: name, label: label, kind: "textarea" });
+    const text = (name, label, box) => ({ name: name, label: label, kind: "text", box: box || "" });
+    const area = (name, label, box) => ({ name: name, label: label, kind: "textarea", box: box || "" });
     const tone = (name, label) => ({ name: name, label: label, kind: "select", options: TONES });
     if (template === "score") {
       return [
+        { kind: "hint", label: "The preview shows a stand-in for the live QR code, with the response count. Drag it to move it. Drag the dark square to change its size. Double-click to put it back." },
         area("prompt", "Question"),
         area("sceneText", "Scene lines, one per line"),
         text("image", "Monitor picture path"),
@@ -276,60 +279,62 @@
     }
     if (template === "pathway") {
       return [
-        text("oneTitle", "Step 1 heading"), area("oneBody", "Step 1 bullets, one per line"),
-        text("twoTitle", "Step 2 heading"), area("twoBody", "Step 2 bullets, one per line"),
-        text("threeTitle", "Step 3 heading"), area("threeBody", "Step 3 bullets, one per line"),
+        text("oneTitle", "Step 1 heading"), area("oneBody", "Step 1 bullets, one per line", "one"),
+        text("twoTitle", "Step 2 heading"), area("twoBody", "Step 2 bullets, one per line", "two"),
+        text("threeTitle", "Step 3 heading"), area("threeBody", "Step 3 bullets, one per line", "three"),
         { name: "reveal", label: "Bring in steps 2 and 3 on a click", kind: "check" }
       ];
     }
     if (template === "split") {
       return [
-        text("scene", "Scene line"),
-        text("question", "Question"),
-        text("yesTitle", "Yes heading"), area("yesBody", "Yes bullets, one per line"),
-        text("noTitle", "No heading"), area("noBody", "No bullets, one per line"),
-        text("footTitle", "Closing bar heading"), area("footBody", "Closing bar text")
+        text("scene", "Scene line", "scene"),
+        text("question", "Question", "question"),
+        text("yesTitle", "Yes heading"), area("yesBody", "Yes bullets, one per line", "yes"),
+        text("noTitle", "No heading"), area("noBody", "No bullets, one per line", "no"),
+        text("footTitle", "Closing bar heading"), area("footBody", "Closing bar text", "foot")
       ];
     }
     if (template === "pairs") {
       return [
-        text("leftTitle", "Left heading"), area("leftBody", "Left bullets, one per line"),
+        text("leftTitle", "Left heading"), area("leftBody", "Left bullets, one per line", "left"),
         text("rightTitle", "Right heading"),
-        area("pairsText", "Clue, then a | then the other diagnosis. One pair per line")
+        area("pairsText", "Clue, then a | then the other diagnosis. One pair per line", "right")
       ];
     }
     if (template === "table") {
       return [
-        area("intro", "Line above the table"),
-        area("tableText", "First line is the headings, separated by |. Then one row per line. A cell can start bad: good: or mid:"),
-        area("closing", "Line under the table")
+        area("intro", "Line above the table", "intro"),
+        area("tableText", "First line is the headings, separated by |. Then one row per line. A cell can start bad: good: or mid:", "table"),
+        area("closing", "Line under the table", "closing")
       ];
     }
     if (template === "scales") {
       return [
-        area("scene", "The patient"),
+        area("scene", "The patient", "scene"),
         text("image", "Monitor picture path"),
         text("imageAlt", "Picture description"),
+        { kind: "hint", label: "Drag the picture in the preview to move it. Drag the dark square on its corner to make it larger or smaller. Double-click the picture to put it back." },
         text("scoreHead", "Middle column heading"),
         text("row1Label", "First scale"), text("row1Score", "First score"),
         { name: "row1Tone", label: "First score colour", kind: "select", options: [["bad", "Red"], ["good", "Green"], ["mid", "Amber"]] },
         area("row1Text", "What that score means"),
         text("row2Label", "Second scale"), text("row2Score", "Second score"),
         { name: "row2Tone", label: "Second score colour", kind: "select", options: [["bad", "Red"], ["good", "Green"], ["mid", "Amber"]] },
-        area("row2Text", "What that score means"),
-        area("callout", "Closing line"),
+        area("row2Text", "What that score means", "table"),
+        area("callout", "Closing line", "callout"),
         { name: "calloutReveal", label: "Bring the closing line in on a click", kind: "check" }
       ];
     }
     if (template === "reveal") {
       return [
-        area("question", "Question shown first"),
+        area("question", "Question shown first", "question"),
         text("image", "Picture path"),
         text("imageAlt", "Picture description"),
+        { kind: "hint", label: "Drag the picture in the preview to move it. Drag the dark square on its corner to make it larger or smaller. Double-click the picture to put it back." },
         text("caption", "Caption"),
         text("cardTitle", "Card heading"),
-        area("cardBody", "Card bullets, one per line"),
-        text("banner", "Banner"),
+        area("cardBody", "Card bullets, one per line", "card"),
+        text("banner", "Banner", "banner"),
         tone("bannerTone", "Banner colour")
       ];
     }
@@ -338,52 +343,54 @@
         text(name + "Image", label + " picture path"),
         text(name + "Alt", label + " picture description"),
         text(name + "Title", label + " heading"),
-        area(name + "Text", label + " text"),
+        area(name + "Text", label + " text", name),
         text(name + "Step", label + " step heading"),
-        area(name + "StepText", label + " step text"),
+        area(name + "StepText", label + " step text", name + "Step"),
         tone(name + "StepTone", label + " step colour")
       ];
-      return block("one", "First").concat(block("two", "Second")).concat(block("three", "Third"));
+      return [{ kind: "hint", label: "Drag a picture in the preview to move it. Drag the dark square on its corner to make it larger or smaller. Double-click the picture to put it back." }].concat(block("one", "First")).concat(block("two", "Second")).concat(block("three", "Third"));
     }
     if (template === "doses") {
       return [
         text("image", "Picture path"), text("imageAlt", "Picture description"),
-        text("leftTitle", "First card heading"), area("leftBody", "First card bullets, one per line"),
-        text("rightTitle", "Second card heading"), area("rightBody", "Second card bullets, one per line"),
-        text("oneTitle", "Step 1 heading"), text("oneText", "Step 1 text"), tone("oneTone", "Step 1 colour"),
-        text("twoTitle", "Step 2 heading"), text("twoText", "Step 2 text"), tone("twoTone", "Step 2 colour"),
-        text("threeTitle", "Step 3 heading"), text("threeText", "Step 3 text"), tone("threeTone", "Step 3 colour"),
-        text("fourTitle", "Step 4 heading"), text("fourText", "Step 4 text"), tone("fourTone", "Step 4 colour")
+        { kind: "hint", label: "Drag the picture in the preview to move it. Drag the dark square on its corner to make it larger or smaller. Double-click the picture to put it back." },
+        text("leftTitle", "First card heading"), area("leftBody", "First card bullets, one per line", "left"),
+        text("rightTitle", "Second card heading"), area("rightBody", "Second card bullets, one per line", "right"),
+        text("oneTitle", "Step 1 heading"), text("oneText", "Step 1 text", "one"), tone("oneTone", "Step 1 colour"),
+        text("twoTitle", "Step 2 heading"), text("twoText", "Step 2 text", "two"), tone("twoTone", "Step 2 colour"),
+        text("threeTitle", "Step 3 heading"), text("threeText", "Step 3 text", "three"), tone("threeTone", "Step 3 colour"),
+        text("fourTitle", "Step 4 heading"), text("fourText", "Step 4 text", "four"), tone("fourTone", "Step 4 colour")
       ];
     }
     if (template === "quotes") {
       return [
-        text("oneTitle", "First heading"), area("oneBody", "First quote"), text("oneNote", "Note under the first quote"),
-        text("twoTitle", "Second heading"), area("twoBody", "Second quote"), text("twoNote", "Note under the second quote")
+        text("oneTitle", "First heading"), area("oneBody", "First quote", "one"), text("oneNote", "Note under the first quote"),
+        text("twoTitle", "Second heading"), area("twoBody", "Second quote", "two"), text("twoNote", "Note under the second quote")
       ];
     }
     if (template === "shock") {
       return [
         text("image", "Monitor picture path"), text("imageAlt", "Picture description"),
-        area("scene", "Scene line"),
+        { kind: "hint", label: "Drag the picture in the preview to move it. Drag the dark square on its corner to make it larger or smaller. Double-click the picture to put it back." },
+        area("scene", "Scene line", "scene"),
         text("v1", "First number"), text("v1Label", "First label"),
         text("v2", "Second number"), text("v2Label", "Second label"),
         text("v3", "Third number"), text("v3Label", "Third label"),
         text("v4", "Fourth number"), text("v4Label", "Fourth label"),
-        area("actions", "Actions, one per line"),
-        text("banner", "Red banner")
+        area("actions", "Actions, one per line", "actions"),
+        text("banner", "Red banner", "banner")
       ];
     }
     if (template === "aims") {
       return [
-        text("leadTitle", "Intro heading"), area("leadBody", "Intro bullets, one per line"),
-        text("leftTitle", "Left heading"), area("leftBody", "Left text"), text("leftNote", "Left note"),
-        text("rightTitle", "Right heading"), area("rightBody", "Right text"), area("rightNote", "Right notes, one paragraph per line"),
-        text("banner1", "First banner"), text("banner2", "Second banner"),
-        area("callout", "Closing line")
+        text("leadTitle", "Intro heading"), area("leadBody", "Intro bullets, one per line", "lead"),
+        text("leftTitle", "Left heading"), area("leftBody", "Left text", "left"), text("leftNote", "Left note"),
+        text("rightTitle", "Right heading"), area("rightBody", "Right text", "right"), area("rightNote", "Right notes, one paragraph per line"),
+        text("banner1", "First banner", "banner1"), text("banner2", "Second banner", "banner2"),
+        area("callout", "Closing line", "callout")
       ];
     }
-    if (template === "feedback") return [text("line1", "First line"), text("line2", "Second line")];
+    if (template === "feedback") return [text("line1", "First line", "line1"), text("line2", "Second line", "line2")];
     if (template === "certificate") return [text("image", "QR picture path"), text("guide", "Instructions picture path")];
     return null;
   }
@@ -397,8 +404,16 @@
   }
 
   function body(slide, ctx, forPlayer, h) {
-    const img = (src, alt, cls) => src ? `<img${cls ? ' class="' + cls + '"' : ""} src="${h.esc(h.imageSrc(src, ctx, forPlayer))}" alt="${h.esc(alt)}">` : "";
-    const step = (tone, title, text) => `<div class="step ${tone || "dark"}"><h3>${h.rich(title)}</h3><p>${h.rich(text)}</p></div>`;
+    const img = (src, alt, cls, key) => {
+      if (!src) return "";
+      const spot = key && slide.place && slide.place[key];
+      const x = spot ? Math.round(Number(spot.x) || 0) : 0;
+      const y = spot ? Math.round(Number(spot.y) || 0) : 0;
+      const scale = spot ? Math.round((Number(spot.scale) || 1) * 100) / 100 : 1;
+      const nudge = key ? ` data-nudge="${h.esc(key)}"${x || y || scale !== 1 ? ` style="transform:translate(${x}%,${y}%) scale(${scale})"` : ""}` : "";
+      return `<img${cls ? ` class="${cls}"` : ""}${nudge} src="${h.esc(h.imageSrc(src, ctx, forPlayer))}" alt="${h.esc(alt)}">`;
+    };
+    const step = (key, tone, title, text) => h.wrap(key, "step " + (tone || "dark"), `<h3>${h.rich(title)}</h3><p>${h.rich(text)}</p>`);
     if (slide.template === "score") {
       const scene = h.lines(slide.sceneText).map((line) => "<li>" + h.rich(line) + "</li>").join("");
       const detail = String(slide.detail || "").replace('<div class="n2-chart-slot"></div>', typeof news2OfficialChart === "function" ? news2OfficialChart() : "");
@@ -409,24 +424,24 @@
       </div>`;
     }
     if (slide.template === "pathway") {
-      const block = (title, body, tone, build) => `<section class="job-step${tone ? " " + tone : ""}${build ? " build" : ""}"><div class="job-num">${build ? "" : "1"}</div><h3>${h.esc(title)}</h3>${h.list(body)}</section>`;
       const later = slide.reveal !== false;
+      const block = (key, num, title, body, extra) => h.wrap(key, "job-step" + (extra || ""), `<div class="job-num">${num}</div><h3>${h.esc(title)}</h3>${h.list(body)}`, "", "section");
       return `<div class="job-flow">
-        <section class="job-step"><div class="job-num">1</div><h3>${h.esc(slide.oneTitle)}</h3>${h.list(slide.oneBody)}</section>
+        ${block("one", "1", slide.oneTitle, slide.oneBody, "")}
         <div class="job-arrow" aria-hidden="true"></div>
-        <section class="job-step decide${later ? " build" : ""}"><div class="job-num">2</div><h3>${h.esc(slide.twoTitle)}</h3>${h.list(slide.twoBody)}</section>
+        ${block("two", "2", slide.twoTitle, slide.twoBody, " decide" + (later ? " build" : ""))}
         <div class="job-arrow" aria-hidden="true"></div>
-        <section class="job-step hand${later ? " build" : ""}"><div class="job-num">3</div><h3>${h.esc(slide.threeTitle)}</h3>${h.list(slide.threeBody)}</section>
+        ${block("three", "3", slide.threeTitle, slide.threeBody, " hand" + (later ? " build" : ""))}
       </div>`;
     }
     if (slide.template === "split") {
-      return `<div class="card" style="margin-bottom:12px;text-align:center"><p style="font-size:22px;font-weight:750;color:var(--navy);margin:0">${h.rich(slide.scene)}</p></div>
-        <p style="text-align:center;font-weight:750;margin:0 0 10px;font-size:22px;color:var(--navy)">${h.rich(slide.question)}</p>
+      return `${h.wrap("scene", "card", `<p style="font-weight:750;color:var(--navy);margin:0;text-align:center">${h.rich(slide.scene)}</p>`, "margin-bottom:12px;text-align:center")}
+        ${h.wrap("question", "ask-line", `<p style="text-align:center;font-weight:750;margin:0;color:var(--navy)">${h.rich(slide.question)}</p>`, "margin:0 0 10px")}
         <div class="diagram-row two">
-          <div class="step red"><h3>${h.esc(slide.yesTitle)}</h3>${h.list(slide.yesBody)}</div>
-          <div class="step green"><h3>${h.esc(slide.noTitle)}</h3>${h.list(slide.noBody)}</div>
+          ${h.wrap("yes", "step red", `<h3>${h.esc(slide.yesTitle)}</h3>${h.list(slide.yesBody)}`)}
+          ${h.wrap("no", "step green", `<h3>${h.esc(slide.noTitle)}</h3>${h.list(slide.noBody)}`)}
         </div>
-        <div class="step dark" style="margin-top:12px"><h3>${h.esc(slide.footTitle)}</h3><p>${h.rich(slide.footBody)}</p></div>`;
+        ${h.wrap("foot", "step dark", `<h3>${h.esc(slide.footTitle)}</h3><p>${h.rich(slide.footBody)}</p>`, "margin-top:12px")}`;
     }
     if (slide.template === "pairs") {
       const pairs = h.lines(slide.pairsText).map((line) => {
@@ -434,8 +449,8 @@
         return `<li><span>${h.rich((bits[0] || "").trim())}</span><em>${h.rich((bits.slice(1).join("|") || "").trim())}</em></li>`;
       }).join("");
       return `<div class="body two">
-        <div class="card"><h3>${h.esc(slide.leftTitle)}</h3>${h.list(slide.leftBody)}</div>
-        <div class="card myth"><h3>${h.esc(slide.rightTitle)}</h3><ul class="think-again">${pairs}</ul></div>
+        ${h.wrap("left", "card", `<h3>${h.esc(slide.leftTitle)}</h3>${h.list(slide.leftBody)}`)}
+        ${h.wrap("right", "card myth", `<h3>${h.esc(slide.rightTitle)}</h3><ul class="think-again">${pairs}</ul>`)}
       </div>`;
     }
     if (slide.template === "table") {
@@ -448,67 +463,67 @@
       };
       const head = rows.length ? `<thead><tr>${cells(rows[0]).map((cell) => paint(cell, "th")).join("")}</tr></thead>` : "";
       const bodyRows = rows.slice(1).map((line) => `<tr>${cells(line).map((cell) => paint(cell, "td")).join("")}</tr>`).join("");
-      return `${slide.intro ? `<p style="margin-bottom:12px;font-size:20px">${h.rich(slide.intro)}</p>` : ""}
-        <table>${head}<tbody>${bodyRows}</tbody></table>
-        ${slide.closing ? `<p style="margin-top:14px">${h.rich(slide.closing)}</p>` : ""}`;
+      return `${slide.intro ? h.wrap("intro", "lead-line", `<p>${h.rich(slide.intro)}</p>`, "margin-bottom:12px") : ""}
+        ${h.wrap("table", "table-fit", `<table>${head}<tbody>${bodyRows}</tbody></table>`)}
+        ${slide.closing ? h.wrap("closing", "lead-line", `<p>${h.rich(slide.closing)}</p>`, "margin-top:14px") : ""}`;
     }
     if (slide.template === "scales") {
       const chart = typeof news2OfficialChart === "function" ? news2OfficialChart() : "";
       const row = (label, score, tone, text) => `<tr><td><strong>${h.rich(label)}</strong></td><td class="score ${tone || "mid"}">${h.rich(score)}</td><td>${h.rich(text)}</td></tr>`;
-      return `<div class="body two scale-pair"><div><p>${h.rich(slide.scene)}</p>${slide.image ? `<div class="photo-frame cutout">${img(slide.image, slide.imageAlt)}</div>` : ""}</div>${chart}</div>
-        <table class="scale-score"><thead><tr><th>Scale</th><th>${h.rich(slide.scoreHead)}</th><th>What the score tells the next clinician</th></tr></thead><tbody>
+      return `<div class="body two scale-pair">${h.wrap("scene", "scale-scene", `<p>${h.rich(slide.scene)}</p>${slide.image ? `<div class="photo-frame cutout">${img(slide.image, slide.imageAlt, "", "image")}</div>` : ""}`)}${chart}</div>
+        ${h.wrap("table", "table-fit", `<table class="scale-score"><thead><tr><th>Scale</th><th>${h.rich(slide.scoreHead)}</th><th>What the score tells the next clinician</th></tr></thead><tbody>
           ${row(slide.row1Label, slide.row1Score, slide.row1Tone, slide.row1Text)}
           ${row(slide.row2Label, slide.row2Score, slide.row2Tone, slide.row2Text)}
-        </tbody></table>
-        ${slide.callout ? `<p class="callout${slide.calloutReveal ? " build" : ""}" style="margin-top:12px">${h.rich(slide.callout)}</p>` : ""}`;
+        </tbody></table>`)}
+        ${slide.callout ? h.wrap("callout", "callout" + (slide.calloutReveal ? " build" : ""), h.rich(slide.callout), "margin-top:12px") : ""}`;
     }
     if (slide.template === "reveal") {
       const tone = ["teal", "green", "dark", "red"].indexOf(slide.bannerTone) !== -1 ? slide.bannerTone : "teal";
-      return `<div class="callout" style="margin-bottom:14px">${h.rich(slide.question)}</div>
+      return `${h.wrap("question", "callout", h.rich(slide.question), "margin-bottom:14px")}
         <div class="build"><div class="body two" style="align-items:stretch">
-          <div>${img(slide.image, slide.imageAlt, "cn-extract")}<p class="photo-caption">${h.rich(slide.caption)}</p></div>
-          <div class="card fact"><h3>${h.esc(slide.cardTitle)}</h3>${h.list(slide.cardBody)}</div>
-        </div>${slide.banner ? `<div class="banner ${tone}" style="margin-top:12px">${h.rich(slide.banner)}</div>` : ""}</div>`;
+          <div>${img(slide.image, slide.imageAlt, "cn-extract", "image")}<p class="photo-caption">${h.rich(slide.caption)}</p></div>
+          ${h.wrap("card", "card fact", `<h3>${h.esc(slide.cardTitle)}</h3>${h.list(slide.cardBody)}`)}
+        </div>${slide.banner ? h.wrap("banner", "banner " + tone, h.rich(slide.banner), "margin-top:12px") : ""}</div>`;
     }
     if (slide.template === "rows") {
-      const articles = ["one", "two", "three"].map((name) => `<article class="o2-row">${img(slide[name + "Image"], slide[name + "Alt"])}<div><h3>${h.esc(slide[name + "Title"])}</h3><p>${h.rich(slide[name + "Text"])}</p></div></article>`).join("");
-      const steps = ["one", "two", "three"].map((name) => step(slide[name + "StepTone"], slide[name + "Step"], slide[name + "StepText"])).join("");
+      const articles = ["one", "two", "three"].map((name) => h.wrap(name, "o2-row", `${img(slide[name + "Image"], slide[name + "Alt"], "", name + "Image")}<div><h3>${h.esc(slide[name + "Title"])}</h3><p>${h.rich(slide[name + "Text"])}</p></div>`, "", "article")).join("");
+      const steps = ["one", "two", "three"].map((name) => step(name + "Step", slide[name + "StepTone"], slide[name + "Step"], slide[name + "StepText"])).join("");
       return `<div class="o2-methods"><div class="o2-rows">${articles}</div><div class="diagram-row three">${steps}</div></div>`;
     }
     if (slide.template === "doses") {
-      const steps = ["one", "two", "three", "four"].map((name) => step(slide[name + "Tone"], slide[name + "Title"], slide[name + "Text"])).join("");
-      return `<div class="body two neb-hero" style="flex:1"><div class="photo-frame cutout">${img(slide.image, slide.imageAlt)}</div>
-        <div><div class="card"><h3>${h.esc(slide.leftTitle)}</h3>${h.list(slide.leftBody)}</div>
-        <div class="card warn" style="margin-top:10px"><h3>${h.esc(slide.rightTitle)}</h3>${h.list(slide.rightBody)}</div></div></div>
+      const steps = ["one", "two", "three", "four"].map((name) => step(name, slide[name + "Tone"], slide[name + "Title"], slide[name + "Text"])).join("");
+      return `<div class="body two neb-hero neb-wide" style="flex:1"><div class="photo-frame cutout">${img(slide.image, slide.imageAlt, "", "image")}</div>
+        <div>${h.wrap("left", "card", `<h3>${h.esc(slide.leftTitle)}</h3>${h.list(slide.leftBody)}`)}
+        ${h.wrap("right", "card warn", `<h3>${h.esc(slide.rightTitle)}</h3>${h.list(slide.rightBody)}`)}</div></div>
         <div class="diagram-row" style="margin-top:12px">${steps}</div>`;
     }
     if (slide.template === "quotes") {
-      const card = (title, body, note) => `<div class="card"${note ? "" : ""}><h3>${h.esc(title)}</h3><p style="font-size:18px">${h.rich(body)}</p>${note ? `<p class="small" style="margin-top:8px">${h.rich(note)}</p>` : ""}</div>`;
-      return `<div class="body">${card(slide.oneTitle, slide.oneBody, slide.oneNote)}<div style="height:10px"></div>${card(slide.twoTitle, slide.twoBody, slide.twoNote)}</div>`;
+      const card = (key, title, body, note) => h.wrap(key, "card", `<h3>${h.esc(title)}</h3><p>${h.rich(body)}</p>${note ? `<p class="small" style="margin-top:8px">${h.rich(note)}</p>` : ""}`);
+      return `<div class="body">${card("one", slide.oneTitle, slide.oneBody, slide.oneNote)}<div style="height:10px"></div>${card("two", slide.twoTitle, slide.twoBody, slide.twoNote)}</div>`;
     }
     if (slide.template === "shock") {
       const vital = (value, label) => `<div><strong>${h.rich(value)}</strong><span>${h.esc(label)}</span></div>`;
-      return `<div class="shock-layout">${img(slide.image, slide.imageAlt, "shock-monitor")}<div>
-          <p class="shock-scene-line">${h.rich(slide.scene)}</p>
+      return `<div class="shock-layout">${img(slide.image, slide.imageAlt, "shock-monitor", "image")}<div>
+          ${h.wrap("scene", "shock-scene-line", h.rich(slide.scene))}
           <div class="shock-vitals">${vital(slide.v1, slide.v1Label)}${vital(slide.v2, slide.v2Label)}${vital(slide.v3, slide.v3Label)}${vital(slide.v4, slide.v4Label)}</div>
-          <ul class="shock-actions">${h.lines(slide.actions).map((line) => "<li>" + h.rich(line) + "</li>").join("")}</ul>
-        </div></div>${slide.banner ? `<div class="banner red" style="margin-top:12px">${h.rich(slide.banner)}</div>` : ""}`;
+          ${h.wrap("actions", "shock-actions", h.lines(slide.actions).map((line) => "<li>" + h.rich(line) + "</li>").join(""), "", "ul")}
+        </div></div>${slide.banner ? h.wrap("banner", "banner red", h.rich(slide.banner), "margin-top:12px") : ""}`;
     }
     if (slide.template === "aims") {
       const notes = (value) => h.lines(value).map((line) => `<p class="small" style="margin-top:6px">${h.rich(line)}</p>`).join("");
-      return `<div class="card" style="margin-bottom:8px"><h3>${h.esc(slide.leadTitle)}</h3><ul style="columns:2;column-gap:28px">${h.lines(slide.leadBody).map((line) => "<li>" + h.rich(line) + "</li>").join("")}</ul></div>
+      return `${h.wrap("lead", "card", `<h3>${h.esc(slide.leadTitle)}</h3><ul style="columns:2;column-gap:28px">${h.lines(slide.leadBody).map((line) => "<li>" + h.rich(line) + "</li>").join("")}</ul>`, "margin-bottom:8px")}
         <div class="body two">
-          <div class="card" style="padding:12px 16px"><h3>${h.esc(slide.leftTitle)}</h3><p>${h.rich(slide.leftBody)}</p>${notes(slide.leftNote)}</div>
-          <div class="card" style="padding:12px 16px;line-height:1.28"><h3>${h.esc(slide.rightTitle)}</h3><p>${h.rich(slide.rightBody)}</p>${notes(slide.rightNote)}</div>
+          ${h.wrap("left", "card", `<h3>${h.esc(slide.leftTitle)}</h3><p>${h.rich(slide.leftBody)}</p>${notes(slide.leftNote)}`, "padding:12px 16px")}
+          ${h.wrap("right", "card", `<h3>${h.esc(slide.rightTitle)}</h3><p>${h.rich(slide.rightBody)}</p>${notes(slide.rightNote)}`, "padding:12px 16px;line-height:1.28")}
         </div>
-        ${slide.banner1 ? `<div class="banner build" style="margin-top:8px">${h.rich(slide.banner1)}</div>` : ""}
-        ${slide.banner2 ? `<div class="banner teal build" style="margin-top:6px">${h.rich(slide.banner2)}</div>` : ""}
-        ${slide.callout ? `<p class="callout build" style="margin-top:8px">${h.rich(slide.callout)}</p>` : ""}`;
+        ${slide.banner1 ? h.wrap("banner1", "banner build", h.rich(slide.banner1), "margin-top:8px") : ""}
+        ${slide.banner2 ? h.wrap("banner2", "banner teal build", h.rich(slide.banner2), "margin-top:6px") : ""}
+        ${slide.callout ? h.wrap("callout", "callout build", h.rich(slide.callout), "margin-top:8px") : ""}`;
     }
     if (slide.template === "feedback") {
       return `<div class="body two feedback-layout"><div>
-          <div class="banner teal">${h.rich(slide.line1)}</div>
-          <div class="banner" style="margin-top:12px">${h.rich(slide.line2)}</div>
+          ${h.wrap("line1", "banner teal", h.rich(slide.line1))}
+          ${h.wrap("line2", "banner", h.rich(slide.line2), "margin-top:12px")}
         </div><aside class="poll-join feedback-join"><img class="feedback-qr" alt="Open the feedback form" width="132" height="132" hidden /><p class="poll-url"></p></aside></div>
         <div class="feedback-brand"><img class="feedback-logo" src="assets/hub-cpd-logo.png" alt="Hub CPD. Ambulance clinical refreshers."><p class="feedback-home"></p></div>`;
     }

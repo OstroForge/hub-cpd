@@ -283,7 +283,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               </tr>
             </tbody>
           </table>`,
-        notes: "Walk through the table slowly. Ask: ‘If you have no blood gas and no documented HCRF, which type do you know this patient has?’ Answer: neither. You know they are at risk. That is why you titrate oxygen. It is not why you switch NEWS2 scale."
+        notes: "Walk through the table slowly. Pa means the partial pressure of that gas in arterial blood, from a blood gas. PaO2 is oxygen. PaCO2 is carbon dioxide. The finger probe is SpO2, not PaO2. Ask: ‘If you have no blood gas and no documented HCRF, which type do you know this patient has?’ Answer: neither. You know they are at risk. That is why you titrate oxygen. It is not why you switch NEWS2 scale."
       },
       {
         kicker: "Evidence",
@@ -355,7 +355,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               <tr>
                 <td><strong>Scale 1 — correct default</strong></td>
                 <td class="score bad">3</td>
-                <td>Single red parameter. This person is hypoxic on the standard scale and needs a proper look.</td>
+                <td>Single red parameter. This person is hypoxic on the standard scale, and the score keeps that visible.</td>
               </tr>
               <tr>
                 <td><strong>Scale 2 — incorrect habit</strong></td>
@@ -376,7 +376,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               <h3>That 3 is doing its job</h3>
               <ul>
                 <li>Scale 1 was built on a normal SpO<sub>2</sub> of 96%+. 90% is hypoxia on that scale, even if it is “normal for them”</li>
-                <li>RCP designed that score to prompt a look. It does not, by itself, mean you must change scale or turn the oxygen up</li>
+                <li>A score of 3 flags that hypoxia. Leave the scale and the oxygen target as they are</li>
                 <li>Keep targeting 88–92% (or the alert card). The oxygen target and the scoring scale are separate decisions</li>
               </ul>
             </div>
@@ -491,7 +491,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         kicker: "Treatment",
         title: "Bronchodilators, nebulisers and the 6-minute rule",
         html: `
-          <div class="body two neb-hero" style="flex:1">
+          <div class="body two neb-hero neb-wide" style="flex:1">
             <div class="photo-frame cutout">
               <img src="copd/assets/o2-nebuliser-70.png" alt="Woman in her 70s wearing an oxygen-driven nebuliser mask">
             </div>
@@ -506,7 +506,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
                   <li><strong>Hydrocortisone 100 mg</strong> slow IV (≥2 min) or IM</li>
                 </ul>
               </div>
-              <div class="card warn" style="margin-top:10px">
+              <div class="card warn">
                 <h3>What the 6 minutes actually limits</h3>
                 <ul>
                   <li>How long <strong>oxygen drives each nebuliser</strong> — not a written maximum number of nebs</li>

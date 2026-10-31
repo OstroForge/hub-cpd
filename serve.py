@@ -212,6 +212,18 @@ COURSES = {
         "home_blurb": "Life-threatening features, oxygen to 94–98%, and when to give intramuscular adrenaline.",
         "home_class": "asthma",
     },
+    "stroke": {
+        "id": "stroke",
+        "title": "Stroke / TIA",
+        "detail": "JRCALC Stroke / TIA · 30 minutes",
+        "prefix": "STROKE-CPD-attendance-",
+        "folder": "stroke",
+        "published": False,
+        "home_tag": "Neurology",
+        "home_heading": "Stroke / TIA",
+        "home_blurb": "Time-critical features, mimics, and who is conveyed as an emergency.",
+        "home_class": "",
+    },
 }
 _DRAFT_HITS: dict[str, list[float]] = {}
 

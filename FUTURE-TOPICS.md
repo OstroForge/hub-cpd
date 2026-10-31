@@ -4,6 +4,10 @@ Each session is one JRCALC guideline and about 30 minutes. COPD and Heart Failur
 
 A new topic can be deployed on hub-cpd before it is ready. Leave it unpublished and off the home page, and open it with the session passcode. An edit to a live topic, or a change to the shared layout, is a separate branch from `main`.
 
+## In progress
+
+1. **Stroke / TIA.** Unpublished and off the public home page. The starter slides are in the editor: title, blank learning objectives, and the closing slides. Time-critical features, mimics, and who is conveyed as an emergency.
+
 ## Next
 
 1. **Acute asthma.** The first deck is in `asthma/`. It still needs the title photograph, a check of the live drug doses, and its own feedback workbook. Life-threatening features, oxygen to 94–98%, oxygen-driven nebulisers, and intramuscular adrenaline when the attack is still deteriorating. Includes a patient who also has COPD.
@@ -11,10 +15,9 @@ A new topic can be deployed on hub-cpd before it is ready. Leave it unpublished 
 
 ## Later
 
-3. **Glycaemic emergencies.** Hypoglycaemia, and the difference between diabetic ketoacidosis and hyperosmolar hyperglycaemic state.
-4. **Convulsions in adults.** When to give benzodiazepines, how many doses, and the patients who need a different plan, including pregnancy and a head injury.
-5. **Stroke and TIA.** Time-critical features, mimics, and who is conveyed as an emergency.
-6. **Acute coronary syndrome.** Recognition, a 12-lead, and conveyance. The heart failure session already separates congestion, ischaemia, and shock, so this can wait until after the topics above.
-7. **Anaphylaxis.** Allergy versus anaphylaxis, intramuscular adrenaline, and a repeat dose. Shorter than the others, so keep it to the decisions and do not pad it.
-8. **Overdose and poisoning.** What was taken, when, and which patients get an antidote now, including naloxone.
-9. **Acute behavioural disturbance.** Recognition, risk, and when sedation is for danger rather than inconvenience.
+1. **Glycaemic emergencies.** Hypoglycaemia, and the difference between diabetic ketoacidosis and hyperosmolar hyperglycaemic state.
+2. **Convulsions in adults.** When to give benzodiazepines, how many doses, and the patients who need a different plan, including pregnancy and a head injury.
+3. **Acute coronary syndrome.** Recognition, a 12-lead, and conveyance. The heart failure session already separates congestion, ischaemia, and shock, so this can wait until after the topics above.
+4. **Anaphylaxis.** Allergy versus anaphylaxis, intramuscular adrenaline, and a repeat dose. Shorter than the others, so keep it to the decisions and do not pad it.
+5. **Overdose and poisoning.** What was taken, when, and which patients get an antidote now, including naloxone.
+6. **Acute behavioural disturbance.** Recognition, risk, and when sedation is for danger rather than inconvenience.

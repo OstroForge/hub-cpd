@@ -3,16 +3,186 @@
 <head>
   <meta charset="UTF-8" />
   <title>Slide preview</title>
-  <link rel="stylesheet" href="/preview.css" />
+    <link rel="stylesheet" href="/preview.css" />
+    <style>
+      .nudge-frame { position: relative; }
+      [data-nudge] { cursor: grab; touch-action: none; }
+      .nudge-handle {
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        border: 2px solid #fff;
+        border-radius: 4px;
+        background: #14382c;
+        cursor: nwse-resize;
+        z-index: 5;
+        padding: 0;
+      }
+    </style>
 </head>
 <body>
   <div class="stage"><div class="deck" id="deck"></div></div>
   <script>
+    function paintBoxText(box, size) {
+      const px = size + "px";
+      const head = Math.round(size * 1.08) + "px";
+      const copy = box.querySelector(":scope > .box-copy");
+      const target = copy || box;
+      target.style.fontSize = px;
+      target.querySelectorAll("h3, .job-pill").forEach((el) => { el.style.fontSize = head; });
+      target.querySelectorAll("p, li, em").forEach((el) => { el.style.fontSize = px; });
+    }
+    function boxContentHeight(box) {
+      const copy = box.querySelector(":scope > .box-copy");
+      if (copy && getComputedStyle(copy).display !== "contents") return copy.scrollHeight;
+      const node = copy || box;
+      return Array.from(node.children).reduce((sum, child) => sum + child.offsetHeight, 0);
+    }
+    function clearBoxText(box) {
+      const copy = box.querySelector(":scope > .box-copy");
+      const target = copy || box;
+      target.style.fontSize = "";
+      target.querySelectorAll("h3, .job-pill, p, li, em").forEach((el) => { el.style.fontSize = ""; });
+    }
+    function fitSlideBoxes(root) {
+      if (!root || !root.querySelectorAll) return;
+      const boxes = Array.from(root.querySelectorAll(".box-text"));
+      boxes.forEach((box) => {
+        const chosen = box.getAttribute("data-box") || "fit";
+        if (chosen !== "fit") paintBoxText(box, Number(chosen) || 24);
+      });
+      const fits = boxes.filter((box) => (box.getAttribute("data-box") || "fit") === "fit" && box.getClientRects().length);
+      fits.forEach(clearBoxText);
+      const limits = fits.map((box) => {
+        const cs = getComputedStyle(box);
+        return box.clientHeight - (parseFloat(cs.paddingTop) || 0) - (parseFloat(cs.paddingBottom) || 0);
+      });
+      fits.forEach((box, index) => {
+        const available = limits[index];
+        if (available < 24) return;
+        const copy = box.querySelector(":scope > .box-copy") || box;
+        const sizes = [box, copy].concat(Array.from(copy.querySelectorAll("h3, .job-pill, p, li")));
+        const start = Math.round(Math.max.apply(null, sizes.map((el) => parseFloat(getComputedStyle(el).fontSize) || 0)) || 24);
+        const cap = Math.min(32, Math.max(start, Math.round(available * 0.22)));
+        let best = start;
+        if (boxContentHeight(box) > available + 1) {
+          for (let size = start; size >= 16; size -= 1) {
+            paintBoxText(box, size);
+            best = size;
+            if (boxContentHeight(box) <= available + 1) break;
+          }
+        } else {
+          for (let size = start; size <= cap; size += 1) {
+            paintBoxText(box, size);
+            if (boxContentHeight(box) <= available + 1) best = size;
+            else break;
+          }
+        }
+        paintBoxText(box, best);
+      });
+    }
     function fit() {
       const scale = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
       document.documentElement.style.setProperty("--slide-scale", String(scale || 1));
     }
     window.addEventListener("resize", fit);
+    function readPlace(img) {
+      const text = img.style.transform || "";
+      const move = /translate\(([-\d.]+)%\s*,\s*([-\d.]+)%\)/.exec(text);
+      const sized = /scale\(([-\d.]+)\)/.exec(text);
+      return {
+        x: move ? Number(move[1]) : 0,
+        y: move ? Number(move[2]) : 0,
+        scale: sized ? Number(sized[1]) : 1
+      };
+    }
+    function writePlace(img, place) {
+      const x = Math.max(-60, Math.min(60, Math.round(place.x)));
+      const y = Math.max(-60, Math.min(60, Math.round(place.y)));
+      const scale = Math.max(0.45, Math.min(2.2, Math.round(place.scale * 100) / 100));
+      img.style.transform = (!x && !y && scale === 1) ? "" : "translate(" + x + "%," + y + "%) scale(" + scale + ")";
+      parkHandle(img);
+    }
+    function parkHandle(node) {
+      const frame = node.classList.contains("poll-hold") ? node : node.parentElement;
+      const handle = frame && frame.querySelector(":scope > .nudge-handle");
+      if (!handle) return;
+      if (frame === node) {
+        handle.style.left = Math.max(0, node.offsetWidth - 26) + "px";
+        handle.style.top = Math.max(0, node.offsetHeight - 26) + "px";
+        return;
+      }
+      const frameBox = frame.getBoundingClientRect();
+      const box = node.getBoundingClientRect();
+      handle.style.left = Math.max(0, box.right - frameBox.left - 26) + "px";
+      handle.style.top = Math.max(0, box.bottom - frameBox.top - 26) + "px";
+    }
+    let nudgeDrag = null;
+    function armNudges() {
+      document.querySelectorAll("[data-nudge]").forEach((node) => {
+        const frame = node.classList.contains("poll-hold") ? node : node.parentElement;
+        if (!frame || node.dataset.armed) return;
+        node.dataset.armed = "1";
+        if (frame !== node) frame.classList.add("nudge-frame");
+        const handle = document.createElement("button");
+        handle.type = "button";
+        handle.className = "nudge-handle";
+        handle.title = "Drag to resize";
+        handle.setAttribute("aria-label", "Resize picture");
+        frame.appendChild(handle);
+        node.title = "Drag to move. Double-click to put it back.";
+        node.addEventListener("pointerdown", (event) => beginNudge(event, node, "move"));
+        handle.addEventListener("pointerdown", (event) => beginNudge(event, node, "size"));
+        node.addEventListener("dblclick", (event) => {
+          event.stopPropagation();
+          writePlace(node, { x: 0, y: 0, scale: 1 });
+          parent.postMessage({ nudge: { key: node.getAttribute("data-nudge"), x: 0, y: 0, scale: 1 } }, location.origin);
+        });
+        parkHandle(node);
+      });
+    }
+    function beginNudge(event, img, mode) {
+      event.preventDefault();
+      event.stopPropagation();
+      const rect = img.getBoundingClientRect();
+      nudgeDrag = {
+        img: img,
+        mode: mode,
+        place: readPlace(img),
+        px: event.clientX,
+        py: event.clientY,
+        w: rect.width || 1,
+        h: rect.height || 1,
+        pointer: event.pointerId
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    window.addEventListener("pointermove", (event) => {
+      if (!nudgeDrag || event.pointerId !== nudgeDrag.pointer) return;
+      const dx = event.clientX - nudgeDrag.px;
+      if (nudgeDrag.mode === "move") {
+        const dy = event.clientY - nudgeDrag.py;
+        writePlace(nudgeDrag.img, {
+          x: nudgeDrag.place.x + (dx / nudgeDrag.w) * 100,
+          y: nudgeDrag.place.y + (dy / nudgeDrag.h) * 100,
+          scale: nudgeDrag.place.scale
+        });
+      } else {
+        writePlace(nudgeDrag.img, {
+          x: nudgeDrag.place.x,
+          y: nudgeDrag.place.y,
+          scale: nudgeDrag.place.scale * (1 + dx / nudgeDrag.w)
+        });
+      }
+    });
+    window.addEventListener("pointerup", (event) => {
+      if (!nudgeDrag || event.pointerId !== nudgeDrag.pointer) return;
+      const place = readPlace(nudgeDrag.img);
+      const before = nudgeDrag.place;
+      const changed = Math.round(before.x) !== place.x || Math.round(before.y) !== place.y || Math.round(before.scale * 100) !== Math.round(place.scale * 100);
+      if (changed) parent.postMessage({ nudge: { key: nudgeDrag.img.getAttribute("data-nudge"), x: place.x, y: place.y, scale: place.scale } }, location.origin);
+      nudgeDrag = null;
+    });
     window.addEventListener("message", (event) => {
       if (event.origin !== location.origin || !event.data) return;
       if (event.data.theme != null) document.body.className = event.data.theme || "";
@@ -22,6 +192,8 @@
         window.__answer = false;
         if (window.__buildTimer) clearInterval(window.__buildTimer);
         markBuilds();
+        fitSlideBoxes(document.getElementById("deck"));
+        armNudges();
       }
       if (event.data.builds) applyBuilds(event.data.builds);
       fit();
@@ -61,6 +233,7 @@
         }, 900);
       }
       markBuilds();
+      fitSlideBoxes(document.getElementById("deck"));
     }
     function markBuilds() {
       const step = window.__buildStep;

@@ -41,7 +41,7 @@
 
   function rich(value) {
     const text = String(value || "");
-    const tags = /<[^>]+>/g;
+    const tags = /<\/?[a-zA-Z][^>]*>/g;
     let out = "";
     let last = 0;
     let match = tags.exec(text);
@@ -284,16 +284,44 @@
     return parts.map((part) => "<p>" + rich(part) + "</p>").join("");
   }
 
-  function cardBox(title, body, prose, note, tone) {
+  function boxWrap(slide, key, className, inner, extraStyle, tag) {
+    const chosen = slide && slide.boxSize ? slide.boxSize[key] : "";
+    const size = ["18", "24", "32", "40"].indexOf(String(chosen)) !== -1 ? String(chosen) : "fit";
+    const styles = [];
+    if (extraStyle) styles.push(extraStyle);
+    if (size !== "fit") styles.push("--box-text:" + size + "px");
+    const el = tag || "div";
+    const cls = ((className || "") + " box-text" + (slide && slide.boxReveal && slide.boxReveal[key] && String(className || "").indexOf("build") === -1 ? " build hold-space" : "")).trim();
+    const open = `<${el} class="${cls}" data-box="${size}"${styles.length ? ` style="${styles.join(";")}"` : ""}>`;
+    if (el === "ul" || el === "ol") return open + inner + `</${el}>`;
+    return open + `<div class="box-copy">${inner}</div></${el}>`;
+  }
+
+  function pairList(body) {
+    return `<ul class="think-again">${lines(body).map((line) => {
+      const bits = String(line).split("|");
+      return `<li><span>${rich((bits[0] || "").trim())}</span><em>${rich(bits.slice(1).join("|").trim())}</em></li>`;
+    }).join("")}</ul>`;
+  }
+
+  function cardBox(title, body, prose, note, tone, slide, key, table) {
     const kind = tone && tone !== "normal" && tone !== "plain" ? "card " + tone : "card";
-    const main = prose ? paras(body) : list(body);
+    const main = table ? pairList(body) : (prose ? paras(body) : list(body));
     const extra = note ? `<p style="margin-top:10px">${rich(note)}</p>` : "";
-    return `<div class="${kind}"><h3>${esc(title)}</h3>${main}${extra}</div>`;
+    const inner = `<h3>${esc(title)}</h3>${main}${extra}`;
+    return key ? boxWrap(slide, key, kind, inner) : `<div class="${kind}">${inner}</div>`;
   }
 
   function bodyHtml(slide, ctx, forPlayer) {
     if (window.HubLayouts && HubLayouts.owns(slide.template)) {
-      const drawn = HubLayouts.body(slide, ctx, forPlayer, { esc: esc, rich: rich, list: list, lines: lines, imageSrc: imageSrc });
+      const drawn = HubLayouts.body(slide, ctx, forPlayer, {
+        esc: esc,
+        rich: rich,
+        list: list,
+        lines: lines,
+        imageSrc: imageSrc,
+        wrap: (key, className, inner, extraStyle, tag) => boxWrap(slide, key, className, inner, extraStyle, tag)
+      });
       if (drawn != null) return drawn;
     }
     if (slide.template === "title") {
@@ -306,29 +334,34 @@
     }
     if (slide.template === "columns" || slide.template === "quote") {
       const cards = `<div class="body two"${slide.template === "quote" ? ' style="margin-top:16px"' : ""}>
-        ${cardBox(slide.leftTitle, slide.leftBody, slide.leftProse, slide.leftNote, slide.leftTone)}
-        ${cardBox(slide.rightTitle, slide.rightBody, slide.rightProse, slide.rightNote, slide.rightTone)}
+        ${cardBox(slide.leftTitle, slide.leftBody, slide.leftProse, slide.leftNote, slide.leftTone, slide, "left", slide.leftTable)}
+        ${cardBox(slide.rightTitle, slide.rightBody, slide.rightProse, slide.rightNote, slide.rightTone, slide, "right", slide.rightTable)}
       </div>`;
-      const opening = slide.template === "quote" || slide.quote ? `<div class="banner dark">${rich(slide.quote)}</div>` : "";
-      const note = slide.note ? `<p class="small" style="margin-top:12px">${rich(slide.note)}</p>` : "";
-      const callout = slide.callout ? `<div class="callout${slide.calloutReveal ? " build" : ""}" style="margin-top:14px">${rich(slide.callout)}</div>` : "";
+      const opening = slide.template === "quote" || slide.quote ? boxWrap(slide, "quote", "banner dark", rich(slide.quote)) : "";
+      const note = slide.note ? boxWrap(slide, "note", "small", rich(slide.note), "margin-top:12px") : "";
+      const callout = slide.callout ? boxWrap(slide, "callout", "callout" + (slide.calloutReveal ? " build" : ""), rich(slide.callout), "margin-top:14px") : "";
       const tone = ["teal", "green", "dark", "red"].indexOf(slide.bannerTone) !== -1 ? " " + slide.bannerTone : "";
       const reveal = slide.banner && slide.bannerReveal === true ? " build" : "";
-      const banner = slide.banner ? `<div class="banner${tone}${reveal}" style="margin-top:12px">${rich(slide.banner)}</div>` : "";
+      const banner = slide.banner ? boxWrap(slide, "banner", "banner" + tone + reveal, rich(slide.banner), "margin-top:12px") : "";
       return `${opening}${cards}${note}${callout}${banner}`;
     }
     if (slide.template === "photo") {
       const src = imageSrc(slide.image, ctx, forPlayer);
-      const card = slide.cardTitle || slide.cardBody ? `<div class="card${slide.cardTone === "warn" ? " warn" : ""}" style="margin-top:10px"><h3>${esc(slide.cardTitle)}</h3><p>${rich(slide.cardBody)}</p></div>` : "";
-      const picture = `<div>${src ? `<div class="photo-frame"><img src="${esc(src)}" alt="${esc(slide.imageAlt)}"></div>` : ""}<p class="photo-caption">${esc(slide.caption)}</p>${card}</div>`;
-      const copy = `<div>${list(slide.body)}</div>`;
+      const spot = slide.place && slide.place.image;
+      const nx = spot ? Math.round(Number(spot.x) || 0) : 0;
+      const ny = spot ? Math.round(Number(spot.y) || 0) : 0;
+      const ns = spot ? Math.round((Number(spot.scale) || 1) * 100) / 100 : 1;
+      const nudge = ` data-nudge="image"${nx || ny || ns !== 1 ? ` style="transform:translate(${nx}%,${ny}%) scale(${ns})"` : ""}`;
+      const card = slide.cardTitle || slide.cardBody ? boxWrap(slide, "card", "card" + (slide.cardTone === "warn" ? " warn" : ""), `<h3>${esc(slide.cardTitle)}</h3><p>${rich(slide.cardBody)}</p>`, "margin-top:10px") : "";
+      const picture = `<div>${src ? `<div class="photo-frame"><img${nudge} src="${esc(src)}" alt="${esc(slide.imageAlt)}"></div>` : ""}<p class="photo-caption">${esc(slide.caption)}</p>${card}</div>`;
+      const copy = boxWrap(slide, "body", "", list(slide.body));
       return `<div class="body two fill-side">${slide.imageSide === "left" ? picture + copy : copy + picture}</div>`;
     }
     if (slide.template === "steps") {
       const block = (heading, body, tone, index) => {
         const toneClass = tone && tone !== "plain" ? " " + tone : "";
         const build = slide.reveal !== false && index > 0 ? " build" : "";
-        return `<section class="job-step${toneClass}${build}"><div class="job-num job-pill">${esc(heading)}</div>${list(body)}</section>`;
+        return boxWrap(slide, ["one", "two", "three"][index], "job-step" + toneClass + build, `<div class="job-num job-pill">${esc(heading)}</div>${list(body)}`, "", "section");
       };
       return `<div class="step-row">
         ${block(slide.oneTitle, slide.oneBody, slide.oneTone, 0)}
@@ -348,7 +381,7 @@
           text = match[2];
         }
         const reveal = slide.reveal === false ? "" : " build hold-space";
-        return `<div class="banner${tone ? " " + tone : ""}${reveal}" style="margin-top:${index ? "8px" : "0"}">${rich(text)}</div>`;
+        return boxWrap(slide, "lines", "banner" + (tone ? " " + tone : "") + reveal, rich(text), "margin-top:" + (index ? "8px" : "0"));
       }).join("")}</div>`;
     }
     if (slide.template === "poll") {
@@ -359,10 +392,10 @@
       }).join("");
       const detail = slide.detail || (slide.image ? `<div class="photo-frame cutout"><img src="${esc(imageSrc(slide.image, ctx, forPlayer))}" alt="${esc(slide.imageAlt)}"></div>` : "");
       return `<div class="body">
-        <p class="poll-prompt">${slide.prompt || ""}</p>
+        ${boxWrap(slide, "prompt", "poll-prompt", slide.prompt || "")}
         ${detail}
-        <div class="poll-opts">${options}</div>
-        ${slide.teach ? `<div class="poll-teach">${slide.teach}</div>` : ""}
+        ${boxWrap(slide, "options", "poll-opts", options)}
+        ${slide.teach ? boxWrap(slide, "teach", "poll-teach", slide.teach) : ""}
       </div>`;
     }
     const html = slide.html || (slide.player && slide.player.html) || (slide.player && slide.player.detail) || "";
@@ -372,13 +405,34 @@
     return html;
   }
 
+  function qrHold(slide) {
+    if (!slide || (slide.template !== "poll" && slide.template !== "score")) return "";
+    const spot = slide.place && slide.place.qr;
+    const x = spot ? Math.round(Number(spot.x) || 0) : 0;
+    const y = spot ? Math.round(Number(spot.y) || 0) : 0;
+    const scale = spot ? Math.round((Number(spot.scale) || 1) * 100) / 100 : 1;
+    const moved = x || y || scale !== 1 ? "transform:translate(" + x + "%," + y + "%) scale(" + scale + ")" : "";
+    return `<aside class="poll-join poll-hold" data-nudge="qr" style="transform-origin:top right;${moved}">
+      <svg class="qr-hold" viewBox="0 0 33 33" role="img" aria-label="QR code">
+        <rect width="33" height="33" fill="#fff"/>
+        <rect x="2" y="2" width="9" height="9"/><rect x="4" y="4" width="5" height="5" fill="#fff"/><rect x="5.5" y="5.5" width="2" height="2"/>
+        <rect x="22" y="2" width="9" height="9"/><rect x="24" y="4" width="5" height="5" fill="#fff"/><rect x="25.5" y="5.5" width="2" height="2"/>
+        <rect x="2" y="22" width="9" height="9"/><rect x="4" y="24" width="5" height="5" fill="#fff"/><rect x="5.5" y="25.5" width="2" height="2"/>
+        <rect x="14" y="4" width="2" height="2"/><rect x="18" y="8" width="2" height="2"/><rect x="14" y="14" width="4" height="4"/>
+        <rect x="22" y="16" width="3" height="3"/><rect x="27" y="22" width="3" height="3"/><rect x="16" y="24" width="2" height="2"/><rect x="22" y="27" width="2" height="2"/>
+      </svg>
+      <p class="poll-phones"><span class="poll-total">0</span> responses</p>
+    </aside>`;
+  }
+
   function previewHtml(slide, ctx) {
     if (!slide) return "";
     const inner = bodyHtml(slide, ctx, false);
     if (slide.template === "title") return shell("title-slide", inner, ctx, titlePreviewStyle(slide, ctx));
-    const kind = slide.template === "poll" ? "poll-slide" : (slide.player && slide.player.hostedOnly ? "trust-slide" : "");
+    const pollish = slide.template === "poll" || slide.template === "score";
+    const kind = pollish ? "poll-slide" + (slide.template === "score" ? " poll-news2" : "") : (slide.player && slide.player.hostedOnly ? "trust-slide" : "");
     const heading = slide.template === "title" ? "" : `<div class="kicker">${esc(slide.kicker)}</div><h2>${esc(slide.title)}</h2>`;
-    return shell(kind, heading + inner, ctx);
+    return shell(kind, heading + inner + qrHold(slide), ctx);
   }
 
   function toPlayer(slide, ctx) {
@@ -407,7 +461,7 @@
     if (slide.template === "poll") {
       const options = lines(slide.optionsText);
       const correct = Math.max(0, Math.min(Math.max(options.length - 1, 0), Number(slide.correct) || 0));
-      return applyAudience({
+        return applyAudience({
         type: "poll",
         pollId: slide.pollId || ("q-" + (slide.id || uid())),
         resultsTitle: slide.resultsTitle || "How the room voted",
@@ -420,7 +474,8 @@
         teach: slide.teach || "",
         notes: slide.notes || "",
         detail: slide.detail || "",
-        image: slide.image || ""
+        image: slide.image || "",
+        qrPlace: slide.place && slide.place.qr ? slide.place.qr : undefined
       }, slide);
     }
     if (slide.template === "score") {
@@ -451,6 +506,7 @@
       };
       out.options = [];
       if (slide.detail) out.detail = slide.image ? String(slide.detail).replace(/src="[^"]*"/, 'src="' + slide.image + '"') : slide.detail;
+      if (slide.place && slide.place.qr) out.qrPlace = slide.place.qr;
       return applyAudience(out, slide);
     }
     return applyAudience({
@@ -471,10 +527,17 @@
   }
 
   function textChunks(slide) {
-    if (slide.template === "columns" || slide.template === "quote") {
+    if (slide.template === "pairs") {
       return [
         { title: slide.leftTitle || "", body: slide.leftBody || "" },
-        { title: slide.rightTitle || "", body: slide.rightBody || "" },
+        { title: slide.rightTitle || "", body: slide.pairsText || "", table: true },
+        { title: "", body: "" }
+      ];
+    }
+    if (slide.template === "columns" || slide.template === "quote") {
+      return [
+        { title: slide.leftTitle || "", body: slide.leftBody || "", table: !!slide.leftTable },
+        { title: slide.rightTitle || "", body: slide.rightBody || "", table: !!slide.rightTable },
         { title: "", body: "" }
       ];
     }
@@ -509,6 +572,9 @@
       fresh.leftBody = chunks[0].body;
       fresh.rightTitle = chunks[1].title;
       fresh.rightBody = chunks[1].body;
+      fresh.leftTable = !!chunks[0].table;
+      fresh.rightTable = !!chunks[1].table;
+      if (chunks[1].table) fresh.rightTone = slide.rightTone && slide.rightTone !== "normal" ? slide.rightTone : "myth";
       if (next === "quote") fresh.quote = slide.quote || "";
       fresh.leftTone = slide.leftTone || fresh.leftTone;
       fresh.rightTone = slide.rightTone || fresh.rightTone;
