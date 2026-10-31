@@ -80,9 +80,9 @@ Stop the server with Ctrl+C.
 
 Instructor PINs and feedback workbook links for **dev and prod** live in `.env` in this folder. That file is gitignored. This laptop uses the `DEV` feedback line. The hosted Hub uses the `LIVE` line. Restart `python serve.py` after you edit `.env`. A blank template is `.env.example`.
 
-`DEBUG=true` uses the dev workbooks. `DEBUG=false` uses the live workbooks. This laptop’s `.env` has `DEBUG=true`. On the live Render service set `DEBUG` to `false`. On the test service set `DEBUG` to `true`.
+`DEBUG=true` uses the dev workbooks. `DEBUG=false` uses the live workbooks. This laptop’s `.env` has `DEBUG=true`. On the live Render service set `DEBUG` to `false`.
 
-The hosted site cannot read this file. In the Render dashboard, set `FEEDBACK_SHARE_COPD_LIVE` and `FEEDBACK_SHARE_HF_LIVE` on the live service, and `FEEDBACK_SHARE_COPD_DEV` and `FEEDBACK_SHARE_HF_DEV` on the test service.
+The hosted site cannot read this file. In the Render dashboard, set `FEEDBACK_SHARE_COPD_LIVE` and `FEEDBACK_SHARE_HF_LIVE` on the live service. The `DEV` names stay in this laptop’s `.env`.
 
 Instructors are one `PRESENTERS` line, in the same shape as the Render dashboard. Copy the value inside the quotes into the dashboard variable `PRESENTERS`:
 
@@ -151,8 +151,6 @@ On this laptop (`DEBUG=true`) the home page lists every session. A draft card is
 
 When a session is ready for the live home page, change that one line in `COURSES` to `"published": True`. Redeploy. The card appears on https://hub-cpd.co.uk/ and the passcode is no longer asked. No separate homepage edit.
 
-`hub-cpd-test.onrender.com` is the old preview site. New sessions do not need it.
-
 Keep the current `copd-cpd` service running so https://copd-cpd.onrender.com/ can forward.
 
 ## Accounts
@@ -179,7 +177,7 @@ https://onedrive.live.com/my?id=%2Fpersonal%2F4a2042dbbcf48071%2FDocuments%2FCur
 3. Share the **Audience** window to the projector and/or Teams (Share window, not the presenter screen).
 4. Room: scan **this session’s** QR (it includes a room code). Teams: copy the join link from the presenter sidebar into chat — do not reuse another facilitator’s QR.
 5. Space, a mouse click on the slide, a wireless clicker (Page Down / next), or **Next** on a question goes to the results slide.
-6. Both hosted decks then show **Help shape the next session**. The feedback QR is in the top right, with the address under it. Phones already on the vote page get the form. Anyone else can scan that QR. The same QR is on the self-guided deck. Download the sheet from **Download feedback** in the presenter sidebar. The last slide is **Record Attendance for CPD Certificate**. Leave that QR up for the room to scan. It is not in the self-guided deck. Certificate attendance is the Trust QR only: there is no name, ESR, or email collection for certificates, and no certificate lookup page.
+6. Both hosted decks then show **Help shape the next session**. The feedback QR is in the top right, with the address under it. Phones already on the vote page get the form. Anyone else can scan that QR. The same QR is on the self-guided deck. Download the sheet from **Download feedback** in the presenter sidebar. If that workbook is open in Excel, new replies are kept and added within a few seconds of the file being closed. Download feedback still includes them while it is open. The open Excel window itself does not change until the file is closed and opened again. The last slide is **Record Attendance for CPD Certificate**. Leave that QR up for the room to scan. It is not in the self-guided deck. Certificate attendance is the Trust QR only: there is no name, ESR, or email collection for certificates, and no certificate lookup page.
 
 Two people can deliver the same CPD at the same time. Each opens presenter view on the **same live site** (usually Render). The site gives each facilitator a different room code, a different attendance file, and quiz answers from their own phones only. Phones must scan the QR on **that** screen.
 
@@ -231,13 +229,13 @@ It creates:
 - a blank handout page
 - `feedback/dev.xlsx` and `feedback/live.xlsx`, blank templates with the column headings. These are not OneDrive workbooks
 - a `TODO.md` in the topic folder: share links for both feedback workbooks, QA CPD sign-off, and the certificate QR
-- the same variable names in `.env.example`, with a line above each one saying to create it on Render
+- the same variable names in `.env.example`. The DEV name is for this laptop. The LIVE name is also created on the live Render service
 - the editor draft in `editor-drafts`, so the topic opens in the editor
 - a line in `FUTURE-TOPICS.md`
 
 Restart `python serve.py` and the editor after it finishes. The new topic is on the laptop home page as a draft. It is not on https://hub-cpd.co.uk/ until you set `"published": True` and push.
 
-Open the new topic’s `TODO.md` before the first live session. Share both feedback workbooks in OneDrive, paste the dev link into `FEEDBACK_SHARE_<ID>_DEV` and the live link into `FEEDBACK_SHARE_<ID>_LIVE`, on Render and in `.env`. A session on hub-cpd.co.uk does not read this laptop’s `.env`. The same list covers QA CPD sign-off and replacing the holding certificate QR.
+Open the new topic’s `TODO.md` before the first live session. Share both feedback workbooks in OneDrive. Paste the dev link into `FEEDBACK_SHARE_<ID>_DEV` in `.env`. Paste the live link into `FEEDBACK_SHARE_<ID>_LIVE` in `.env` and on the live Render service. A session on hub-cpd.co.uk does not read this laptop’s `.env`. The same list covers QA CPD sign-off and replacing the holding certificate QR.
 
 The teaching slides, the real references, and a title photograph are added in the editor after this starter exists.
 

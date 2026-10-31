@@ -38,7 +38,7 @@ def env_example_block(course: str) -> str:
     dev_name = feedback_var(course, "DEV")
     live_name = feedback_var(course, "LIVE")
     return (
-        f"# Create {dev_name} on the test Render service.\n"
+        f"# Create {dev_name} in this laptop's .env.\n"
         f"# Create {live_name} on the live Render service.\n"
         f"{dev_name}=\n"
         f"{live_name}=\n"
@@ -56,7 +56,7 @@ def topic_todo(heading: str, course: str) -> str:
         "\n"
         "- [ ] In OneDrive, create a share link for the dev feedback workbook\n"
         "- [ ] In OneDrive, create a share link for the live feedback workbook\n"
-        f"- [ ] Paste the dev share link into `{dev_name}` in this laptop's `.env` and on the test Render service\n"
+        f"- [ ] Paste the dev share link into `{dev_name}` in this laptop's `.env`\n"
         f"- [ ] Paste the live share link into `{live_name}` in this laptop's `.env` and on the live Render service (hub-cpd)\n"
         "- [ ] Get QA CPD sign-off\n"
         f"- [ ] Replace the holding certificate QR with the Trust QR from that sign-off. Save it as `{qr}`. On the form, the tutor is QA CPD and the training location is Other.\n"

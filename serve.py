@@ -165,6 +165,11 @@ OD_UA = (
 _OD: dict = {}
 FEEDBACK_FILE = ROOT / "feedback.csv"
 FEEDBACK_LOCK = threading.Lock()
+_FEEDBACK_FLUSH_THREAD: threading.Thread | None = None
+
+
+class WorkbookLocked(OSError):
+    """The feedback workbook is open, so OneDrive will not replace it yet."""
 _FEEDBACK_SESSIONS: dict[str, dict] = {}
 _FEEDBACK_HITS: dict[str, list[float]] = {}
 FEEDBACK_HEADERS = ["Submitted", "Room", "Useful", "Comments", "Email", "Suggestion", "Name"]
@@ -1187,7 +1192,7 @@ def feedback_upload(session: dict, content: bytes) -> None:
         od_http("POST", endpoint, data=content, headers=headers)
     except urllib.error.HTTPError as err:
         if err.code == 423:
-            raise OSError("Feedback workbook is open elsewhere. Close it, then try again.") from err
+            raise WorkbookLocked("Feedback workbook is open elsewhere.") from err
         raise OSError("Feedback workbook upload failed ({})".format(err.code)) from err
 
 
@@ -1199,42 +1204,168 @@ def local_feedback_workbook(course_id: str) -> Path | None:
     return path if path.is_file() else None
 
 
-def append_local_workbook(path: Path, values: list[str]) -> None:
-    path.write_bytes(xlsx_append(path.read_bytes(), values))
+def feedback_pending_path(course_id: str) -> Path | None:
+    course = (course_id or "").strip().casefold()
+    if course not in COURSES:
+        return None
+    return ROOT / course / "feedback" / ("pending-" + attend_env() + ".json")
 
 
-def append_remote_workbook(course_id: str, values: list[str]) -> None:
-    last_error: Exception | None = None
-    url = feedback_workbook_url(course_id)
-    for attempt in range(2):
+def read_pending_feedback(course_id: str) -> list[list[str]]:
+    path = feedback_pending_path(course_id)
+    if path is None or not path.is_file():
+        return []
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeError):
+        return []
+    rows: list[list[str]] = []
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, list):
+                rows.append([str(cell) for cell in item[: len(FEEDBACK_HEADERS)]])
+    return rows
+
+
+def write_pending_feedback(course_id: str, rows: list[list[str]]) -> None:
+    path = feedback_pending_path(course_id)
+    if path is None:
+        raise OSError("No feedback workbook is configured")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not rows:
+        if path.is_file():
+            path.unlink()
+        return
+    temporary = path.with_suffix(".json.tmp")
+    temporary.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
+    temporary.replace(path)
+
+
+def feedback_row_present(data: bytes, values: list[str]) -> bool:
+    needle = [cell.strip() for cell in values]
+    width = len(needle)
+    for row in workbook_rows(data):
+        if [cell.strip() for cell in row[:width]] == needle:
+            return True
+    return False
+
+
+def xlsx_append_many(data: bytes, rows: list[list[str]]) -> bytes:
+    for values in rows:
+        data = xlsx_append(data, values)
+    return data
+
+
+def with_held_feedback(course_id: str, data: bytes | None) -> bytes | None:
+    pending = read_pending_feedback(course_id)
+    if not pending:
+        return data
+    base = data if data else build_xlsx([FEEDBACK_HEADERS])
+    fresh = [row for row in pending if not feedback_row_present(base, row)]
+    if not fresh:
+        return base
+    return xlsx_append_many(base, fresh)
+
+
+def put_feedback_rows(course_id: str, rows: list[list[str]]) -> None:
+    if not rows:
+        return
+    if feedback_workbook_url(course_id):
+        last_error: Exception | None = None
+        locked: WorkbookLocked | None = None
+        url = feedback_workbook_url(course_id)
+        for _attempt in range(2):
+            try:
+                session = get_feedback_session(course_id, force=last_error is not None or locked is not None)
+                data = feedback_download(session)
+                fresh = [row for row in rows if not feedback_row_present(data, row)]
+                if fresh:
+                    feedback_upload(session, xlsx_append_many(data, fresh))
+                return
+            except WorkbookLocked as err:
+                locked = err
+                if url:
+                    _FEEDBACK_SESSIONS.pop(url, None)
+            except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, ET.ParseError, zipfile.BadZipFile) as err:
+                last_error = err
+                if url:
+                    _FEEDBACK_SESSIONS.pop(url, None)
+        if locked is not None and last_error is None:
+            raise locked
+        raise OSError("Feedback workbook update failed") from (last_error or locked)
+    local = local_feedback_workbook(course_id)
+    if local is None:
+        raise OSError("No feedback workbook is configured")
+    try:
+        current = local.read_bytes() if local.is_file() else build_xlsx([FEEDBACK_HEADERS])
+        fresh = [row for row in rows if not feedback_row_present(current, row)]
+        if fresh:
+            local.write_bytes(xlsx_append_many(current, fresh))
+    except PermissionError as err:
+        raise WorkbookLocked("Feedback workbook is open elsewhere.") from err
+
+
+def hold_feedback_row(course_id: str, values: list[str]) -> None:
+    pending = read_pending_feedback(course_id)
+    pending.append(values)
+    write_pending_feedback(course_id, pending)
+
+
+def flush_held_feedback() -> None:
+    for course in list(COURSES):
+        pending = read_pending_feedback(course)
+        if not pending:
+            continue
         try:
-            session = get_feedback_session(course_id, force=attempt > 0)
-            feedback_upload(session, xlsx_append(feedback_download(session), values))
+            put_feedback_rows(course, pending)
+        except WorkbookLocked:
+            continue
+        except OSError as err:
+            cause = err.__cause__ or err
+            code = getattr(cause, "code", None)
+            detail = " ({})".format(code) if code else ""
+            print("Held feedback for {} is still waiting{}.".format(course, detail), flush=True)
+            continue
+        write_pending_feedback(course, [])
+        print("Added held feedback to the {} workbook.".format(course), flush=True)
+
+
+def feedback_flush_loop() -> None:
+    while True:
+        with FEEDBACK_LOCK:
+            flush_held_feedback()
+            waiting = any(read_pending_feedback(course) for course in COURSES)
+        if not waiting:
             return
-        except (OSError, urllib.error.URLError, TimeoutError, ValueError, KeyError, ET.ParseError, zipfile.BadZipFile) as err:
-            last_error = err
-            if url:
-                _FEEDBACK_SESSIONS.pop(url, None)
-    raise OSError("Feedback workbook update failed") from last_error
+        time.sleep(20)
+
+
+def ensure_feedback_flusher() -> None:
+    global _FEEDBACK_FLUSH_THREAD
+    if _FEEDBACK_FLUSH_THREAD is not None and _FEEDBACK_FLUSH_THREAD.is_alive():
+        return
+    _FEEDBACK_FLUSH_THREAD = threading.Thread(target=feedback_flush_loop, name="feedback-flush", daemon=True)
+    _FEEDBACK_FLUSH_THREAD.start()
 
 
 def append_feedback_workbook(row: dict) -> None:
     course = str(row.get("course") or "copd")
     values = feedback_row_values(row)
-    if feedback_workbook_url(course):
-        try:
-            append_remote_workbook(course, values)
-        except OSError as err:
-            cause = err.__cause__ or err
-            code = getattr(cause, "code", None)
-            detail = " ({})".format(code) if code else ""
-            print("Feedback workbook update failed{}.".format(detail), flush=True)
-            raise
+    batch = read_pending_feedback(course) + [values]
+    try:
+        put_feedback_rows(course, batch)
+    except WorkbookLocked:
+        hold_feedback_row(course, values)
+        ensure_feedback_flusher()
+        print("Feedback held for {}. The workbook is open. It will be added when the file is free.".format(course), flush=True)
         return
-    local = local_feedback_workbook(course)
-    if local is None:
-        raise OSError("No feedback workbook is configured")
-    append_local_workbook(local, values)
+    except OSError as err:
+        cause = err.__cause__ or err
+        code = getattr(cause, "code", None)
+        detail = " ({})".format(code) if code else ""
+        print("Feedback workbook update failed{}.".format(detail), flush=True)
+        raise
+    write_pending_feedback(course, [])
 
 
 def save_feedback(row: dict) -> None:
@@ -1267,6 +1398,7 @@ def feedback_workbook_bytes(course_id: str = "copd") -> bytes | None:
         local = local_feedback_workbook(course_id)
         if local is not None:
             data = local.read_bytes()
+    data = with_held_feedback(course_id, data)
     if not data or _response_count(data) < 1:
         return None
     return data
@@ -2894,6 +3026,8 @@ def main() -> None:
     print()
     print("Ctrl+C to stop.", flush=True)
     print()
+    if any(read_pending_feedback(course) for course in COURSES):
+        ensure_feedback_flusher()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -23,6 +23,7 @@ feedback-share.txt
 feedback.csv
 *Feedback*.xlsx
 **/feedback/*.xlsx
+**/feedback/pending-*.json
 certificates.csv
 certificates-*.csv
 certificates/**/*.csv
