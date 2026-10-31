@@ -5,7 +5,7 @@ Before the first live session:
 - [x] In OneDrive, create a share link for the dev feedback workbook
 - [x] In OneDrive, create a share link for the live feedback workbook
 - [x] Paste the dev share link into `FEEDBACK_SHARE_COPD_DEV` in this laptop's `.env`
-- [ ] Paste the live share link into `FEEDBACK_SHARE_COPD_LIVE` in this laptop's `.env` and on the live Render service (hub-cpd)
+- [x] Paste the live share link into `FEEDBACK_SHARE_COPD_LIVE` in this laptop's `.env` and on the live Render service (hub-cpd)
 - [x] Get QA CPD sign-off
 - [x] Replace the holding certificate QR with the Trust QR from that sign-off. Save it as `copd/assets/copd-certificate-qr.png`. On the form, the tutor is QA CPD and the training location is Other.
 
