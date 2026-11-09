@@ -3432,7 +3432,9 @@
   <script src="hf/slides.js?v=steps1"></script>
   <script src="asthma/slides.js?v=steps1"></script>
   <script src="stroke/slides.js?v=start1"></script>
-  <script id="hubPublished" type="application/json">{"copd":true,"hf":false,"asthma":false,"stroke":false}</script>
+  <script src="ppt/deck.js"></script>
+  <script src="ppt/slides.js?v=start1"></script>
+  <script id="hubPublished" type="application/json">{"copd":true,"hf":false,"asthma":false,"stroke":false,"ppt":false}</script>
   <script>
     function hubPublished(id, fallback) {
       const node = document.getElementById("hubPublished");
@@ -3493,7 +3495,19 @@
         channel: "stroke-cpd-deck",
         attendKey: "stroke-cpd-register",
         published: hubPublished("stroke", false)
-      }
+      },
+      ppt: {
+        id: "ppt",
+        title: "PowerPoint Test",
+        short: "PowerPoint Test CPD",
+        footer: "Hub CPD · JRCALC PowerPoint Test",
+        handout: "ppt/handout.html",
+        store: "ppt-cpd-state",
+        selfStore: "ppt-cpd-self-state",
+        channel: "ppt-cpd-deck",
+        attendKey: "ppt-cpd-register",
+        published: hubPublished("ppt", false)
+      },
     };
     const courseKey = String(params.get("course") || "").trim().toLowerCase();
     const catalogCourse = Object.prototype.hasOwnProperty.call(COURSE_CATALOG, courseKey)

@@ -326,6 +326,20 @@ def editor_deck(topic: dict) -> dict:
     }
 
 
+def insert_catalog_entry(page_text: str, catalog: str) -> str:
+    """Add a course to the home-page list, including the comma the last course may lack."""
+    cursor = page_text.find('    const courseKey = String(params.get("course")')
+    brace = page_text.rfind("    };", 0, cursor)
+    if cursor < 0 or brace < 0:
+        raise SystemExit("Could not update the course list in index.html")
+    if catalog.strip() in page_text:
+        return page_text
+    head = page_text[:brace].rstrip()
+    if head.endswith("}"):
+        head = head[:-1] + "},"
+    return head + "\n" + catalog + page_text[brace:]
+
+
 def insert_before(path: Path, marker: str, addition: str) -> None:
     text = path.read_text(encoding="utf-8")
     if addition.strip() in text:
@@ -356,7 +370,7 @@ def register_course(topic: dict) -> None:
         f'        "home_class": "",\n'
         f'    }},\n'
     )
-    insert_before(serve, "\n}\n_DRAFT_HITS", block)
+    insert_before(serve, "\n}\n_DRAFT_HITS", "\n" + block)
 
     editor = ROOT / "editor.py"
     editor_text = editor.read_text(encoding="utf-8")
@@ -397,13 +411,7 @@ def register_course(topic: dict) -> None:
         f'        published: hubPublished("{course}", false)\n'
         f'      }},\n'
     )
-    cursor = page_text.find('    const courseKey = String(params.get("course")')
-    brace = page_text.rfind("    };", 0, cursor)
-    if cursor < 0 or brace < 0 or catalog.strip() in page_text:
-        if catalog.strip() not in page_text:
-            raise SystemExit("Could not update the course list in index.html")
-    else:
-        page_text = page_text[:brace] + catalog + page_text[brace:]
+    page_text = insert_catalog_entry(page_text, catalog)
     page.write_text(page_text, encoding="utf-8")
 
     example = ROOT / ".env.example"
@@ -513,6 +521,29 @@ def self_test() -> None:
     assert "FEEDBACK_SHARE_COPD_DEV=\n" in example and "live Render service" in example
     assert "## In progress" in (ROOT / "FUTURE-TOPICS.md").read_text(encoding="utf-8")
     page = (ROOT / "index.html").read_text(encoding="utf-8")
+    sample = (
+        '    const COURSE_CATALOG = {\n'
+        '      stroke: {\n'
+        '        published: hubPublished("stroke", false)\n'
+        '      }\n'
+        '    };\n'
+        '    const courseKey = String(params.get("course")\n'
+    )
+    added = (
+        '      glycaemic: {\n'
+        '        id: "glycaemic",\n'
+        '        published: hubPublished("glycaemic", false)\n'
+        '      },\n'
+    )
+    joined = insert_catalog_entry(sample, added)
+    assert "},\n      glycaemic:" in joined
+    assert "}\n      glycaemic:" not in joined
+    again = insert_catalog_entry(
+        joined,
+        '      sepsis: {\n        id: "sepsis",\n        published: hubPublished("sepsis", false)\n      },\n',
+    )
+    assert "},\n      sepsis:" in again
+    assert "},," not in again
     assert 'const courseKey = String(params.get("course")' in page
     assert (ROOT / "serve.py").read_text(encoding="utf-8").find("\n}\n_DRAFT_HITS") > 0
     print("new topic check ok")

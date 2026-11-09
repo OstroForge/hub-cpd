@@ -229,6 +229,19 @@ COURSES = {
         "home_blurb": "Time-critical features, mimics, and who is conveyed as an emergency.",
         "home_class": "",
     },
+    "ppt": {
+        "id": "ppt",
+        "title": "PowerPoint Test",
+        "detail": "JRCALC PowerPoint Test · 30 minutes",
+        "prefix": "PPT-CPD-attendance-",
+        "folder": "PowerPoint Test",
+        "published": False,
+        "home_tag": "Functionality Test",
+        "home_heading": "PowerPoint Test",
+        "home_blurb": "PowerPoint Conversion test",
+        "home_class": "",
+    },
+
 }
 _DRAFT_HITS: dict[str, list[float]] = {}
 

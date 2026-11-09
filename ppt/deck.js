@@ -1,0 +1,2 @@
+/* No editor draft has been copied into this project yet.
+   The player uses slides.js until the editor copies a deck here. */
