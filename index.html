@@ -730,6 +730,60 @@
     }
     body.live .poll-foot-url:not(:empty) { display: block; }
     .footer-bar .slide-num { flex: none; }
+    .slide.canvas-slide {
+      padding: 0;
+      background: var(--paper);
+    }
+    .canvas-slide .footer-bar {
+      z-index: 4;
+      text-shadow: 0 1px 2px rgba(240, 226, 196, 0.95);
+    }
+    .efaaw {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: var(--paper);
+    }
+    .efaaw-shape {
+      position: absolute;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .efaaw-shape.anchor-t { justify-content: flex-start; }
+    .efaaw-shape.anchor-ctr { justify-content: center; }
+    .efaaw-shape.anchor-b { justify-content: flex-end; }
+    .efaaw-copy { width: 100%; min-height: 0; }
+    .efaaw-p {
+      margin: 0;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+    }
+    .efaaw-bu {
+      display: inline-block;
+      width: auto;
+      margin-right: 0.35em;
+      color: var(--amber);
+      font-weight: 700;
+    }
+    .efaaw-pic, .efaaw-crop { position: absolute; overflow: hidden; }
+    .efaaw-crop img, .efaaw-pic { display: block; max-width: none; }
+    .efaaw-round { border-radius: 50%; }
+    .efaaw-shape.build.show { display: flex; }
+    .efaaw-crop.build.show, .efaaw-pic.build.show, .efaaw-p.build.show { display: block; }
+    .efaaw .build.show[data-out]:not([data-in]) { animation: none; }
+    .efaaw a { color: inherit; text-decoration: underline; }
+    .efaaw table {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      font-size: inherit;
+    }
+    .efaaw td {
+      border-color: var(--line);
+      vertical-align: top;
+    }
     .footer-brand {
       display: flex;
       align-items: center;
@@ -3424,7 +3478,7 @@
     </div>
   </div>
 
-  <script src="copd/deck.js"></script>
+  <script src="copd/deck.js?v=scale1"></script>
   <script src="hf/deck.js"></script>
   <script src="asthma/deck.js"></script>
   <script src="stroke/deck.js"></script>
@@ -3433,7 +3487,7 @@
   <script src="asthma/slides.js?v=steps1"></script>
   <script src="stroke/slides.js?v=start1"></script>
   <script src="ppt/deck.js"></script>
-  <script src="ppt/slides.js?v=start1"></script>
+  <script src="ppt/slides.js?v=efaaw6"></script>
   <script id="hubPublished" type="application/json">{"copd":true,"hf":false,"asthma":false,"stroke":false,"ppt":false}</script>
   <script>
     function hubPublished(id, fallback) {
@@ -3584,7 +3638,7 @@
       if (selfMode) {
         const copy = Object.assign({}, s);
         if (s.pollId === "hands") {
-          copy.kicker = "Check yourself";
+          copy.kicker = typeof s.correct === "number" ? "Check yourself" : "Before you start";
           copy.title = "Default NEWS2 scale in COPD";
         } else if (s.pollId === "hf-hands") {
           copy.kicker = "Check yourself";
@@ -3600,13 +3654,16 @@
         }
         return [copy];
       }
+      const hasAnswer = typeof s.correct === "number" || !!(s.teach && String(s.teach).trim());
       return [s, {
         type: "poll-results",
         pollId: s.pollId,
         layout: s.layout || "",
         kicker: "Results",
         title: s.resultsTitle || "How the room voted",
-        notes: "The audience did not see these numbers on the question. Space or click once to mark the correct answer in green and show the teaching point."
+        notes: hasAnswer
+          ? "The audience did not see these numbers on the question. Space or click once to mark the correct answer in green and show the teaching point."
+          : "The audience did not see these numbers on the question. Leave the bars as they are. Do not say which answer was right."
       }];
     });
 
@@ -3991,8 +4048,14 @@
           <div class="body">
             <p class="poll-prompt">${q.prompt || ""}</p>
             ${spread}
-            <div class="poll-teach build"></div>
+            ${(typeof q.correct === "number" || (q.teach && String(q.teach).trim())) ? `<div class="poll-teach build"></div>` : ""}
           </div>
+          <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
+        </section>`;
+      }
+      if (s.type === "canvas") {
+        return `<section class="slide canvas-slide" data-i="${idx}">
+          ${s.html}
           <div class="footer-bar"><span class="footer-brand"><img class="footer-mark" src="assets/hub-cpd-star.png" alt="">${COURSE.footer}</span><span>${idx + 1} / ${slides.length}</span></div>
         </section>`;
       }
@@ -4004,12 +4067,39 @@
       </section>`;
     }
 
+    function buildGroups(el) {
+      const tagged = [...el.querySelectorAll("[data-build]")];
+      if (tagged.length) {
+        const groups = new Map();
+        tagged.forEach((node) => {
+          const key = Number(node.getAttribute("data-build"));
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(node);
+        });
+        return [...groups.keys()].sort((a, b) => a - b).map((key) => groups.get(key));
+      }
+      return [...el.querySelectorAll(".build")].map((node) => [node]);
+    }
+
+    function timelineNodes(el) {
+      return [...el.querySelectorAll("[data-in], [data-out]")];
+    }
+
     function buildsOn(idx) {
       const el = stage.querySelectorAll(".slide")[idx];
       if (!el) return 0;
       const zooms = el.querySelectorAll("[data-zoom]").length;
       if (zooms) return zooms;
-      return el.querySelectorAll(".build").length;
+      const timed = timelineNodes(el);
+      if (timed.length) {
+        let max = 0;
+        timed.forEach((node) => {
+          if (node.hasAttribute("data-in")) max = Math.max(max, Number(node.getAttribute("data-in")) || 0);
+          if (node.hasAttribute("data-out")) max = Math.max(max, Number(node.getAttribute("data-out")) || 0);
+        });
+        return max;
+      }
+      return buildGroups(el).length;
     }
 
     function persist() {
@@ -4193,9 +4283,34 @@
       });
       const current = els[i];
       if (current) {
-        [...current.querySelectorAll(".build")].forEach((el, n) => {
-          el.classList.toggle("show", n < build);
-        });
+        const timed = timelineNodes(current);
+        if (timed.length) {
+          timed.forEach((node) => {
+            const inn = node.hasAttribute("data-in") ? Number(node.getAttribute("data-in")) : 0;
+            const out = node.hasAttribute("data-out") ? Number(node.getAttribute("data-out")) : Infinity;
+            node.classList.toggle("show", build >= inn && build < out);
+          });
+        } else {
+          buildGroups(current).forEach((group, n) => {
+            group.forEach((el) => el.classList.toggle("show", n < build));
+          });
+          current.querySelectorAll("[data-stack]").forEach((node) => {
+            node.style.visibility = "";
+          });
+          const stacks = new Map();
+          current.querySelectorAll("[data-stack]").forEach((node) => {
+            const shown = node.classList.contains("show") || !node.classList.contains("build");
+            if (!shown) return;
+            const key = node.getAttribute("data-stack");
+            if (!stacks.has(key)) stacks.set(key, []);
+            stacks.get(key).push(node);
+          });
+          stacks.forEach((nodes) => {
+            nodes.forEach((node, index) => {
+              if (index < nodes.length - 1) node.style.visibility = "hidden";
+            });
+          });
+        }
         applyPicZoom(current, current.querySelector("[data-zoom]") ? build : 0);
         current.classList.toggle("answer-on", slides[i] && slides[i].type === "poll-results" && build > 0);
       }
@@ -4230,6 +4345,8 @@
       if (!s || s.type !== "poll") return false;
       if (slides[i + 1] && slides[i + 1].type === "poll-results" && slides[i + 1].pollId === s.pollId) return false;
       if (pollRevealed()) return false;
+      const hasAnswer = typeof s.correct === "number" || !!(s.teach && String(s.teach).trim());
+      if (!hasAnswer) return false;
       if (hub.ok && view === "presenter" && hub.token) hostAction("reveal");
       const el = stage.querySelectorAll(".slide")[i];
       if (el) {
@@ -5630,7 +5747,8 @@
             return;
           }
           promptEl.innerHTML = p.prompt || "";
-          if (p.revealed) statusEl.textContent = "Answer in. Here is the teaching point.";
+          if (p.revealed && (p.correct != null || (p.teach && String(p.teach).trim()))) statusEl.textContent = "Answer in. Here is the teaching point.";
+          else if (p.revealed) statusEl.textContent = "Voting has closed.";
           else if (picked != null) statusEl.textContent = "Vote in. You can change it until the room moves on.";
           else statusEl.textContent = "Tap one answer";
           optsEl.innerHTML = "";

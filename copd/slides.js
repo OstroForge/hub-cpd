@@ -20,40 +20,19 @@ function copdSlides() {
           "Scale 1",
           "Scale 2"
         ],
-        correct: 0,
-        teach: "Unless there is clear documented history that the patient has type 2 respiratory failure (or they carry an alert card) then <strong>ALWAYS use Scale 1</strong>. COPD in itself does not mean Scale 2.",
-        notes: "Leave this up while people scan the QR. Typical wrong answer is Scale 2 because they have COPD. Space goes to the results (numbers only). Space or click once more to paint Scale 1 green and show the teaching point."
+        notes: "Leave this up while people scan the QR. Space goes to the results and stays on the numbers. Do not mark a correct answer and do not teach it here. Scale 1, unless type 2 failure is already documented, is the next slides and the first check."
       },
       {
         kicker: "Core messages",
         title: "Learning objectives",
         html: `
-          <div class="card" style="margin-bottom:8px">
-            <h3>By the end you will have refreshed how to:</h3>
-            <ul style="columns:2;column-gap:28px">
-              <li>Recognise and treat an acute exacerbation of COPD using JRCALC principles</li>
-              <li>Give controlled oxygen without withholding it from the critically ill</li>
-              <li>Use NEWS2 Scale 1 unless type 2 failure is already documented</li>
-              <li>Hand over a score that receiving staff can trust</li>
-            </ul>
-          </div>
-          <div class="body two">
-            <div class="card" style="padding:12px 16px">
-              <h3>Oxygen target</h3>
-              <p>In known or suspected COPD, start with a target of <strong>88–92%</strong> (or the alert-card range) unless the patient is critically ill.</p>
-              <p class="small" style="margin-top:6px">This is a treatment decision from JRCALC.</p>
-            </div>
-            <div class="card" style="padding:12px 16px;line-height:1.28">
-              <h3>NEWS2 scale</h3>
-              <p>Use <strong>Scale 1</strong> unless type 2 respiratory failure is clearly documented in their medical history, they carry an alert card or are able to categorically inform you that they do have type 2 (hypercapnic) respiratory failure.</p>
-              <p class="small" style="margin-top:6px">Routinely, look for that record before Scale 2. There can be exceptions — if you use Scale 2 without it, say why at handover.</p>
-              <p class="small" style="margin-top:6px">This is a scoring decision from RCP NEWS2. The oxygen target does not, by itself, choose the scale.</p>
-            </div>
-          </div>
-          <div class="banner build" style="margin-top:8px">COPD ≠ type 2 respiratory failure</div>
-          <div class="banner teal build" style="margin-top:6px">COPD ≠ automatic NEWS2 Scale 2</div>
-          <p class="callout build" style="margin-top:8px">These are two separate decisions. They do not automatically travel together.</p>`,
-        notes: "Outcomes in 30 seconds. Then oxygen vs NEWS2. Space reveals the two banners, then the callout. Drop the old ‘usually missed’ card — the banners are that point."
+          <div class="body">
+            <div class="banner">1. Recognise and treat an acute exacerbation of COPD using JRCALC principles</div>
+            <div class="banner teal" style="margin-top:8px">2. Give controlled oxygen without withholding it from the critically ill</div>
+            <div class="banner dark" style="margin-top:8px">3. Choose the correct NEWS2 oxygen scale</div>
+            <div class="banner green" style="margin-top:8px">4. Hand over a score that receiving staff can trust</div>
+          </div>`,
+        notes: "Read the four lines and move on. Do not explain Scale 1, Scale 2, or 88–92% here. The next slide is the first time that conclusion is said, in JRCALC’s own words."
       },
       {
         kicker: "JRCALC Guideline 'Chronic Obstructive Pulmonary Disease' — the actual wording",
@@ -96,7 +75,7 @@ function copdSlides() {
               <div class="photo-frame">
                 <img src="copd/assets/copd-exacerbation-cxr.jpg" alt="Anteroposterior chest X-ray of a COPD exacerbation">
               </div>
-              <p class="photo-caption">AP chest X-ray in a COPD exacerbation (Mikael Häggström, MD, public domain / CC0).</p>
+              <p class="photo-caption">Anteroposterior (AP) chest X-ray in a COPD exacerbation (Mikael Häggström, MD, public domain / CC0).</p>
               <div class="card warn" style="margin-top:10px">
                 <h3>Pre-hospital trap</h3>
                 <p>COPD is a risk factor for hypercapnia. It is not proof of hypercapnia. Only a blood gas (now or previously documented) confirms type 2 respiratory failure.</p>
@@ -155,7 +134,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               <ul>
                 <li>Baseline saturations when well, and previous problems with oxygen</li>
                 <li>Alert card, individualised plan, or Hub special message</li>
-                <li>Home oxygen, previous NIV / ITU</li>
+                <li>Home oxygen, previous non-invasive ventilation (NIV) / ITU</li>
                 <li>Have they already taken steroids or antibiotics?</li>
                 <li>Encourage their usual breathing-control techniques if they help</li>
               </ul>
@@ -235,10 +214,9 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <div class="step green">
               <h3>NO — controlled oxygen</h3>
               <ul>
-                <li>Target 88–92% (or the alert card)</li>
-                <li>Start the 28% white Venturi this service stocks</li>
-                <li>Salbutamol 5 mg, 6-minute oxygen drive</li>
-                <li>Ipratropium once if severe</li>
+                <li>Controlled oxygen, target 88–92% (or the alert card)</li>
+                <li>A bronchodilator if they are wheezy or tight</li>
+                <li>Stay with them and watch for tiring</li>
               </ul>
             </div>
           </div>
@@ -246,7 +224,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <h3>Both paths — NEWS2</h3>
             <p>Scale 1 unless type 2 failure is already documented. Look for that record — an alert card, specialist plan or previous blood gas. 88–92% is the oxygen target. It is not, by itself, Scale 2.</p>
           </div>`,
-        notes: "Scene first: breathless, known or suspected COPD. Then the split: critically ill or not. Navy bar last: both paths still Scale 1 unless type 2 is already documented. Look for the alert card. Oxygen target is not the NEWS2 scale. There can be exceptions — say why if Scale 2 is used without that record."
+        notes: "Scene first: breathless, known or suspected COPD. Then the split: critically ill or not. The no-path is the decision only — controlled oxygen to 88–92%, then a bronchodilator. Do not give the mask or the doses here. White 28% Venturi is the oxygen slide. Salbutamol and ipratropium are the neb slide. Navy bar last: both paths still Scale 1 unless type 2 is already documented. There can be exceptions — say why if Scale 2 is used without that record."
       },
       {
         kicker: "Physiology that changes the score",
@@ -293,7 +271,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <div class="card">
               <h3>What the evidence says</h3>
               <ul>
-                <li>Around 1 in 5 hospitalised AECOPD patients has respiratory acidosis — so most do not</li>
+                <li>Around 1 in 5 patients hospitalised with an acute exacerbation of COPD (AECOPD) has respiratory acidosis — so most do not</li>
                 <li>RCP NEWS2 authors: Scale 2 was designed only for documented hypercapnic respiratory failure, “explicitly noting that most acutely ill patients with AECOPD will not present with HCRF”</li>
                 <li>RCP 2020: putting COPD patients without hypercapnia on Scale 2 “is not in line with NEWS2 guidance”</li>
               </ul>
@@ -316,7 +294,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               <ul>
                 <li>Hypercapnic (type 2) failure already confirmed on blood gas — previous admission or this hospital stay</li>
                 <li>A hospital doctor, ANP or specialist has already recorded that decision</li>
-                <li>You can see that documentation: alert card stating type 2 / raised CO<sub>2</sub>, specialist care plan, previous ABG, or Hub special message</li>
+                <li>You can see that documentation: alert card stating type 2 / raised CO<sub>2</sub>, specialist care plan, previous arterial blood gas (ABG), or Hub special message</li>
               </ul>
               <p style="margin-top:10px"><strong>The usual role on scene is to apply that record. Look for it before you use Scale 2.</strong></p>
             </div>
@@ -342,8 +320,9 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
             <div>
               <p>68-year-old with known COPD. No alert card. No documented blood gas. SpO<sub>2</sub> <strong>90% on air</strong>, elevated pulse and respiratory rate. Other observations unremarkable.</p>
               <div class="photo-frame cutout">
-                <img src="copd/assets/zoll_1.png" alt="Zoll monitor showing pulse 110, blood pressure 144 over 87, respiratory rate 24, SpO2 90 percent">
+                <img src="copd/assets/zoll_1.png" alt="Zoll monitor showing pulse 110, blood pressure 144 over 87, mean arterial pressure (MAP) 106, respiratory rate 24, SpO2 90 percent">
               </div>
+              <p class="photo-caption">The number in brackets is the mean arterial pressure (MAP).</p>
             </div>
             ${news2OfficialChart()}
           </div>
@@ -364,32 +343,8 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
               </tr>
             </tbody>
           </table>
-          <p class="callout build" style="margin-top:12px">Wrong scale does not just tidy the paperwork. It can hide a hypoxic patient.</p>`,
-        notes: "Emphasise the importance of recognising that 91% and lower is hypoxia, even if it is 'normal' for the patient. Automatically using scale 2 for a non T2RF patient will hide the hypoxia."
-      },
-      {
-        kicker: "Why Scale 1 is still right",
-        title: "A usual SpO₂ of 90% scoring 3 is not a reason to switch scale",
-        html: `
-          <div class="body two">
-            <div class="card">
-              <h3>That 3 is doing its job</h3>
-              <ul>
-                <li>Scale 1 was built on a normal SpO<sub>2</sub> of 96%+. 90% is hypoxia on that scale, even if it is “normal for them”</li>
-                <li>A score of 3 flags that hypoxia. Leave the scale and the oxygen target as they are</li>
-                <li>Keep targeting 88–92% (or the alert card). The oxygen target and the scoring scale are separate decisions</li>
-              </ul>
-            </div>
-            <div class="card warn">
-              <h3>Scale 2 is still the wrong fix</h3>
-              <ul>
-                <li>Switching scale because 90% is “usual for them” scores that hypoxia as 0 and hides it</li>
-                <li>Scale 2 is only for documented type 2 failure — not for a comfortable NEWS</li>
-                <li>Handover: “NEWS 3, all from sats, usual 90% on air, Scale 1, targeting 88–92%.”</li>
-              </ul>
-            </div>
-          </div>`,
-        notes: "The 3 is working — it flags hypoxia on the standard scale. Do not switch to Scale 2 to make the score look nicer. Still 88–92%. Next slide is the room’s pre-alert worry and CN-436."
+          <p class="callout build" style="margin-top:12px">Handover: “NEWS 3, all from sats, usual 90% on air, Scale 1, targeting 88–92%.”</p>`,
+        notes: "Emphasise that 91% and lower is hypoxia, even if it is usual for the patient. Scale 2 would hide it. Land the handover line. Next is the pre-alert worry and CN-436."
       },
       {
         kicker: "CN-436",
@@ -491,82 +446,36 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         kicker: "Treatment",
         title: "Bronchodilators, nebulisers and the 6-minute rule",
         html: `
-          <div class="body two neb-hero neb-wide" style="flex:1">
-            <div class="photo-frame cutout">
-              <img src="copd/assets/o2-nebuliser-70.png" alt="Woman in her 70s wearing an oxygen-driven nebuliser mask">
-            </div>
-            <div>
-              <div class="card">
-                <h3>Adult doses from live JRCALC</h3>
-                <ul>
-                  <li>Sit forwards if blood pressure allows</li>
-                  <li><strong>Salbutamol 5 mg</strong> neb. Repeat every <strong>5 minutes</strong> unless side-effects dominate (tremor, HR &gt;140). No maximum number of salbutamol doses</li>
-                  <li><strong>Ipratropium 500 micrograms</strong> neb <strong>once</strong> in severe cases, or if unresponsive to salbutamol</li>
-                  <li>Protect the eyes — caution in glaucoma</li>
-                  <li><strong>Hydrocortisone 100 mg</strong> slow IV (≥2 min) or IM</li>
-                </ul>
-              </div>
-              <div class="card warn">
-                <h3>What the 6 minutes actually limits</h3>
-                <ul>
-                  <li>How long <strong>oxygen drives each nebuliser</strong> — not a written maximum number of nebs</li>
-                  <li>This is <strong>not</strong> a timer on oxygen therapy</li>
-                  <li>Do not leave an oxygen-driven neb running for a full 10–15 minutes</li>
-                  <li>Applies if <strong>COPD is a possibility</strong> — not only proven type 2 failure</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="diagram-row" style="margin-top:12px">
-            <div class="step green"><h3>1. Salbutamol 5 mg</h3><p>Oxygen drive for <strong>6 minutes</strong></p></div>
-            <div class="step gold"><h3>2. Stop the drive</h3><p>Off the neb mask. Aim <strong>88–92%</strong></p></div>
-            <div class="step dark"><h3>3. Still symptomatic?</h3><p>Further 6-minute run if clinically indicated</p></div>
-            <div class="step red" style="background:var(--green)"><h3>Ipratropium</h3><p>500 micrograms <strong>once only</strong></p></div>
-          </div>`,
-        notes: "Concede this if challenged: JRCALC / AACE COPD guidance does not say ‘maximum two oxygen-powered nebs’. It says limit oxygen-driven nebulisation to 6 minutes. Salbutamol may still be repeated. Each O2-driven episode should still be a 6-minute run, not a continuous neb. High-flow oxygen for critical illness has no 6-minute cap."
-      },
-      {
-        kicker: "The guideline text",
-        title: "Where the 6-minute rule is written",
-        html: `
-          <div class="body">
-            <div class="card">
-              <h3>JRCALC / AACE COPD guidance — Bronchodilators</h3>
-              <p style="font-size:18px">“Limit oxygen-driven nebulisation to 6 minutes. If journey time is significant, consider a further 6 minutes of nebulisation therapy ONLY if clinically indicated, but aim for a target saturation within the range of 88–92%.”</p>
-            </div>
-            <div class="card" style="margin-top:10px">
-              <h3>JRCALC Salbutamol and Ipratropium</h3>
-              <p style="font-size:18px">Both monographs: “If COPD is a possibility limit nebulisation with oxygen to 6 minutes.”</p>
-              <p class="small" style="margin-top:8px">That is COPD as a possibility — not “only if type 2 failure is proven”.</p>
-            </div>
-          </div>`,
-        notes: "Read the quotes. Then say what they do not say: there is no sentence that reads ‘maximum of two oxygen-powered nebs’. The 6 minutes is the duration of oxygen as the driving gas. Salbutamol may be repeated. Ipratropium once."
-      },
-      {
-        kicker: "Treatment",
-        title: "What to do after a 6-minute oxygen-driven neb",
-        html: `
           <div class="body two">
             <div class="card">
-              <h3>What JRCALC / AACE COPD guidance actually says</h3>
+              <h3>Adult doses from live JRCALC</h3>
               <ul>
-                <li>Limit oxygen-driven nebulisation to 6 minutes</li>
-                <li>If the journey is significant, consider a further 6 minutes only if clinically indicated</li>
-                <li>Aim 88–92% throughout</li>
-                <li>Salbutamol may be repeated at regular intervals. Ipratropium once</li>
+                <li>Sit forwards if blood pressure allows</li>
+                <li><strong>Salbutamol 5 mg</strong> neb. Repeat every <strong>5 minutes</strong> unless side-effects dominate (tremor, HR &gt;140). No maximum number of salbutamol doses</li>
+                <li><strong>Ipratropium 500 micrograms</strong> neb <strong>once</strong> in severe cases, or if unresponsive to salbutamol</li>
+                <li>Protect the eyes — caution in glaucoma</li>
+                <li><strong>Hydrocortisone 100 mg</strong> slow IV (≥2 min) or IM</li>
               </ul>
             </div>
-            <div class="card warn">
-              <h3>What it does not say</h3>
+            <div class="card fact">
+              <h3>There is no two-neb cap</h3>
               <ul>
-                <li>It does <strong>not</strong> write a maximum of two oxygen-powered nebs for the whole job</li>
-                <li>If they still need bronchodilator and oxygen is the only driving gas you have, a further 6-minute oxygen-driven neb can be argued as clinically indicated</li>
-                <li>What you must not do is leave oxygen driving the neb continuously, or for 10–15 minutes at a time</li>
-                <li>Between runs: off the neb mask, titrate to 88–92%</li>
+                <li>JRCALC does <strong>not</strong> write a maximum of two oxygen-powered nebs</li>
+                <li>Six minutes is how long <strong>oxygen drives each neb</strong> — not a timer on oxygen for hypoxia</li>
+                <li>A further 6-minute run is allowed if they still need the drug</li>
+                <li>Between runs: off the neb mask, aim <strong>88–92%</strong>. Do not leave the drive running</li>
               </ul>
             </div>
+          </div>
+          <div class="card" style="margin-top:10px">
+            <h3>JRCALC / AACE COPD guidance — Bronchodilators</h3>
+            <p>“Limit oxygen-driven nebulisation to 6 minutes. If journey time is significant, consider a further 6 minutes of nebulisation therapy ONLY if clinically indicated, but aim for a target saturation within the range of 88–92%.”</p>
+          </div>
+          <div class="card" style="margin-top:8px">
+            <h3>JRCALC Salbutamol and Ipratropium</h3>
+            <p>Both monographs: “If COPD is a possibility limit nebulisation with oxygen to 6 minutes.” That is COPD as a possibility — not only proven type 2 failure.</p>
           </div>`,
-        notes: "Teach the 6-minute duration limit. Do not teach a two-neb cap that is not in the text. If someone in the room makes that point, agree. The operational rule is: 6 minutes of oxygen drive, stop, titrate, repeat as 6-minute episodes if they still need the drug and you have no air compressor. Ipratropium remains once only. Time-critical features still override."
+        notes: "One slide for the 6-minute rule. Doses first, then the two JRCALC quotes, then the card: there is no two-neb cap. Read the quotes. JRCALC does not say ‘maximum two oxygen-powered nebs’. Six minutes is how long oxygen drives each neb. Salbutamol may be repeated as further 6-minute runs. Ipratropium once. Between runs, off the neb mask and aim 88–92%. The neb quiz still checks the 6 minutes."
       },
       {
         kicker: "Package of care",
@@ -592,7 +501,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
                 <li>Cannot cope at home, living alone, or not coping</li>
                 <li>Severe breathlessness, poor or deteriorating condition</li>
                 <li>Cyanosis, new or worsening oedema, impaired consciousness, acute confusion</li>
-                <li>Already on LTOT, rapid onset, or significant comorbidity</li>
+                <li>Already on long-term oxygen therapy (LTOT), rapid onset, or significant comorbidity</li>
                 <li>SpO<sub>2</sub> &lt;90%</li>
               </ul>
             </section>
@@ -645,7 +554,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         detail: `
           <div class="poll-detail">
             <div class="photo-frame n2-monitor">
-              <img src="copd/assets/patient1-monitor.png" alt="Zoll monitor showing pulse 92, blood pressure 118 over 72, MAP 87, respiratory rate 24, SpO2 96 percent">
+              <img src="copd/assets/patient1-monitor.png" alt="Zoll monitor showing pulse 92, blood pressure 118 over 72, mean arterial pressure (MAP) 87, respiratory rate 24, SpO2 96 percent">
             </div>
             <div class="n2-chart-slot"></div>
           </div>`,
@@ -687,37 +596,12 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         detail: `
           <div class="poll-detail">
             <div class="photo-frame n2-monitor">
-              <img src="copd/assets/patient2-monitor.png" alt="Zoll monitor showing pulse 104, blood pressure 152 over 88, MAP 109, respiratory rate 22, SpO2 90 percent">
+              <img src="copd/assets/patient2-monitor.png" alt="Zoll monitor showing pulse 104, blood pressure 152 over 88, mean arterial pressure (MAP) 109, respiratory rate 22, SpO2 90 percent">
             </div>
             <div class="n2-chart-slot"></div>
           </div>`,
         teach: "<strong>NEWS 6 on Scale 1.</strong> COPD, extra secretions and 90% on air do not document type 2 failure, so stay on Scale 1. RR 22 scores 2, SpO<sub>2</sub> 90% on air scores 3, air 0, SBP 152 scores 0, pulse 104 scores 1, Alert 0, temp 36.9 scores 0. Total <strong>6</strong>. Scale 2 would score 90% as 0 (88–92) and give NEWS <strong>3</strong>, hiding the hypoxia. Still target 88–92%.",
         notes: "Patient 2 has no documented T2RF — Scale 1. Correct is NEWS 6. Typical error: Scale 2 because they have COPD, so 90% scores 0."
-      },
-      {
-        kicker: "Critically unwell",
-        title: "This patient needs high-flow oxygen now",
-        html: `
-          <div class="shock-layout">
-            <img class="shock-monitor" src="copd/assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, MAP 62, respiratory rate 32, SpO2 80 percent">
-            <div>
-              <p class="shock-scene-line">64, known COPD. Alert card: previous type 2 failure, target 88–92%, on a 28% Venturi. Exhausted, cyanosed, barely responding.</p>
-              <div class="shock-vitals">
-                <div><strong>80%</strong><span>SpO2</span></div>
-                <div><strong>86/50</strong><span>BP</span></div>
-                <div><strong>128</strong><span>Pulse</span></div>
-                <div><strong>32</strong><span>RR</span></div>
-              </div>
-              <ul class="shock-actions">
-                <li>Do not withhold oxygen for COPD, the alert card, or the 88–92% target</li>
-                <li>Reservoir mask now. <strong>TIME-CRITICAL.</strong> ATMIST</li>
-                <li>Titrate once they are no longer critically ill. If they become drowsy, reduce flow and support ventilation</li>
-                <li><strong>Scale 2</strong> because type 2 is already documented — not because of the high-flow oxygen</li>
-              </ul>
-            </div>
-          </div>
-          <div class="banner red" style="margin-top:12px">The 6-minute rule is neb drive only. It is not a timer on oxygen for hypoxia</div>`,
-        notes: "Land this as the critically unwell exception, not a ‘take the oxygen off’ story. High-flow now. The 6-minute clock does not apply to oxygen therapy. Alert-card 88–92% is for when they are not critically ill. Scale 2 is from the documented type 2, not from the oxygen you just put on."
       },
       {
         type: "poll",
@@ -746,7 +630,7 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         pollId: "q3",
         kicker: "Check  3 of 5",
         title: "The critically ill",
-        prompt: "Known COPD patient presents with the observations below. Do we give high-flow or low-flow oxygen?",
+        prompt: "64, known COPD. Alert card: previous type 2 failure, on a 28% Venturi. Exhausted, cyanosed, barely responding. High-flow or low-flow oxygen?",
         options: [
           "They are hypoxic and in shock — give high-flow, then titrate if they improve",
           "They have COPD — give low-flow oxygen"
@@ -755,10 +639,10 @@ Do not lecture pathophysiology. The trap box is the only part that must land.`
         image: "copd/assets/patient-shock-monitor.png",
         detail: `
           <div class="photo-frame cutout shock-zoll">
-            <img src="copd/assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, MAP 62, respiratory rate 32, SpO2 80 percent">
+            <img src="copd/assets/patient-shock-monitor.png" alt="Zoll monitor showing pulse 128, blood pressure 86 over 50, mean arterial pressure (MAP) 62, respiratory rate 32, SpO2 80 percent">
           </div>`,
-        teach: "<strong>High-flow.</strong> This is shock, not a “usual COPD”. JRCALC / AACE COPD guidance: do not withhold high-concentration oxygen if the primary illness needs it. Hypoxia is the greater short-term risk. Titrate 88–92% once they are no longer critically ill. The 6-minute rule does not apply here — that only limits oxygen as the driving gas of a nebuliser.",
-        notes: "Watch for people still giving controlled oxygen in shock because of COPD. The Zoll is the argument: 80%, 86/50, 128, RR 32."
+        teach: "<strong>High-flow.</strong> This is shock, not a “usual COPD”. JRCALC / AACE COPD guidance: do not withhold high-concentration oxygen if the primary illness needs it. Hypoxia is the greater short-term risk. Titrate 88–92% once they are no longer critically ill. The 6-minute rule does not apply here — that only limits oxygen as the driving gas of a nebuliser. <strong>Scale 2</strong> because type 2 failure is already documented on the alert card — not because of the high-flow oxygen just applied.",
+        notes: "This is the first time the room sees this patient. The monitor is the argument: 80%, 86/50, 128, RR 32. Watch for people still giving controlled oxygen because of COPD or the alert card. After the answer, land the new line: Scale 2 is from the documented type 2, not from the oxygen just applied."
       },
       {
         type: "poll",
