@@ -31,3 +31,4 @@ certificates/**/*.csv
 *-CPD-attendance-*.csv
 session-*.json
 Proposal for accreditation/
+*session feedback*.html

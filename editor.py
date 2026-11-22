@@ -64,6 +64,7 @@ COURSE_FILES = {
     "hf": ("heartFailureDeckSlides", ROOT / "hf" / "deck.js", ROOT / "hf" / "slides.js"),
     "asthma": ("asthmaDeckSlides", ROOT / "asthma" / "deck.js", ROOT / "asthma" / "slides.js"),
     "stroke": ("strokeDeckSlides", ROOT / "stroke" / "deck.js", ROOT / "stroke" / "slides.js"),
+    "ppt": ("pptDeckSlides", ROOT / "ppt" / "deck.js", ROOT / "ppt" / "slides.js"),
 }
 PENDING: dict[str, dict] = {}
 PREVIEW_CSS: str | None = None

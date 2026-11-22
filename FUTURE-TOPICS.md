@@ -7,6 +7,7 @@ A new topic can be deployed on hub-cpd before it is ready. Leave it unpublished 
 ## In progress
 
 1. **Stroke / TIA.** Unpublished and off the public home page. The starter slides are in the editor: title, blank learning objectives, and the closing slides. Time-critical features, mimics, and who is conveyed as an emergency.
+2. **PowerPoint Test.** Unpublished and off the public home page. Starter slides are in the editor. PowerPoint Conversion test
 
 ## Next
 
